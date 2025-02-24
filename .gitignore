@@ -1,0 +1,42 @@
+# --- System ---
+.DS_Store
+Thumbs.db
+
+# --- Compilation ---
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.dir/
+*.sln
+*.vcxproj*
+*.xcodeproj/
+
+# --- vcpkg ---
+vcpkg_installed/
+.vcpkg-root
+
+# --- Bin & out ---
+*.exe
+*.dll
+*.so
+*.dylib
+*.app
+*.o
+*.obj
+*.lib
+*.a
+*.pdb
+
+# --- Tests & logs ---
+*.log
+*.out
+*.tmp
+
+# --- Other ---
+.idea/
+.vscode/
+*.swp
+*.bak
+.env
