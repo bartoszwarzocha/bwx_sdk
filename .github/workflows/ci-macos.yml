@@ -1,0 +1,99 @@
+name: MACOS
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    name: Build on macOS
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release, Debug]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1
+        with:
+          cmake-version: '3.22.0'
+
+      - name: Install Required Packages (macOS)
+        run: |
+          brew update
+          brew install ninja pkg-config gettext
+          brew link --force gettext
+        shell: bash
+
+      - name: Cache vcpkg and Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg
+            ${{ github.workspace }}/build/vcpkg_installed
+            ${{ github.workspace }}/vcpkg/downloads
+          key: macos-vcpkg-${{ hashFiles('vcpkg.json') }}
+
+      - name: Prepare vcpkg
+        run: |
+          if [ ! -d "vcpkg" ]; then
+            git clone https://github.com/microsoft/vcpkg.git
+          fi
+          cd vcpkg
+          git pull origin master
+          ./bootstrap-vcpkg.sh
+        shell: bash
+
+      - name: Set VCPKG Triplet
+        run: echo "VCPKG_TRIPLET=x64-osx" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Install Dependencies via vcpkg (Manifest Mode)
+        run: |
+          ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --manifest-root="${{ github.workspace }}"
+        shell: bash
+
+      - name: Configure CMake
+        run: |
+          BUILD_DIR="build/macos-${{ matrix.build_type }}"
+          mkdir -p "$BUILD_DIR"
+          cmake -B "$BUILD_DIR" -S . \
+            -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
+            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
+            -DBUILD_SHARED_LIBS=OFF
+        shell: bash
+
+      - name: Build
+        run: |
+          BUILD_DIR="build/macos-${{ matrix.build_type }}"
+          cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
+        shell: bash
+
+      - name: Run Tests (if any)
+        run: |
+          BUILD_DIR="build/macos-${{ matrix.build_type }}"
+          cd "$BUILD_DIR"
+          ctest --output-on-failure --build-config "${{ matrix.build_type }}"
+        shell: bash
