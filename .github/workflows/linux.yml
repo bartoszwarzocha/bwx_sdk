@@ -42,15 +42,20 @@ jobs:
             wget
         shell: bash
 
-      - name: Install libxcrypt (alternative download source)
+      - name: Install libxcrypt (via system alternatives)
         run: |
-          wget https://sources.archlinux.org/other/libxcrypt/libxcrypt-4.4.36.tar.gz -O libxcrypt-4.4.36.tar.gz
-          tar -xzf libxcrypt-4.4.36.tar.gz
-          cd libxcrypt-4.4.36
-          autoreconf -vfi
-          ./configure --prefix=/usr --disable-static --enable-shared
-          make -j$(nproc)
-          sudo make install
+          sudo apt-get install -y libxcrypt-dev || echo "libxcrypt-dev not found, using alternative approach."
+          if ! ldconfig -p | grep -q libxcrypt; then
+            echo "libxcrypt not found in system libraries. Building from source."
+            git clone https://gitlab.com/cryptsetup/libxcrypt.git || exit 1
+            cd libxcrypt
+            autoreconf -vfi
+            ./configure --prefix=/usr --disable-static --enable-shared
+            make -j$(nproc)
+            sudo make install
+          else
+            echo "libxcrypt is already installed."
+          fi
         shell: bash
 
       - name: Cache vcpkg and dependencies
