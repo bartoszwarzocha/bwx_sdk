@@ -39,16 +39,21 @@ jobs:
             flex \
             zip \
             cmake \
-            wget
+            wget \
+            curl
         shell: bash
 
-      - name: Install libxcrypt (via system alternatives)
+      - name: Install libxcrypt (from Fedora source RPM as fallback)
         run: |
-          sudo apt-get install -y libxcrypt-dev || echo "libxcrypt-dev not found, using alternative approach."
+          sudo apt-get install -y libxcrypt-dev || echo "libxcrypt-dev not found, using source RPM fallback."
+
           if ! ldconfig -p | grep -q libxcrypt; then
-            echo "libxcrypt not found in system libraries. Building from source."
-            git clone https://gitlab.com/cryptsetup/libxcrypt.git || exit 1
-            cd libxcrypt
+            echo "libxcrypt not found in system libraries. Downloading source RPM..."
+            curl -LO https://kojipkgs.fedoraproject.org//packages/libxcrypt/4.4.36/1.fc38/src/libxcrypt-4.4.36-1.fc38.src.rpm
+            mkdir libxcrypt-src && cd libxcrypt-src
+            rpm2cpio ../libxcrypt-4.4.36-1.fc38.src.rpm | cpio -idmv
+            tar -xvf libxcrypt-4.4.36.tar.gz
+            cd libxcrypt-4.4.36
             autoreconf -vfi
             ./configure --prefix=/usr --disable-static --enable-shared
             make -j$(nproc)
