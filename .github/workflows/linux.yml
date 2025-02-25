@@ -43,24 +43,38 @@ jobs:
             curl
         shell: bash
 
-      - name: Install libxcrypt (from Fedora source RPM as fallback)
+      - name: Install libxcrypt (from GitHub source with validation)
         run: |
-          sudo apt-get install -y libxcrypt-dev || echo "libxcrypt-dev not found, using source RPM fallback."
+          sudo apt-get install -y libxcrypt-dev && echo "libxcrypt-dev installed from system packages." || {
+            echo "libxcrypt-dev not found. Falling back to GitHub source..."
 
-          if ! ldconfig -p | grep -q libxcrypt; then
-            echo "libxcrypt not found in system libraries. Downloading source RPM..."
-            curl -LO https://kojipkgs.fedoraproject.org//packages/libxcrypt/4.4.36/1.fc38/src/libxcrypt-4.4.36-1.fc38.src.rpm
-            mkdir libxcrypt-src && cd libxcrypt-src
-            rpm2cpio ../libxcrypt-4.4.36-1.fc38.src.rpm | cpio -idmv
-            tar -xvf libxcrypt-4.4.36.tar.gz
-            cd libxcrypt-4.4.36
+            LIBXCRYPT_VERSION="4.4.36"
+            DOWNLOAD_URL="https://github.com/besser82/libxcrypt/releases/download/v${LIBXCRYPT_VERSION}/libxcrypt-${LIBXCRYPT_VERSION}.tar.xz"
+
+            echo "Downloading libxcrypt from: $DOWNLOAD_URL"
+            if ! curl -LO "$DOWNLOAD_URL"; then
+              echo "Failed to download libxcrypt from GitHub. Exiting."
+              exit 1
+            fi
+
+            if [ ! -f "libxcrypt-${LIBXCRYPT_VERSION}.tar.xz" ]; then
+              echo "Downloaded file not found. Exiting."
+              exit 1
+            fi
+
+            tar -xf "libxcrypt-${LIBXCRYPT_VERSION}.tar.xz" || {
+              echo "Failed to extract libxcrypt archive. Exiting."
+              exit 1
+            }
+
+            cd "libxcrypt-${LIBXCRYPT_VERSION}"
             autoreconf -vfi
             ./configure --prefix=/usr --disable-static --enable-shared
             make -j$(nproc)
             sudo make install
-          else
-            echo "libxcrypt is already installed."
-          fi
+
+            echo "libxcrypt built and installed from source."
+          }
         shell: bash
 
       - name: Cache vcpkg and dependencies
