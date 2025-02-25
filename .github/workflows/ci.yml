@@ -40,21 +40,26 @@ jobs:
           fi
         shell: bash
 
-      - name: Install dependencies
+      - name: Set VCPKG Triplet
+        id: set_triplet
         run: |
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            VCPKG_TRIPLET="x64-windows"
-            vcpkg_command=".\\vcpkg\\vcpkg.exe"
+            echo "VCPKG_TRIPLET=x64-windows" >> "$GITHUB_ENV"
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            VCPKG_TRIPLET="x64-osx"
-            vcpkg_command="./vcpkg/vcpkg"
+            echo "VCPKG_TRIPLET=x64-osx" >> "$GITHUB_ENV"
           else
-            VCPKG_TRIPLET="x64-linux"
-            vcpkg_command="./vcpkg/vcpkg"
+            echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
           fi
+        shell: bash
 
+      - name: Install dependencies
+        run: |
           echo "Installing dependencies for triplet: $VCPKG_TRIPLET"
-          $vcpkg_command install --triplet $VCPKG_TRIPLET --clean-after-build
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            .\\vcpkg\\vcpkg.exe install --triplet $VCPKG_TRIPLET --clean-after-build
+          else
+            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build
+          fi
         shell: bash
 
       - name: Configure CMake
@@ -67,7 +72,8 @@ jobs:
             -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
             -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
             -DCMAKE_PREFIX_PATH="${{ github.workspace }}/vcpkg_installed/$VCPKG_TRIPLET" \
-            -DBUILD_SHARED_LIBS=OFF 
+            -DBUILD_SHARED_LIBS=OFF \
+            -G "Visual Studio 17 2022" -A x64
         shell: bash
 
       - name: Build
