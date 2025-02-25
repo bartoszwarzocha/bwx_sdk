@@ -1,0 +1,115 @@
+name: C++ CI/CD
+
+on: [push, pull_request]
+
+jobs:
+  linux-build:
+    name: Linux Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [Release, Debug]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1
+        with:
+          cmake-version: '3.22.0'
+
+      - name: Install required Linux packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            ninja-build \
+            build-essential \
+            libssl-dev \
+            libffi-dev \
+            libgmp-dev \
+            libpcre3-dev \
+            gettext \
+            texinfo \
+            m4 \
+            gperf \
+            bison \
+            flex \
+            zip \
+            libxcrypt-compat  # Zapewnia kompatybilność z libxcrypt na Ubuntu 24.04
+        shell: bash
+
+      - name: Cache vcpkg and dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg
+            ${{ github.workspace }}/build/vcpkg_installed
+            ${{ github.workspace }}/vcpkg/downloads
+          key: linux-vcpkg-${{ hashFiles('vcpkg.json') }}
+
+      - name: Prepare vcpkg directory
+        run: |
+          if [ ! -d "vcpkg" ]; then
+            git clone https://github.com/microsoft/vcpkg.git
+          else
+            echo "vcpkg directory already exists. Skipping clone."
+          fi
+        shell: bash
+
+      - name: Bootstrap vcpkg
+        run: |
+          cd vcpkg
+          ./bootstrap-vcpkg.sh
+        shell: bash
+
+      - name: Set VCPKG Triplet
+        run: echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Install dependencies
+        run: |
+          ./vcpkg/vcpkg install --triplet x64-linux --clean-after-build
+        shell: bash
+
+      - name: Configure CMake
+        run: |
+          BUILD_DIR="build/linux-latest-${{ matrix.build_type }}"
+          mkdir -p "$BUILD_DIR"
+
+          cmake -B "$BUILD_DIR" -S . \
+            -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
+            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
+            -DBUILD_SHARED_LIBS=OFF
+        shell: bash
+
+      - name: Build
+        run: |
+          BUILD_DIR="build/linux-latest-${{ matrix.build_type }}"
+          cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
+        shell: bash
+
+      - name: Package artifacts
+        run: |
+          BUILD_DIR="build/linux-latest-${{ matrix.build_type }}"
+          PACKAGE_NAME="bwx_sdk-linux-${{ matrix.build_type }}.zip"
+          mkdir -p packages
+          zip -r "packages/$PACKAGE_NAME" "$BUILD_DIR"
+        shell: bash
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: bwx_sdk-linux-${{ matrix.build_type }}
+          path: packages/*.zip
+
+      - name: Run tests (if any)
+        run: |
+          BUILD_DIR="build/linux-latest-${{ matrix.build_type }}"
+          cd "$BUILD_DIR"
+          ctest --output-on-failure --build-config "${{ matrix.build_type }}"
+        shell: bash
