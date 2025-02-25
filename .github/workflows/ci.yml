@@ -19,6 +19,13 @@ jobs:
         with:
           cmake-version: '3.22.0'
 
+      - name: Install required Linux packages (for Linux builds)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool pkg-config ninja-build build-essential
+        shell: bash
+
       - name: Cache vcpkg and dependencies
         uses: actions/cache@v3
         with:
@@ -67,13 +74,24 @@ jobs:
           BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
           mkdir -p "$BUILD_DIR"
 
+          CMAKE_GENERATOR=""
+          CMAKE_ARCH=""
+
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            CMAKE_GENERATOR="-G \"Visual Studio 17 2022\" -A x64"
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            CMAKE_GENERATOR="-G Ninja"
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            CMAKE_GENERATOR="-G Ninja"
+          fi
+
           cmake -B "$BUILD_DIR" -S . \
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
             -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
             -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
             -DCMAKE_PREFIX_PATH="${{ github.workspace }}/vcpkg_installed/$VCPKG_TRIPLET" \
             -DBUILD_SHARED_LIBS=OFF \
-            -G "Visual Studio 17 2022" -A x64
+            $CMAKE_GENERATOR
         shell: bash
 
       - name: Build
