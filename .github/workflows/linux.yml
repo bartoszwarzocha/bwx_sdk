@@ -42,9 +42,9 @@ jobs:
             wget
         shell: bash
 
-      - name: Install libxcrypt (manual build for Ubuntu 24.04 compatibility)
+      - name: Install libxcrypt (alternative download source)
         run: |
-          wget https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.gz
+          wget https://sources.archlinux.org/other/libxcrypt/libxcrypt-4.4.36.tar.gz -O libxcrypt-4.4.36.tar.gz
           tar -xzf libxcrypt-4.4.36.tar.gz
           cd libxcrypt-4.4.36
           autoreconf -vfi
