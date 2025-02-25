@@ -1,0 +1,99 @@
+name: C++ CI/CD
+
+on: [push, pull_request]
+
+jobs:
+  windows-build:
+    name: Windows Build
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        build_type: [Release, Debug]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1
+        with:
+          cmake-version: '3.22.0'
+
+      - name: Install required Windows packages
+        run: |
+          choco install zip -y
+        shell: powershell
+
+      - name: Cache vcpkg and dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg
+            ${{ github.workspace }}/build/vcpkg_installed
+            ${{ github.workspace }}/vcpkg/downloads
+          key: windows-vcpkg-${{ hashFiles('vcpkg.json') }}
+
+      - name: Prepare vcpkg directory
+        run: |
+          if (!(Test-Path -Path "vcpkg")) {
+            git clone https://github.com/microsoft/vcpkg.git
+          } else {
+            Write-Output "vcpkg directory already exists. Skipping clone."
+          }
+        shell: powershell
+
+      - name: Bootstrap vcpkg
+        run: |
+          cd vcpkg
+          ./bootstrap-vcpkg.bat
+        shell: powershell
+
+      - name: Set VCPKG Triplet
+        run: |
+          echo "VCPKG_TRIPLET=x64-windows" >> $env:GITHUB_ENV
+        shell: powershell
+
+      - name: Install dependencies
+        run: |
+          .\\vcpkg\\vcpkg.exe install --triplet x64-windows --clean-after-build
+        shell: powershell
+
+      - name: Configure CMake
+        run: |
+          $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
+          New-Item -ItemType Directory -Force -Path $BUILD_DIR
+
+          cmake -B $BUILD_DIR -S . \
+            -G "Visual Studio 17 2022" \
+            -A x64 \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET="x64-windows" \
+            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_CONFIGURATION_TYPES="${{ matrix.build_type }}"
+        shell: powershell
+
+      - name: Build
+        run: |
+          $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
+          cmake --build $BUILD_DIR --config "${{ matrix.build_type }}"
+        shell: powershell
+
+      - name: Package artifacts
+        run: |
+          $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
+          $PACKAGE_NAME = "bwx_sdk-windows-${{ matrix.build_type }}.zip"
+          New-Item -ItemType Directory -Force -Path packages
+          Compress-Archive -Path "$BUILD_DIR/*" -DestinationPath "packages/$PACKAGE_NAME"
+        shell: powershell
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: bwx_sdk-windows-${{ matrix.build_type }}
+          path: packages/*.zip
+
+      - name: Run tests (if any)
+        run: |
+          $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
+          cd $BUILD_DIR
+          ctest --output-on-failure --build-config "${{ matrix.build_type }}"
+        shell: powershell
