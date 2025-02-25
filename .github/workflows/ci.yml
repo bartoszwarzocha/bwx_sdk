@@ -27,6 +27,7 @@ jobs:
             autoconf \
             automake \
             libtool \
+            libtool-bin \
             pkg-config \
             ninja-build \
             build-essential \
@@ -36,15 +37,20 @@ jobs:
             libpcre3-dev \
             gettext \
             texinfo \
-            m4
+            m4 \
+            gperf \
+            bison \
+            flex
         shell: bash
 
       - name: Install required macOS packages (for macOS builds)
         if: matrix.os == 'macos-latest'
         run: |
           brew update
-          brew install cmake ninja pkg-config gettext
+          brew reinstall --formula cmake pkgconf gettext
+          brew install ninja
           brew link --force gettext
+          export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/gettext/lib/pkgconfig"
         shell: bash
 
       - name: Cache vcpkg and dependencies
@@ -93,7 +99,7 @@ jobs:
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             .\\vcpkg\\vcpkg.exe install --triplet $VCPKG_TRIPLET --clean-after-build
           else
-            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build
+            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build --x-manifest-root="${{ github.workspace }}"
           fi
         shell: bash
 
@@ -123,7 +129,8 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
             -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
             -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
-            -DBUILD_SHARED_LIBS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DPKG_CONFIG_PATH="$PKG_CONFIG_PATH"
         shell: bash
 
       - name: Build
