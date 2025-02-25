@@ -59,7 +59,10 @@ jobs:
             meson \
             gperf \
             bison \
-            flex
+            flex \
+            m4 \
+            gettext \
+            texinfo
         shell: bash
 
       - name: Cache vcpkg and Dependencies
@@ -77,7 +80,7 @@ jobs:
             git clone https://github.com/microsoft/vcpkg.git
           fi
           cd vcpkg
-          git pull origin master
+          git pull --rebase --autostash origin master
           ./bootstrap-vcpkg.sh
         shell: bash
 
@@ -87,14 +90,22 @@ jobs:
 
       - name: Install Dependencies via vcpkg (Manifest Mode)
         run: |
-          ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET" || {
-            echo "vcpkg install failed. Cleaning buildtrees and retrying...";
-            rm -rf ./vcpkg/buildtrees;
-            ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET" || {
-              echo "Failed to install dependencies via vcpkg after retry. Exiting.";
-              exit 1;
-            }
-          }
+          RETRIES=3
+          for i in $(seq 1 $RETRIES); do
+            echo "Attempt $i to install dependencies via vcpkg..."
+            if ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET"; then
+              echo "vcpkg install succeeded."
+              break
+            else
+              echo "vcpkg install failed on attempt $i. Cleaning buildtrees and retrying..."
+              rm -rf ./vcpkg/buildtrees
+              if [ "$i" -eq "$RETRIES" ]; then
+                echo "vcpkg install failed after $RETRIES attempts. Exiting."
+                exit 1
+              fi
+              sleep 10
+            fi
+          done
         shell: bash
 
       - name: Configure CMake
