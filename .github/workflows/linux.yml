@@ -1,4 +1,4 @@
-name: C++ CI/CD
+name: C++ CI/CD Linux
 
 on: [push, pull_request]
 
