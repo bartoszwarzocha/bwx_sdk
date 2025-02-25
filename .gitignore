@@ -40,3 +40,5 @@ vcpkg_installed/
 *.swp
 *.bak
 .env
+docs/html/
+docs/man/

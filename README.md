@@ -5,9 +5,9 @@
 
 The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**, and offers both static and shared builds. BWX_SDK is distributed under the **wxWidgets license**.
 
-[![Unix (CMake)](https://github.com/wxWidgets/wxWidgets/actions/workflows/ci_cmake.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-linux.yml)
-[![MSW (MSVC)](https://github.com/wxWidgets/wxWidgets/actions/workflows/ci_msw.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-windows.yml)
-[![Mac](https://github.com/wxWidgets/wxWidgets/actions/workflows/ci_mac.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-macos.yml)
+[![LINUX](https://github.com/wxWidgets/wxWidgets/actions/workflows/ci_cmake.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-linux.yml)
+[![WINDOWS](https://github.com/wxWidgets/wxWidgets/actions/workflows/ci_msw.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-windows.yml)
+[![MACOS](https://github.com/wxWidgets/wxWidgets/actions/workflows/ci_mac.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-macos.yml)
 
 ---
 
@@ -34,7 +34,7 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 ---
 
 ## Library documentation
-The library is supplied with a default HTML documentation and a doxygen configuration file with which you can generate HTML and man documentation.
+The library is supplied with a doxygen configuration file with which you can generate HTML and man documentation.
 If you need documentation in the form of a CHM file, please enable the GENERATE_HTMLHELP parameter and disable the HTML_DYNAMIC_MENUS parameter in the doxygen file and generate the documentation again. You will get a set of files ready to build a CHM help file.
 
 ---
