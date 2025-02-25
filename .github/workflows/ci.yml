@@ -23,7 +23,17 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config ninja-build build-essential
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            ninja-build \
+            build-essential \
+            libssl-dev \
+            libffi-dev \
+            libgmp-dev \
+            libpcre3-dev
         shell: bash
 
       - name: Cache vcpkg and dependencies
@@ -35,16 +45,29 @@ jobs:
             ${{ github.workspace }}/vcpkg/downloads
           key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
 
-      - name: Install vcpkg
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Prepare vcpkg directory
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
+          if [ ! -d "vcpkg" ]; then
+            git clone https://github.com/microsoft/vcpkg.git
+          else
+            echo "vcpkg directory already exists. Skipping clone."
+          fi
+        shell: bash
+
+      - name: Bootstrap vcpkg
+        run: |
           cd vcpkg
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             ./bootstrap-vcpkg.bat
           else
             ./bootstrap-vcpkg.sh
           fi
+        shell: bash
+
+      - name: Update vcpkg ports
+        run: |
+          cd vcpkg
+          git pull
         shell: bash
 
       - name: Set VCPKG Triplet
@@ -65,7 +88,7 @@ jobs:
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             .\\vcpkg\\vcpkg.exe install --triplet $VCPKG_TRIPLET --clean-after-build
           else
-            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build
+            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build --debug
           fi
         shell: bash
 
@@ -74,14 +97,9 @@ jobs:
           BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
           mkdir -p "$BUILD_DIR"
 
-          CMAKE_GENERATOR=""
-          CMAKE_ARCH=""
-
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             CMAKE_GENERATOR="-G \"Visual Studio 17 2022\" -A x64"
-          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            CMAKE_GENERATOR="-G Ninja"
-          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+          else
             CMAKE_GENERATOR="-G Ninja"
           fi
 
