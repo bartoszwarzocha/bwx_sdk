@@ -1,6 +1,24 @@
 name: LINUX
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   linux-build:
@@ -75,17 +93,14 @@ jobs:
         run: echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Install dependencies (including cairo handling)
+      - name: Install dependencies (with manifest mode support)
         run: |
-          sudo apt-get install -y libpixman-1-dev libcairo2-dev || {
-            echo "Failed to install cairo dependencies from system packages. Falling back to vcpkg."
-          }
-
-          ./vcpkg/vcpkg install --triplet x64-linux --clean-after-build || {
-            echo "vcpkg installation failed. Retrying after cleaning buildtrees..."
-            rm -rf ./vcpkg/buildtrees/cairo
-            ./vcpkg/vcpkg install cairo --triplet x64-linux --clean-after-build || {
-              echo "Failed to build cairo even after cleaning buildtrees. Exiting."
+          echo "Installing dependencies using manifest mode."
+          ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET" --clean-after-build || {
+            echo "vcpkg installation failed. Cleaning buildtrees and retrying."
+            rm -rf ./vcpkg/buildtrees
+            ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET" --clean-after-build || {
+              echo "Failed to install dependencies via vcpkg even after cleanup. Exiting."
               exit 1
             }
           }

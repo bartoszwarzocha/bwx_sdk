@@ -1,6 +1,24 @@
 name: WINDOWS
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   windows-build:
