@@ -1,4 +1,4 @@
-name: LINUX
+name: Linux CI/CD
 
 on:
   push:
@@ -21,24 +21,24 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-linux:
+    name: Build on Linux
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release, Debug]
-    runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
       - name: Set up CMake
         uses: jwlawson/actions-setup-cmake@v1
         with:
           cmake-version: '3.22.0'
 
-      - name: Install required packages (Linux)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Install Required Packages (Linux)
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -59,22 +59,14 @@ jobs:
             meson
         shell: bash
 
-      - name: Install required packages (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew update
-          brew install ninja pkg-config gettext
-          brew link --force gettext
-        shell: bash
-
-      - name: Cache vcpkg and dependencies
+      - name: Cache vcpkg and Dependencies
         uses: actions/cache@v3
         with:
           path: |
             ${{ github.workspace }}/vcpkg
             ${{ github.workspace }}/build/vcpkg_installed
             ${{ github.workspace }}/vcpkg/downloads
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+          key: linux-vcpkg-${{ hashFiles('vcpkg.json') }}
 
       - name: Prepare vcpkg
         run: |
@@ -83,44 +75,21 @@ jobs:
           fi
           cd vcpkg
           git pull origin master
-          ./bootstrap-vcpkg.sh || ./bootstrap-vcpkg.bat
+          ./bootstrap-vcpkg.sh
         shell: bash
 
       - name: Set VCPKG Triplet
-        id: set_triplet
-        run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            echo "VCPKG_TRIPLET=x64-windows" >> "$GITHUB_ENV"
-          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            echo "VCPKG_TRIPLET=x64-osx" >> "$GITHUB_ENV"
-          else
-            echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
-          fi
+        run: echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Install dependencies via vcpkg (Manifest Mode)
+      - name: Install Dependencies via vcpkg (Manifest Mode)
         run: |
           ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --manifest-root="${{ github.workspace }}"
         shell: bash
 
-      - name: Configure CMake (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Configure CMake
         run: |
-          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
-          mkdir -p "$BUILD_DIR"
-          cmake -B "$BUILD_DIR" -S . \
-            -G "Visual Studio 17 2022" \
-            -A x64 \
-            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
-            -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
-            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
-            -DBUILD_SHARED_LIBS=OFF
-        shell: bash
-
-      - name: Configure CMake (Linux & macOS)
-        if: matrix.os != 'windows-latest'
-        run: |
-          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
+          BUILD_DIR="build/linux-${{ matrix.build_type }}"
           mkdir -p "$BUILD_DIR"
           cmake -B "$BUILD_DIR" -S . \
             -G Ninja \
@@ -132,13 +101,13 @@ jobs:
 
       - name: Build
         run: |
-          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
+          BUILD_DIR="build/linux-${{ matrix.build_type }}"
           cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
         shell: bash
 
-      - name: Run tests (if any)
+      - name: Run Tests (if any)
         run: |
-          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
+          BUILD_DIR="build/linux-${{ matrix.build_type }}"
           cd "$BUILD_DIR"
           ctest --output-on-failure --build-config "${{ matrix.build_type }}"
         shell: bash
