@@ -62,7 +62,8 @@ jobs:
             flex \
             m4 \
             gettext \
-            texinfo
+            texinfo \
+            libxcrypt-dev || echo "libxcrypt-dev not found, continuing..."
         shell: bash
 
       - name: Cache vcpkg and Dependencies
@@ -103,7 +104,7 @@ jobs:
                 echo "vcpkg install failed after $RETRIES attempts. Exiting."
                 exit 1
               fi
-              sleep 10
+              sleep 15
             fi
           done
         shell: bash
