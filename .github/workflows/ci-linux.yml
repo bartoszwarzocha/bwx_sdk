@@ -1,4 +1,4 @@
-name: Linux CI/CD
+name: LINUX
 
 on:
   push:
@@ -84,7 +84,7 @@ jobs:
 
       - name: Install Dependencies via vcpkg (Manifest Mode)
         run: |
-          ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --manifest-root="${{ github.workspace }}"
+          ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET"
         shell: bash
 
       - name: Configure CMake
@@ -96,7 +96,8 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
             -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
             -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
-            -DBUILD_SHARED_LIBS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         shell: bash
 
       - name: Build
