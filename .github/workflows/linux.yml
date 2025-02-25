@@ -38,7 +38,19 @@ jobs:
             bison \
             flex \
             zip \
-            libxcrypt-compat  # Zapewnia kompatybilność z libxcrypt na Ubuntu 24.04
+            cmake \
+            wget
+        shell: bash
+
+      - name: Install libxcrypt (manual build for Ubuntu 24.04 compatibility)
+        run: |
+          wget https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.gz
+          tar -xzf libxcrypt-4.4.36.tar.gz
+          cd libxcrypt-4.4.36
+          autoreconf -vfi
+          ./configure --prefix=/usr --disable-static --enable-shared
+          make -j$(nproc)
+          sudo make install
         shell: bash
 
       - name: Cache vcpkg and dependencies
