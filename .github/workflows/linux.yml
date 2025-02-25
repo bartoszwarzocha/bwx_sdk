@@ -40,10 +40,11 @@ jobs:
             zip \
             cmake \
             wget \
-            curl
+            curl \
+            libltdl-dev
         shell: bash
 
-      - name: Install libxcrypt (from GitHub source with validation)
+      - name: Install libxcrypt (from GitHub source with validation and fixed macros)
         run: |
           sudo apt-get install -y libxcrypt-dev && echo "libxcrypt-dev installed from system packages." || {
             echo "libxcrypt-dev not found. Falling back to GitHub source..."
@@ -68,10 +69,21 @@ jobs:
             }
 
             cd "libxcrypt-${LIBXCRYPT_VERSION}"
-            autoreconf -vfi
-            ./configure --prefix=/usr --disable-static --enable-shared
-            make -j$(nproc)
-            sudo make install
+
+            # Ensure necessary macros are available for autoreconf
+            autoreconf -vfi || {
+              echo "autoreconf failed. Installing missing macros..."
+              sudo apt-get install -y libltdl-dev gettext autopoint
+              autoreconf -vfi || { echo "autoreconf failed again. Exiting."; exit 1; }
+            }
+
+            ./configure --prefix=/usr --disable-static --enable-shared || {
+              echo "configure failed. Exiting."
+              exit 1
+            }
+
+            make -j$(nproc) || { echo "make failed. Exiting."; exit 1; }
+            sudo make install || { echo "make install failed. Exiting."; exit 1; }
 
             echo "libxcrypt built and installed from source."
           }
