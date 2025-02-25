@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     strategy:
-      fail-fast: false  # Zapobiega przerywaniu wszystkich zadań po pierwszym błędzie
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release, Debug]
@@ -33,8 +33,25 @@ jobs:
             libssl-dev \
             libffi-dev \
             libgmp-dev \
-            libpcre3-dev
+            libpcre3-dev \
+            gettext \
+            texinfo \
+            m4
         shell: bash
+
+      - name: Install required macOS packages (for macOS builds)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install cmake ninja pkg-config gettext
+          brew link --force gettext
+        shell: bash
+
+      - name: Install required Windows packages (for Windows builds)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install ninja -y
+        shell: powershell
 
       - name: Cache vcpkg and dependencies
         uses: actions/cache@v3
@@ -68,6 +85,7 @@ jobs:
         run: |
           cd vcpkg
           git pull
+          ./vcpkg update
         shell: bash
 
       - name: Set VCPKG Triplet
@@ -88,7 +106,7 @@ jobs:
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             .\\vcpkg\\vcpkg.exe install --triplet $VCPKG_TRIPLET --clean-after-build
           else
-            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build --debug
+            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build --allow-unsupported --debug
           fi
         shell: bash
 
@@ -99,7 +117,7 @@ jobs:
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             CMAKE_GENERATOR="-G \"Visual Studio 17 2022\" -A x64"
-          else
+          elif [[ "${{ matrix.os }}" == "macos-latest" || "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             CMAKE_GENERATOR="-G Ninja"
           fi
 
