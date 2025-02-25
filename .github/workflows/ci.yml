@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     strategy:
-      fail-fast: false
+      fail-fast: false  # Zapobiega przerywaniu wszystkich zadań po pierwszym błędzie
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release, Debug]
@@ -46,12 +46,6 @@ jobs:
           brew install cmake ninja pkg-config gettext
           brew link --force gettext
         shell: bash
-
-      - name: Install required Windows packages (for Windows builds)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install ninja -y
-        shell: powershell
 
       - name: Cache vcpkg and dependencies
         uses: actions/cache@v3
@@ -99,28 +93,37 @@ jobs:
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             .\\vcpkg\\vcpkg.exe install --triplet $VCPKG_TRIPLET --clean-after-build
           else
-            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build --x-manifest-root="${{ github.workspace }}"
+            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build
           fi
         shell: bash
 
-      - name: Configure CMake
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
           BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
           mkdir -p "$BUILD_DIR"
 
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            CMAKE_GENERATOR="-G \"Visual Studio 17 2022\" -A x64"
-          elif [[ "${{ matrix.os }}" == "macos-latest" || "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            CMAKE_GENERATOR="-G Ninja"
-          fi
-
           cmake -B "$BUILD_DIR" -S . \
+            -G "Visual Studio 17 2022" \
+            -A x64 \
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
             -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
             -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
-            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/vcpkg_installed/$VCPKG_TRIPLET" \
-            -DBUILD_SHARED_LIBS=OFF \
-            $CMAKE_GENERATOR
+            -DBUILD_SHARED_LIBS=OFF
+        shell: bash
+
+      - name: Configure CMake (Linux & macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
+          mkdir -p "$BUILD_DIR"
+
+          cmake -B "$BUILD_DIR" -S . \
+            -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
+            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
+            -DBUILD_SHARED_LIBS=OFF
         shell: bash
 
       - name: Build
