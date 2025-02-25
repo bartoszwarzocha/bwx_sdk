@@ -41,25 +41,23 @@ jobs:
             cmake \
             wget \
             curl \
-            libltdl-dev
+            libltdl-dev \
+            meson \
+            python3-pip
+          pip3 install --upgrade meson
         shell: bash
 
-      - name: Install libxcrypt (from GitHub source with validation and fixed macros)
+      - name: Install libxcrypt (fallback to source build if necessary)
         run: |
           sudo apt-get install -y libxcrypt-dev && echo "libxcrypt-dev installed from system packages." || {
             echo "libxcrypt-dev not found. Falling back to GitHub source..."
-
+            
             LIBXCRYPT_VERSION="4.4.36"
             DOWNLOAD_URL="https://github.com/besser82/libxcrypt/releases/download/v${LIBXCRYPT_VERSION}/libxcrypt-${LIBXCRYPT_VERSION}.tar.xz"
 
             echo "Downloading libxcrypt from: $DOWNLOAD_URL"
             if ! curl -LO "$DOWNLOAD_URL"; then
               echo "Failed to download libxcrypt from GitHub. Exiting."
-              exit 1
-            fi
-
-            if [ ! -f "libxcrypt-${LIBXCRYPT_VERSION}.tar.xz" ]; then
-              echo "Downloaded file not found. Exiting."
               exit 1
             fi
 
@@ -70,10 +68,9 @@ jobs:
 
             cd "libxcrypt-${LIBXCRYPT_VERSION}"
 
-            # Ensure necessary macros are available for autoreconf
             autoreconf -vfi || {
               echo "autoreconf failed. Installing missing macros..."
-              sudo apt-get install -y libltdl-dev gettext autopoint
+              sudo apt-get install -y autopoint
               autoreconf -vfi || { echo "autoreconf failed again. Exiting."; exit 1; }
             }
 
@@ -84,7 +81,6 @@ jobs:
 
             make -j$(nproc) || { echo "make failed. Exiting."; exit 1; }
             sudo make install || { echo "make install failed. Exiting."; exit 1; }
-
             echo "libxcrypt built and installed from source."
           }
         shell: bash
@@ -117,9 +113,17 @@ jobs:
         run: echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Install dependencies
+      - name: Install dependencies (handling cairo build issues)
         run: |
-          ./vcpkg/vcpkg install --triplet x64-linux --clean-after-build
+          sudo apt-get install -y libpixman-1-dev libcairo2-dev
+          ./vcpkg/vcpkg install --triplet x64-linux --clean-after-build || {
+            echo "vcpkg installation failed. Retrying after cleaning buildtrees..."
+            rm -rf ./vcpkg/buildtrees/cairo
+            ./vcpkg/vcpkg install cairo --triplet x64-linux --clean-after-build || {
+              echo "Failed to build cairo even after cleaning buildtrees. Exiting."
+              exit 1
+            }
+          }
         shell: bash
 
       - name: Configure CMake
