@@ -80,8 +80,6 @@ cmake --build . --config Release
 ## Directory Structure
 ```
 ├── .github/            # GitHub workflows (CI/CD)
-│   └── workflows/
-│       └── ci.yml      # Continuous integration configuration
 ├── examples/           # Example applications demonstrating usage
 │   └── example_app/
 │       ├── CMakeLists.txt
@@ -89,7 +87,7 @@ cmake --build . --config Release
 ├── include/            # Public header files
 │   └── bwx_sdk/
 │       ├── bwx_globals.h
-│       ├── [specific libraries folders]
+│       ├── [specific libraries folders]/
 ├── scripts/            # Helper scripts
 ├── src/                # Source files
 ├── vcpkg.json          # Dependency manifest
