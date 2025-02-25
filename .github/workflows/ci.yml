@@ -40,7 +40,8 @@ jobs:
             m4 \
             gperf \
             bison \
-            flex
+            flex \
+            libxcrypt-dev  # Dodano bezpośrednią instalację libxcrypt, aby zapobiec błędom w vcpkg
         shell: bash
 
       - name: Install required macOS packages (for macOS builds)
@@ -48,9 +49,9 @@ jobs:
         run: |
           brew update
           brew reinstall --formula cmake pkgconf gettext
-          brew install ninja
-          brew link --force gettext
-          export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/gettext/lib/pkgconfig"
+          brew install ninja wxwidgets
+          brew link --force gettext wxwidgets
+          export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/gettext/lib/pkgconfig:$(brew --prefix wxwidgets)/lib/pkgconfig"
         shell: bash
 
       - name: Cache vcpkg and dependencies
