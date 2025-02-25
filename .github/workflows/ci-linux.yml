@@ -56,7 +56,10 @@ jobs:
             libxcb1-dev \
             libxcb-render0-dev \
             libxcb-shm0-dev \
-            meson
+            meson \
+            gperf \
+            bison \
+            flex
         shell: bash
 
       - name: Cache vcpkg and Dependencies
@@ -84,7 +87,14 @@ jobs:
 
       - name: Install Dependencies via vcpkg (Manifest Mode)
         run: |
-          ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET"
+          ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET" || {
+            echo "vcpkg install failed. Cleaning buildtrees and retrying...";
+            rm -rf ./vcpkg/buildtrees;
+            ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET" || {
+              echo "Failed to install dependencies via vcpkg after retry. Exiting.";
+              exit 1;
+            }
+          }
         shell: bash
 
       - name: Configure CMake
