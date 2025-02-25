@@ -55,8 +55,8 @@ jobs:
             libxrender-dev \
             libxcb1-dev \
             libxcb-render0-dev \
-            libxcb-shm0-dev 
-          pip3 install --upgrade meson
+            libxcb-shm0-dev \
+            meson
         shell: bash
 
       - name: Install required packages (macOS)
@@ -98,9 +98,9 @@ jobs:
           fi
         shell: bash
 
-      - name: Install dependencies via vcpkg
+      - name: Install dependencies via vcpkg (Manifest Mode)
         run: |
-          ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET
+          ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --manifest-root="${{ github.workspace }}"
         shell: bash
 
       - name: Configure CMake (Windows)
