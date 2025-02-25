@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     strategy:
+      fail-fast: false  # Zapobiega przerywaniu wszystkich zadań po pierwszym błędzie
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release, Debug]
@@ -24,6 +25,7 @@ jobs:
           path: |
             ${{ github.workspace }}/vcpkg
             ${{ github.workspace }}/build/vcpkg_installed
+            ${{ github.workspace }}/vcpkg/downloads
           key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
 
       - name: Install vcpkg
@@ -31,7 +33,7 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             ./bootstrap-vcpkg.bat
           else
             ./bootstrap-vcpkg.sh
@@ -40,25 +42,43 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            vcpkg\\vcpkg.exe install --triplet x64-windows
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            ./vcpkg/vcpkg install --triplet x64-osx
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            VCPKG_TRIPLET="x64-windows"
+            vcpkg_command=".\\vcpkg\\vcpkg.exe"
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            VCPKG_TRIPLET="x64-osx"
+            vcpkg_command="./vcpkg/vcpkg"
           else
-            ./vcpkg/vcpkg install --triplet x64-linux
+            VCPKG_TRIPLET="x64-linux"
+            vcpkg_command="./vcpkg/vcpkg"
           fi
+
+          echo "Installing dependencies for triplet: $VCPKG_TRIPLET"
+          $vcpkg_command install --triplet $VCPKG_TRIPLET --clean-after-build
         shell: bash
 
       - name: Configure CMake
         run: |
-          cmake -B build -S . \
-            -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
+          mkdir -p "$BUILD_DIR"
+
+          cmake -B "$BUILD_DIR" -S . \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
+            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/vcpkg_installed/$VCPKG_TRIPLET" \
+            -DBUILD_SHARED_LIBS=OFF 
+        shell: bash
 
       - name: Build
-        run: cmake --build build --config ${{ matrix.build_type }}
+        run: |
+          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
+          cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
+        shell: bash
 
       - name: Run tests (if any)
         run: |
-          cd build
-          ctest --output-on-failure --build-config ${{ matrix.build_type }}
+          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
+          cd "$BUILD_DIR"
+          ctest --output-on-failure --build-config "${{ matrix.build_type }}"
+        shell: bash
