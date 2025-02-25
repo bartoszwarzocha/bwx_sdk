@@ -1,0 +1,462 @@
+.TH "bwx_sdk::bwxProperty< T >" 3 "Version 1.0.0" "BWX SDK" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+bwx_sdk::bwxProperty< T > \- Template class representing a property with advanced features\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fR#include <bwx_oop\&.h>\fP
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "using \fBValidator\fP = std::function<bool(const T&)>"
+.br
+.RI "Validator function to validate new values\&. "
+.ti -1c
+.RI "using \fBChangeCallback\fP = std::function<void(const T&, const T&)>"
+.br
+.RI "Callback invoked when the value changes\&. "
+.ti -1c
+.RI "using \fBRejectCallback\fP = std::function<void(const T&)>"
+.br
+.RI "Callback invoked when a value is rejected\&. "
+.ti -1c
+.RI "using \fBTimestamp\fP = std::chrono::system_clock::time_point"
+.br
+.RI "Timestamp of the last modification\&. "
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBbwxProperty\fP (const T &defaultValue=T(), \fBValidator\fP validator=nullptr, \fBChangeCallback\fP onChange=nullptr, \fBRejectCallback\fP onReject=nullptr, size_t historyLimit=0, std::optional< std::chrono::seconds > undoTimeout=std::nullopt, wxEvtHandler *eventHandler=nullptr)"
+.br
+.RI "Constructs a Property with optional parameters\&. "
+.ti -1c
+.RI "\fBbwxProperty\fP< T > & \fBoperator=\fP (const T &newValue)"
+.br
+.RI "Assigns a new value to the property\&. "
+.ti -1c
+.RI "void \fBset\fP (const T &newValue)"
+.br
+.RI "Sets a new value for the property\&. "
+.ti -1c
+.RI "const T & \fBget\fP () const noexcept"
+.br
+.RI "Retrieves the current value\&. "
+.ti -1c
+.RI "const char * \fBAsCStr\fP () const"
+.br
+.RI "Converts the value to a C-style string\&. "
+.ti -1c
+.RI "void \fBreset\fP ()"
+.br
+.RI "Resets the value to its default\&. "
+.ti -1c
+.RI "void \fBsetValidator\fP (\fBValidator\fP validator)"
+.br
+.RI "Sets a new validator function\&. "
+.ti -1c
+.RI "void \fBsetOnChangeCallback\fP (\fBChangeCallback\fP onChange)"
+.br
+.RI "Assigns a callback for value changes\&. "
+.ti -1c
+.RI "void \fBsetOnRejectCallback\fP (\fBRejectCallback\fP onReject)"
+.br
+.RI "Assigns a callback for value rejections\&. "
+.ti -1c
+.RI "void \fBsetReadOnly\fP (bool readOnly)"
+.br
+.RI "Enables or disables read-only mode\&. "
+.ti -1c
+.RI "bool \fBisReadOnly\fP () const noexcept"
+.br
+.RI "Checks if the property is read-only\&. "
+.ti -1c
+.RI "bool \fBundo\fP ()"
+.br
+.RI "Undoes the last value change\&. "
+.ti -1c
+.RI "bool \fBredo\fP ()"
+.br
+.RI "Redoes the previously undone value change\&. "
+.ti -1c
+.RI "void \fBsetHistoryLimit\fP (size_t limit)"
+.br
+.RI "Sets the history limit for undo/redo operations\&. "
+.ti -1c
+.RI "size_t \fBgetHistoryLimit\fP () const noexcept"
+.br
+.RI "Retrieves the configured history limit\&. "
+.ti -1c
+.RI "void \fBclearHistory\fP ()"
+.br
+.RI "Clears the undo and redo histories\&. "
+.ti -1c
+.RI "void \fBsetUndoTimeout\fP (std::chrono::seconds timeout)"
+.br
+.RI "Sets the timeout for undo operations\&. "
+.ti -1c
+.RI "std::optional< std::chrono::seconds > \fBgetUndoTimeout\fP () const noexcept"
+.br
+.RI "Retrieves the undo timeout duration\&. "
+.ti -1c
+.RI "\fBTimestamp\fP \fBgetLastChangeTime\fP () const"
+.br
+.RI "Retrieves the timestamp of the last change\&. "
+.ti -1c
+.RI "void \fBbind\fP (Property< T > &other)"
+.br
+.RI "Binds another property to synchronize value changes\&. "
+.ti -1c
+.RI "Property< T > & \fBoperator+=\fP (const T &rhs)"
+.br
+.ti -1c
+.RI "Property< T > & \fBoperator\-=\fP (const T &rhs)"
+.br
+.ti -1c
+.RI "Property< T > & \fBoperator*=\fP (const T &rhs)"
+.br
+.ti -1c
+.RI "Property< T > & \fBoperator/=\fP (const T &rhs)"
+.br
+.ti -1c
+.RI "bool \fBoperator==\fP (const T &rhs) const"
+.br
+.ti -1c
+.RI "bool \fBoperator!=\fP (const T &rhs) const"
+.br
+.ti -1c
+.RI "bool \fBoperator<\fP (const T &rhs) const"
+.br
+.ti -1c
+.RI "bool \fBoperator<=\fP (const T &rhs) const"
+.br
+.ti -1c
+.RI "bool \fBoperator>\fP (const T &rhs) const"
+.br
+.ti -1c
+.RI "bool \fBoperator>=\fP (const T &rhs) const"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SS "template<typename T>
+.br
+class bwx_sdk::bwxProperty< T >"Template class representing a property with advanced features\&. 
+
+This class manages a single value with the following capabilities:
+.IP "\(bu" 2
+Value validation with customizable validator\&.
+.IP "\(bu" 2
+Change and rejection callbacks\&.
+.IP "\(bu" 2
+Undo/redo functionality with configurable history limit\&.
+.IP "\(bu" 2
+Read-only mode to prevent modifications\&.
+.IP "\(bu" 2
+wxWidgets event notifications and callback handling\&.
+.IP "\(bu" 2
+Timestamp tracking for the last modification\&.
+.IP "\(bu" 2
+Property binding to synchronize values between properties\&.
+.IP "\(bu" 2
+Arithmetic and comparison operators\&.
+.IP "\(bu" 2
+Conversion of the value to C-style strings (for supported types)\&.
+.PP
+.PP
+\fBTemplate Parameters\fP
+.RS 4
+\fIT\fP Type of the value\&. 
+.RE
+.PP
+
+.SH "Member Typedef Documentation"
+.PP 
+.SS "template<typename T > using \fBbwx_sdk::bwxProperty\fP< T >::ChangeCallback = std::function<void(const T&, const T&)>"
+
+.PP
+Callback invoked when the value changes\&. 
+.SS "template<typename T > using \fBbwx_sdk::bwxProperty\fP< T >::RejectCallback = std::function<void(const T&)>"
+
+.PP
+Callback invoked when a value is rejected\&. 
+.SS "template<typename T > using \fBbwx_sdk::bwxProperty\fP< T >::Timestamp = std::chrono::system_clock::time_point"
+
+.PP
+Timestamp of the last modification\&. 
+.SS "template<typename T > using \fBbwx_sdk::bwxProperty\fP< T >::Validator = std::function<bool(const T&)>"
+
+.PP
+Validator function to validate new values\&. 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "template<typename T > \fBbwx_sdk::bwxProperty\fP< T >::bwxProperty (const T & defaultValue = \fRT()\fP, \fBValidator\fP validator = \fRnullptr\fP, \fBChangeCallback\fP onChange = \fRnullptr\fP, \fBRejectCallback\fP onReject = \fRnullptr\fP, size_t historyLimit = \fR0\fP, std::optional< std::chrono::seconds > undoTimeout = \fRstd::nullopt\fP, wxEvtHandler * eventHandler = \fRnullptr\fP)\fR [inline]\fP, \fR [explicit]\fP"
+
+.PP
+Constructs a Property with optional parameters\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIdefaultValue\fP Initial value of the property\&. 
+.br
+\fIvalidator\fP Validator function for new values\&. 
+.br
+\fIonChange\fP Callback invoked on value change\&. 
+.br
+\fIonReject\fP Callback invoked when value is rejected\&. 
+.br
+\fIhistoryLimit\fP Maximum number of undo/redo states (0 disables history)\&. 
+.br
+\fIundoTimeout\fP Optional timeout for undo operations\&. 
+.br
+\fIeventHandler\fP Optional wxWidgets event handler for notifications\&. 
+.RE
+.PP
+
+.SH "Member Function Documentation"
+.PP 
+.SS "template<typename T > const char * \fBbwx_sdk::bwxProperty\fP< T >::AsCStr () const\fR [inline]\fP"
+
+.PP
+Converts the value to a C-style string\&. 
+.PP
+\fBReturns\fP
+.RS 4
+Pointer to the C-string or nullptr if unsupported\&. 
+.RE
+.PP
+
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::bind (Property< T > & other)\fR [inline]\fP"
+
+.PP
+Binds another property to synchronize value changes\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIother\fP Property to bind to\&. 
+.RE
+.PP
+
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::clearHistory ()\fR [inline]\fP"
+
+.PP
+Clears the undo and redo histories\&. 
+.SS "template<typename T > const T & \fBbwx_sdk::bwxProperty\fP< T >::get () const\fR [inline]\fP, \fR [nodiscard]\fP, \fR [noexcept]\fP"
+
+.PP
+Retrieves the current value\&. 
+.PP
+\fBReturns\fP
+.RS 4
+Constant reference to the value\&. 
+.RE
+.PP
+
+.SS "template<typename T > size_t \fBbwx_sdk::bwxProperty\fP< T >::getHistoryLimit () const\fR [inline]\fP, \fR [nodiscard]\fP, \fR [noexcept]\fP"
+
+.PP
+Retrieves the configured history limit\&. 
+.PP
+\fBReturns\fP
+.RS 4
+History limit\&. 
+.RE
+.PP
+
+.SS "template<typename T > \fBTimestamp\fP \fBbwx_sdk::bwxProperty\fP< T >::getLastChangeTime () const\fR [inline]\fP"
+
+.PP
+Retrieves the timestamp of the last change\&. 
+.PP
+\fBReturns\fP
+.RS 4
+Last change timestamp\&. 
+.RE
+.PP
+
+.SS "template<typename T > std::optional< std::chrono::seconds > \fBbwx_sdk::bwxProperty\fP< T >::getUndoTimeout () const\fR [inline]\fP, \fR [nodiscard]\fP, \fR [noexcept]\fP"
+
+.PP
+Retrieves the undo timeout duration\&. 
+.PP
+\fBReturns\fP
+.RS 4
+Optional undo timeout\&. 
+.RE
+.PP
+
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::isReadOnly () const\fR [inline]\fP, \fR [nodiscard]\fP, \fR [noexcept]\fP"
+
+.PP
+Checks if the property is read-only\&. 
+.PP
+\fBReturns\fP
+.RS 4
+True if read-only, false otherwise\&. 
+.RE
+.PP
+
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::operator!= (const T & rhs) const\fR [inline]\fP"
+
+.SS "template<typename T > Property< T > & \fBbwx_sdk::bwxProperty\fP< T >::operator*= (const T & rhs)\fR [inline]\fP"
+
+.PP
+References \fBbwx_sdk::bwxProperty< T >::set()\fP\&.
+.SS "template<typename T > Property< T > & \fBbwx_sdk::bwxProperty\fP< T >::operator+= (const T & rhs)\fR [inline]\fP"
+
+.PP
+References \fBbwx_sdk::bwxProperty< T >::set()\fP\&.
+.SS "template<typename T > Property< T > & \fBbwx_sdk::bwxProperty\fP< T >::operator\-= (const T & rhs)\fR [inline]\fP"
+
+.PP
+References \fBbwx_sdk::bwxProperty< T >::set()\fP\&.
+.SS "template<typename T > Property< T > & \fBbwx_sdk::bwxProperty\fP< T >::operator/= (const T & rhs)\fR [inline]\fP"
+
+.PP
+References \fBbwx_sdk::bwxProperty< T >::set()\fP\&.
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::operator< (const T & rhs) const\fR [inline]\fP"
+
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::operator<= (const T & rhs) const\fR [inline]\fP"
+
+.SS "template<typename T > \fBbwxProperty\fP< T > & \fBbwx_sdk::bwxProperty\fP< T >::operator= (const T & newValue)\fR [inline]\fP"
+
+.PP
+Assigns a new value to the property\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fInewValue\fP Value to assign\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Reference to the updated property\&. 
+.RE
+.PP
+
+.PP
+References \fBbwx_sdk::bwxProperty< T >::set()\fP\&.
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::operator== (const T & rhs) const\fR [inline]\fP"
+
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::operator> (const T & rhs) const\fR [inline]\fP"
+
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::operator>= (const T & rhs) const\fR [inline]\fP"
+
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::redo ()\fR [inline]\fP"
+
+.PP
+Redoes the previously undone value change\&. 
+.PP
+\fBReturns\fP
+.RS 4
+True if successful, false otherwise\&. 
+.RE
+.PP
+
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::reset ()\fR [inline]\fP"
+
+.PP
+Resets the value to its default\&. 
+.PP
+References \fBbwx_sdk::bwxProperty< T >::set()\fP\&.
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::set (const T & newValue)\fR [inline]\fP"
+
+.PP
+Sets a new value for the property\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fInewValue\fP Value to set\&. 
+.RE
+.PP
+
+.PP
+Referenced by \fBbwx_sdk::bwxProperty< T >::operator*=()\fP, \fBbwx_sdk::bwxProperty< T >::operator+=()\fP, \fBbwx_sdk::bwxProperty< T >::operator\-=()\fP, \fBbwx_sdk::bwxProperty< T >::operator/=()\fP, \fBbwx_sdk::bwxProperty< T >::operator=()\fP, and \fBbwx_sdk::bwxProperty< T >::reset()\fP\&.
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::setHistoryLimit (size_t limit)\fR [inline]\fP"
+
+.PP
+Sets the history limit for undo/redo operations\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIlimit\fP Number of history entries to retain\&. 
+.RE
+.PP
+
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::setOnChangeCallback (\fBChangeCallback\fP onChange)\fR [inline]\fP"
+
+.PP
+Assigns a callback for value changes\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIonChange\fP Callback to set\&. 
+.RE
+.PP
+
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::setOnRejectCallback (\fBRejectCallback\fP onReject)\fR [inline]\fP"
+
+.PP
+Assigns a callback for value rejections\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIonReject\fP Callback to set\&. 
+.RE
+.PP
+
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::setReadOnly (bool readOnly)\fR [inline]\fP"
+
+.PP
+Enables or disables read-only mode\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIreadOnly\fP True to enable, false to disable\&. 
+.RE
+.PP
+
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::setUndoTimeout (std::chrono::seconds timeout)\fR [inline]\fP"
+
+.PP
+Sets the timeout for undo operations\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fItimeout\fP Timeout duration\&. 
+.RE
+.PP
+
+.SS "template<typename T > void \fBbwx_sdk::bwxProperty\fP< T >::setValidator (\fBValidator\fP validator)\fR [inline]\fP"
+
+.PP
+Sets a new validator function\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIvalidator\fP Validator function to set\&. 
+.RE
+.PP
+
+.SS "template<typename T > bool \fBbwx_sdk::bwxProperty\fP< T >::undo ()\fR [inline]\fP"
+
+.PP
+Undoes the last value change\&. 
+.PP
+\fBReturns\fP
+.RS 4
+True if successful, false otherwise\&. 
+.RE
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for BWX SDK from the source code\&.

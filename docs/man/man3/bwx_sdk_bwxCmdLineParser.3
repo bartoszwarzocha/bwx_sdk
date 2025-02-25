@@ -1,0 +1,703 @@
+.TH "bwx_sdk::bwxCmdLineParser" 3 "Version 1.0.0" "BWX SDK" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+bwx_sdk::bwxCmdLineParser
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fR#include <bwx_cmd\&.h>\fP
+.PP
+Inherits wxCmdLineParser\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBbwxCmdLineParser\fP ()"
+.br
+.RI "Default constructor\&. "
+.ti -1c
+.RI "\fBbwxCmdLineParser\fP (int argc, char **argv)"
+.br
+.RI "Constructor for ANSI and Unicode command line arguments\&. "
+.ti -1c
+.RI "\fBbwxCmdLineParser\fP (int argc, wchar_t **argv)"
+.br
+.RI "Constructor for wide-character command line arguments\&. "
+.ti -1c
+.RI "bool \fBParse\fP ()"
+.br
+.RI "Parses the command line arguments\&. "
+.ti -1c
+.RI "void \fBSetOptionalString\fP (const wxString &s)"
+.br
+.ti -1c
+.RI "wxString \fBGetOptionalString\fP ()"
+.br
+.ti -1c
+.RI "void \fBSetHelpInfoString\fP (const wxString &s)"
+.br
+.ti -1c
+.RI "wxString \fBGetHelpInfoString\fP ()"
+.br
+.ti -1c
+.RI "void \fBSetSwitches\fP (const wxString &switch_chars=wxT('/\-'))"
+.br
+.RI "Sets the characters used to identify switches\&. "
+.ti -1c
+.RI "void \fBAddHelp\fP (const wxString &short_name=wxT('h'), const wxString &long_name=wxT('help'), const wxString &description=wxT('Shows this help'))"
+.br
+.RI "Adds a help switch to the parser\&. "
+.ti -1c
+.RI "void \fBAddSwitchOptional\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds an optional switch\&. "
+.ti -1c
+.RI "void \fBAddSwitchMandatory\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds a mandatory switch\&. "
+.ti -1c
+.RI "void \fBAddStringOptional\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds an optional string option\&. "
+.ti -1c
+.RI "void \fBAddStringMandatory\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds a mandatory string option\&. "
+.ti -1c
+.RI "void \fBAddNumberOptional\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds an optional numerical option\&. "
+.ti -1c
+.RI "void \fBAddNumberMandatory\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds a mandatory numerical option\&. "
+.ti -1c
+.RI "void \fBAddDoubleOptional\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds an optional double option\&. "
+.ti -1c
+.RI "void \fBAddDoubleMandatory\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds a mandatory double option\&. "
+.ti -1c
+.RI "void \fBAddDateOptional\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds an optional date option\&. "
+.ti -1c
+.RI "void \fBAddDateMandatory\fP (const wxString &short_name, const wxString &long_name, const wxString &description, bool visible=true)"
+.br
+.RI "Adds a mandatory date option\&. "
+.ti -1c
+.RI "void \fBAddStringParamOptional\fP (const wxString &name, bool visible=true)"
+.br
+.RI "Adds an optional string parameter\&. "
+.ti -1c
+.RI "void \fBAddStringParamMandatory\fP (const wxString &name, bool visible=true)"
+.br
+.RI "Adds a mandatory string parameter\&. "
+.ti -1c
+.RI "void \fBAddNumberParamOptional\fP (const wxString &name, bool visible=true)"
+.br
+.RI "Adds an optional numerical parameter\&. "
+.ti -1c
+.RI "void \fBAddNumberParamMandatory\fP (const wxString &name, bool visible=true)"
+.br
+.RI "Adds a mandatory numerical parameter\&. "
+.ti -1c
+.RI "void \fBAddDoubleParamOptional\fP (const wxString &name, bool visible=true)"
+.br
+.RI "Adds an optional double parameter\&. "
+.ti -1c
+.RI "void \fBAddDoubleParamMandatory\fP (const wxString &name, bool visible=true)"
+.br
+.RI "Adds a mandatory double parameter\&. "
+.ti -1c
+.RI "void \fBAddDateParamOptional\fP (const wxString &name, bool visible=true)"
+.br
+.RI "Adds an optional date parameter\&. "
+.ti -1c
+.RI "void \fBAddDateParamMandatory\fP (const wxString &name, bool visible=true)"
+.br
+.RI "Adds a mandatory date parameter\&. "
+.ti -1c
+.RI "wxCmdLineSwitchState \fBGetSwitch\fP (const wxString &name)"
+.br
+.RI "Retrieves the state of a switch\&. "
+.ti -1c
+.RI "bool \fBGetSwitchAsBool\fP (const wxString &name)"
+.br
+.RI "Retrieves the state of a switch as a boolean\&. "
+.ti -1c
+.RI "wxString \fBGetString\fP (const wxString &name, const wxString &defaultValue=_ES_)"
+.br
+.RI "Retrieves the string value of an option\&. "
+.ti -1c
+.RI "long \fBGetNumber\fP (const wxString &name, const long &defaultValue=\-1)"
+.br
+.RI "Retrieves the numerical value of an option\&. "
+.ti -1c
+.RI "double \fBGetDouble\fP (const wxString &name, const double &defaultValue=\-1)"
+.br
+.RI "Retrieves the double precision value of an option\&. "
+.ti -1c
+.RI "wxDateTime \fBGetDate\fP (const wxString &name, const wxDateTime &defaultValue=_DT_)"
+.br
+.RI "Retrieves the date value of an option\&. "
+.ti -1c
+.RI "wxString \fBGetStringParam\fP (size_t index=0, const wxString &defaultValue=_ES_)"
+.br
+.RI "Retrieves the string value of a positional parameter\&. "
+.ti -1c
+.RI "long \fBGetNumberParam\fP (size_t index=0, const long &defaultValue=\-1)"
+.br
+.RI "Retrieves the numerical value of a positional parameter\&. "
+.ti -1c
+.RI "double \fBGetDoubleParam\fP (size_t index=0, const double &defaultValue=\-1)"
+.br
+.RI "Retrieves the double precision value of a positional parameter\&. "
+.ti -1c
+.RI "wxDateTime \fBGetDateParam\fP (size_t index=0, const wxDateTime &defaultValue=_DT_)"
+.br
+.RI "Retrieves the date value of a positional parameter\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "bwx_sdk::bwxCmdLineParser::bwxCmdLineParser ()"
+
+.PP
+Default constructor\&. Initializes the base wxCmdLineParser and calls the Init() method\&. 
+.SS "bwx_sdk::bwxCmdLineParser::bwxCmdLineParser (int argc, char ** argv)"
+
+.PP
+Constructor for ANSI and Unicode command line arguments\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIargc\fP Number of arguments\&. 
+.br
+\fIargv\fP Array of argument strings (char**)\&. 
+.RE
+.PP
+
+.SS "bwx_sdk::bwxCmdLineParser::bwxCmdLineParser (int argc, wchar_t ** argv)"
+
+.PP
+Constructor for wide-character command line arguments\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIargc\fP Number of arguments\&. 
+.br
+\fIargv\fP Array of argument strings (wchar_t**)\&. 
+.RE
+.PP
+
+.SH "Member Function Documentation"
+.PP 
+.SS "void bwx_sdk::bwxCmdLineParser::AddDateMandatory (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory date option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the option\&. 
+.br
+\fIlong_name\fP Long name of the option\&. 
+.br
+\fIdescription\fP Description of the option\&. 
+.br
+\fIvisible\fP Flag indicating whether the option is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddDateOptional (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional date option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the option\&. 
+.br
+\fIlong_name\fP Long name of the option\&. 
+.br
+\fIdescription\fP Description of the option\&. 
+.br
+\fIvisible\fP Flag indicating whether the option is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddDateParamMandatory (const wxString & name, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory date parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the parameter\&. 
+.br
+\fIvisible\fP Flag indicating whether the parameter is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddDateParamOptional (const wxString & name, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional date parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the parameter\&. 
+.br
+\fIvisible\fP Flag indicating whether the parameter is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddDoubleMandatory (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory double option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the option\&. 
+.br
+\fIlong_name\fP Long name of the option\&. 
+.br
+\fIdescription\fP Description of the option\&. 
+.br
+\fIvisible\fP Flag indicating whether the option is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddDoubleOptional (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional double option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the option\&. 
+.br
+\fIlong_name\fP Long name of the option\&. 
+.br
+\fIdescription\fP Description of the option\&. 
+.br
+\fIvisible\fP Flag indicating whether the option is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddDoubleParamMandatory (const wxString & name, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory double parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the parameter\&. 
+.br
+\fIvisible\fP Flag indicating whether the parameter is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddDoubleParamOptional (const wxString & name, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional double parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the parameter\&. 
+.br
+\fIvisible\fP Flag indicating whether the parameter is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddHelp (const wxString & short_name = \fRwxT('h')\fP, const wxString & long_name = \fRwxT('help')\fP, const wxString & description = \fRwxT('Shows this help')\fP)"
+
+.PP
+Adds a help switch to the parser\&. The help switch will display usage information\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the help switch\&. 
+.br
+\fIlong_name\fP Long name of the help switch\&. 
+.br
+\fIdescription\fP Description of the help switch\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddNumberMandatory (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory numerical option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the option\&. 
+.br
+\fIlong_name\fP Long name of the option\&. 
+.br
+\fIdescription\fP Description of the option\&. 
+.br
+\fIvisible\fP Flag indicating whether the option is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddNumberOptional (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional numerical option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the option\&. 
+.br
+\fIlong_name\fP Long name of the option\&. 
+.br
+\fIdescription\fP Description of the option\&. 
+.br
+\fIvisible\fP Flag indicating whether the option is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddNumberParamMandatory (const wxString & name, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory numerical parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the parameter\&. 
+.br
+\fIvisible\fP Flag indicating whether the parameter is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddNumberParamOptional (const wxString & name, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional numerical parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the parameter\&. 
+.br
+\fIvisible\fP Flag indicating whether the parameter is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddStringMandatory (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory string option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the option\&. 
+.br
+\fIlong_name\fP Long name of the option\&. 
+.br
+\fIdescription\fP Description of the option\&. 
+.br
+\fIvisible\fP Flag indicating whether the option is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddStringOptional (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional string option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the option\&. 
+.br
+\fIlong_name\fP Long name of the option\&. 
+.br
+\fIdescription\fP Description of the option\&. 
+.br
+\fIvisible\fP Flag indicating whether the option is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddStringParamMandatory (const wxString & name, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory string parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the parameter\&. 
+.br
+\fIvisible\fP Flag indicating whether the parameter is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddStringParamOptional (const wxString & name, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional string parameter\&. This method adds a positional parameter for string values\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the parameter\&. 
+.br
+\fIvisible\fP Flag indicating whether the parameter is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddSwitchMandatory (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds a mandatory switch\&. This method adds a command line switch that is mandatory\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the switch\&. 
+.br
+\fIlong_name\fP Long name of the switch\&. 
+.br
+\fIdescription\fP Description of the switch\&. 
+.br
+\fIvisible\fP Flag indicating whether the switch is visible\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::AddSwitchOptional (const wxString & short_name, const wxString & long_name, const wxString & description, bool visible = \fRtrue\fP)"
+
+.PP
+Adds an optional switch\&. This method adds a command line switch that is optional\&. If not visible, the switch is hidden from the help output\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIshort_name\fP Short name of the switch\&. 
+.br
+\fIlong_name\fP Long name of the switch\&. 
+.br
+\fIdescription\fP Description of the switch\&. 
+.br
+\fIvisible\fP Flag indicating whether the switch is visible\&. 
+.RE
+.PP
+
+.SS "wxDateTime bwx_sdk::bwxCmdLineParser::GetDate (const wxString & name, const wxDateTime & defaultValue = \fR_DT_\fP)"
+
+.PP
+Retrieves the date value of an option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the option\&. 
+.br
+\fIdefaultValue\fP Default date returned if the option is not found or invalid\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The date value of the option\&. 
+.RE
+.PP
+
+.SS "wxDateTime bwx_sdk::bwxCmdLineParser::GetDateParam (size_t index = \fR0\fP, const wxDateTime & defaultValue = \fR_DT_\fP)"
+
+.PP
+Retrieves the date value of a positional parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIindex\fP Index of the parameter\&. 
+.br
+\fIdefaultValue\fP Default date returned if the parameter is not provided or invalid\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The date value of the parameter\&. 
+.RE
+.PP
+
+.SS "double bwx_sdk::bwxCmdLineParser::GetDouble (const wxString & name, const double & defaultValue = \fR\-1\fP)"
+
+.PP
+Retrieves the double precision value of an option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the option\&. 
+.br
+\fIdefaultValue\fP Default value returned if the option is not found\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The double value of the option\&. 
+.RE
+.PP
+
+.SS "double bwx_sdk::bwxCmdLineParser::GetDoubleParam (size_t index = \fR0\fP, const double & defaultValue = \fR\-1\fP)"
+
+.PP
+Retrieves the double precision value of a positional parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIindex\fP Index of the parameter\&. 
+.br
+\fIdefaultValue\fP Default value returned if the parameter is not provided\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The double value of the parameter\&. 
+.RE
+.PP
+
+.SS "wxString bwx_sdk::bwxCmdLineParser::GetHelpInfoString ()\fR [inline]\fP"
+
+.SS "long bwx_sdk::bwxCmdLineParser::GetNumber (const wxString & name, const long & defaultValue = \fR\-1\fP)"
+
+.PP
+Retrieves the numerical value of an option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the option\&. 
+.br
+\fIdefaultValue\fP Default value returned if the option is not found\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The numerical value of the option\&. 
+.RE
+.PP
+
+.SS "long bwx_sdk::bwxCmdLineParser::GetNumberParam (size_t index = \fR0\fP, const long & defaultValue = \fR\-1\fP)"
+
+.PP
+Retrieves the numerical value of a positional parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIindex\fP Index of the parameter\&. 
+.br
+\fIdefaultValue\fP Default value returned if the parameter is not provided\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The numerical value of the parameter\&. 
+.RE
+.PP
+
+.SS "wxString bwx_sdk::bwxCmdLineParser::GetOptionalString ()\fR [inline]\fP"
+
+.SS "wxString bwx_sdk::bwxCmdLineParser::GetString (const wxString & name, const wxString & defaultValue = \fR_ES_\fP)"
+
+.PP
+Retrieves the string value of an option\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the option\&. 
+.br
+\fIdefaultValue\fP Default value returned if the option is not found\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The string value of the option\&. 
+.RE
+.PP
+
+.SS "wxString bwx_sdk::bwxCmdLineParser::GetStringParam (size_t index = \fR0\fP, const wxString & defaultValue = \fR_ES_\fP)"
+
+.PP
+Retrieves the string value of a positional parameter\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIindex\fP Index of the parameter\&. 
+.br
+\fIdefaultValue\fP Default value returned if the parameter is not provided\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The string value of the parameter\&. 
+.RE
+.PP
+
+.SS "wxCmdLineSwitchState bwx_sdk::bwxCmdLineParser::GetSwitch (const wxString & name)"
+
+.PP
+Retrieves the state of a switch\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the switch\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The state of the switch\&. 
+.RE
+.PP
+
+.PP
+Referenced by \fBGetSwitchAsBool()\fP\&.
+.SS "bool bwx_sdk::bwxCmdLineParser::GetSwitchAsBool (const wxString & name)"
+
+.PP
+Retrieves the state of a switch as a boolean\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIname\fP Name of the switch\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+True if the switch is present; false otherwise\&. 
+.RE
+.PP
+
+.PP
+References \fBGetSwitch()\fP\&.
+.SS "bool bwx_sdk::bwxCmdLineParser::Parse ()"
+
+.PP
+Parses the command line arguments\&. If only one argument is provided, a help message is printed\&. The function then calls the base class parser and returns false if an error occurred or if help was requested\&.
+.PP
+\fBReturns\fP
+.RS 4
+True if parsing was successful; false otherwise\&. 
+.RE
+.PP
+
+.SS "void bwx_sdk::bwxCmdLineParser::SetHelpInfoString (const wxString & s)\fR [inline]\fP"
+
+.SS "void bwx_sdk::bwxCmdLineParser::SetOptionalString (const wxString & s)\fR [inline]\fP"
+
+.SS "void bwx_sdk::bwxCmdLineParser::SetSwitches (const wxString & switch_chars = \fRwxT('/\-')\fP)"
+
+.PP
+Sets the characters used to identify switches\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIswitch_chars\fP String containing the switch characters\&. 
+.RE
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for BWX SDK from the source code\&.

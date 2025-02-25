@@ -1,0 +1,75 @@
+.TH "E:/C++/Projekty/Libs/bwx_sdk/src/bwx_core/bwx_math.cpp" 3 "Version 1.0.0" "BWX SDK" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+E:/C++/Projekty/Libs/bwx_sdk/src/bwx_core/bwx_math.cpp \- Implements basic mathematical functions used within the BWX_SDK Library\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include <wx/wxprec\&.h>\fP
+.br
+\fR#include <wx/wx\&.h>\fP
+.br
+\fR#include <random>\fP
+.br
+\fR#include 'bwx_math\&.h'\fP
+.br
+
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI "namespace \fBbwx_sdk\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "float \fBbwx_sdk::bwxToRadians\fP (float dgrs)"
+.br
+.RI "Converts an angle from degrees to radians\&. "
+.ti -1c
+.RI "float \fBbwx_sdk::bwxToDegrees\fP (float rads)"
+.br
+.RI "Converts an angle from radians to degrees\&. "
+.ti -1c
+.RI "bool \fBbwx_sdk::bwxIsPower2\fP (int x)"
+.br
+.RI "Checks if an integer is a power of 2\&. "
+.ti -1c
+.RI "int \fBbwx_sdk::bwxNextPower2\fP (int x)"
+.br
+.RI "Returns the next power of 2 greater than or equal to the given number\&. "
+.ti -1c
+.RI "int \fBbwx_sdk::bwxRand\fP (int min, int max)"
+.br
+.RI "Generates a random integer within the inclusive range [min, max]\&. "
+.ti -1c
+.RI "double \fBbwx_sdk::bwxRand\fP (double min, double max)"
+.br
+.RI "Generates a random double within the inclusive range [min, max]\&. "
+.ti -1c
+.RI "int \fBbwx_sdk::bwxNextMultiple\fP (int m, int value)"
+.br
+.RI "Returns the smallest multiple of m that is greater than or equal to value\&. "
+.ti -1c
+.RI "double \fBbwx_sdk::bwxNextMultiple\fP (double m, double value)"
+.br
+.RI "Returns the smallest multiple of m that is greater than or equal to value\&. "
+.ti -1c
+.RI "float \fBbwx_sdk::bwxIntermediate\fP (float a, float b, float x)"
+.br
+.RI "Returns a normalized value in the range [0, 1] based on x within the interval [a, b]\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Implements basic mathematical functions used within the BWX_SDK Library\&. 
+
+
+.PP
+Definition in file \fBbwx_math\&.cpp\fP\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for BWX SDK from the source code\&.

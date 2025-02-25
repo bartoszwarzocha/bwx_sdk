@@ -1,0 +1,56 @@
+.TH "E:/C++/Projekty/Libs/bwx_sdk/src/bwx_core/bwx_core.h" 3 "Version 1.0.0" "BWX SDK" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+E:/C++/Projekty/Libs/bwx_sdk/src/bwx_core/bwx_core.h
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'bwx_sdk/bwx_globals\&.h'\fP
+.br
+
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI "namespace \fBbwx_sdk\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBbwx_sdk::bwxStdPathsInfo\fP (void)"
+.br
+.RI "Displays standard system paths in a message box\&. "
+.ti -1c
+.RI "void \fBbwx_sdk::bwxSetByteFlag\fP (int &var, bwxByteFlag flag) noexcept"
+.br
+.RI "Overwrites a variable with a specific bit flag\&. "
+.ti -1c
+.RI "void \fBbwx_sdk::bwxAddByteFlag\fP (int &var, bwxByteFlag flag) noexcept"
+.br
+.RI "Adds a bit flag to a variable\&. "
+.ti -1c
+.RI "void \fBbwx_sdk::bwxRemoveByteFlag\fP (int &var, bwxByteFlag flag) noexcept"
+.br
+.RI "Removes a bit flag from a variable\&. "
+.ti -1c
+.RI "bool \fBbwx_sdk::bwxIsByteFlagSet\fP (int &var, bwxByteFlag flag) noexcept"
+.br
+.ti -1c
+.RI "wxString \fBbwx_sdk::bwxGetThreadErrorDescription\fP (const wxThreadError &err, bool processLog)"
+.br
+.RI "Retrieves a description for a thread error\&. "
+.ti -1c
+.RI "wxString \fBbwx_sdk::bwxGetSemaphoreErrorDescription\fP (const wxSemaError &err, bool processLog)"
+.br
+.RI "Retrieves a description for a semaphore error\&. "
+.ti -1c
+.RI "wxString \fBbwx_sdk::bwxGetMutexErrorDescritpion\fP (const wxMutexError &err, bool processLog)"
+.br
+.RI "Retrieves a description for a mutex error\&. "
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for BWX SDK from the source code\&.

@@ -1,0 +1,28 @@
+var classbwx__sdk_1_1bwx_property_map =
+[
+    [ "ChangeCallback", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a29c1387469939ca819fcc099dfc73f02", null ],
+    [ "Timestamp", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#ac852ae559c43b650163b427455bc2f99", null ],
+    [ "bwxPropertyMap", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a4cceec6164f7c5400729c6c8cde7bbaf", null ],
+    [ "AsCStr", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a214d6278d86cf0b98816bb6bc899c4f6", null ],
+    [ "begin", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a5a5df6956f1768a1ac16daae2885e3b1", null ],
+    [ "cbegin", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#aa20b1056cc8b50bd2ab85d5627bdce0f", null ],
+    [ "cend", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a8a47ef88854a82cf2a7ebf4a32e53177", null ],
+    [ "clear", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a8448af815a7cf45d0b2a0df53071872a", null ],
+    [ "clearHistory", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a2e08559ba88885073ffe75cd3049ba00", null ],
+    [ "end", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#acf6d327f478736aa9dd2f87fab81a25f", null ],
+    [ "get", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a88772ffe162cbea0a269a05f083f7496", null ],
+    [ "getCapacityLimit", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a8f5db05ddc6e4955549770951a810b4b", null ],
+    [ "getHistoryLimit", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#af5985465b60cfd92746be0bb90147000", null ],
+    [ "getLastChangeTime", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a2e1e93992b5a00c25915561c9d563764", null ],
+    [ "getRef", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a11d1574605a3df62b792423c8d4ea9f3", null ],
+    [ "isReadOnly", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a2ae8465aac5a99a53399c090310114c7", null ],
+    [ "redo", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a3d0c849344d02a8426f1e20d37f233c5", null ],
+    [ "set", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a1d31c056f8cad5c20f7491c69dbc1dd1", null ],
+    [ "setCapacityLimit", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a845b64e95813be3935a57acd2d58a961", null ],
+    [ "setEventHandler", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a68d2ed15641e103b6f3a67ed6579f363", null ],
+    [ "setHistoryLimit", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a5d99f5e1271f14b6ac4c281899e3867c", null ],
+    [ "setOnChangeCallback", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a259e2dfe1d6fde83b6b3110f1825f250", null ],
+    [ "setReadOnly", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a714dd4fb3bedeabb7f6c795fe2327358", null ],
+    [ "size", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#a967189c8375504b82852cdeb6d66e7e5", null ],
+    [ "undo", "de/dcb/classbwx__sdk_1_1bwx_property_map.html#ae5b3f543b1a1ed597a8a53ba86d4c900", null ]
+];
