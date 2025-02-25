@@ -41,7 +41,8 @@ jobs:
             gperf \
             bison \
             flex \
-            libxcrypt-dev
+            libxcrypt-dev \
+            zip
         shell: bash
 
       - name: Install required macOS packages
@@ -49,10 +50,16 @@ jobs:
         run: |
           brew update
           brew reinstall --formula cmake pkgconf gettext wxwidgets
-          brew install ninja
+          brew install ninja zip
           brew link --force gettext wxwidgets
           echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/gettext/lib/pkgconfig:$(brew --prefix wxwidgets)/lib/pkgconfig" >> $GITHUB_ENV
         shell: bash
+
+      - name: Install required Windows packages
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install zip -y
+        shell: powershell
 
       - name: Cache vcpkg and dependencies
         uses: actions/cache@v3
