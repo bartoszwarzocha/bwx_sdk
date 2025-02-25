@@ -81,13 +81,6 @@ jobs:
           fi
         shell: bash
 
-      - name: Update vcpkg ports
-        run: |
-          cd vcpkg
-          git pull
-          ./vcpkg update
-        shell: bash
-
       - name: Set VCPKG Triplet
         id: set_triplet
         run: |
@@ -106,7 +99,7 @@ jobs:
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             .\\vcpkg\\vcpkg.exe install --triplet $VCPKG_TRIPLET --clean-after-build
           else
-            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build --allow-unsupported --debug
+            ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --clean-after-build --x-manifest-root="${{ github.workspace }}"
           fi
         shell: bash
 
