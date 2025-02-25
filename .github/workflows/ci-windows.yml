@@ -1,4 +1,4 @@
-name: C++ CI/CD Windows
+name: WINDOWS
 
 on: [push, pull_request]
 
