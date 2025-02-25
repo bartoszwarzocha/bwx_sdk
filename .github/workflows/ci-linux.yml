@@ -63,14 +63,15 @@ jobs:
             m4 \
             gettext \
             texinfo \
-            libxcrypt-dev || echo "libxcrypt-dev not found, attempting alternative installation..."
+            libssl-dev \
+            libffi-dev \
+            libxcrypt-dev || echo "libxcrypt-dev not found, using fallback installation."
 
-          # Fallback installation of libxcrypt from source if apt installation fails
           if ! ldconfig -p | grep -q libxcrypt; then
-            echo "Building libxcrypt from source..."
-            wget https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.gz -O libxcrypt.tar.gz
+            echo "Attempting to build libxcrypt from source..."
+            wget https://github.com/besser82/libxcrypt/archive/refs/tags/v4.4.36.tar.gz -O libxcrypt.tar.gz || { echo "Failed to download libxcrypt."; exit 1; }
             tar -xzf libxcrypt.tar.gz
-            cd libxcrypt-4.4.36
+            cd libxcrypt-4.4.36 || { echo "libxcrypt source not found."; exit 1; }
             autoreconf -vfi || { echo "autoreconf failed."; exit 1; }
             ./configure --prefix=/usr || { echo "configure failed."; exit 1; }
             make -j$(nproc) || { echo "make failed."; exit 1; }
@@ -118,7 +119,7 @@ jobs:
                 echo "vcpkg install failed after $RETRIES attempts. Exiting."
                 exit 1
               fi
-              sleep 15
+              sleep 10
             fi
           done
         shell: bash
