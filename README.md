@@ -33,6 +33,12 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 
 ---
 
+## Library documentation
+The library is supplied with a default HTML documentation and a doxygen configuration file with which you can generate HTML and man documentation.
+If you need documentation in the form of a CHM file, please enable the GENERATE_HTMLHELP parameter and disable the HTML_DYNAMIC_MENUS parameter in the doxygen file and generate the documentation again. You will get a set of files ready to build a CHM help file.
+
+---
+
 ## Installation & Build Instructions
 
 ### Option 1: Automated (Recommended)
@@ -84,6 +90,8 @@ cmake --build . --config Release
 ## Directory Structure
 ```
 ├── .github/            # GitHub workflows (CI/CD)
+├── docs/               # Library documentation
+│   └── doxygen/        # Doxygen configuration
 ├── examples/           # Example applications demonstrating usage
 │   └── example_app/
 │       ├── CMakeLists.txt

@@ -21,12 +21,14 @@ permissions:
   contents: read
 
 jobs:
-  linux-build:
-    name: Linux Build
-    runs-on: ubuntu-latest
+  build:
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release, Debug]
+    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v3
 
@@ -35,7 +37,8 @@ jobs:
         with:
           cmake-version: '3.22.0'
 
-      - name: Install required Linux packages
+      - name: Install required packages (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -45,24 +48,23 @@ jobs:
             pkg-config \
             ninja-build \
             build-essential \
-            libssl-dev \
-            libffi-dev \
-            libgmp-dev \
-            libpcre3-dev \
-            gettext \
-            texinfo \
-            m4 \
-            gperf \
-            bison \
-            flex \
-            zip \
-            cmake \
-            wget \
-            curl \
-            libltdl-dev \
-            meson \
-            python3-pip 
+            libglib2.0-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            libpng-dev \
+            libxrender-dev \
+            libxcb1-dev \
+            libxcb-render0-dev \
+            libxcb-shm0-dev 
           pip3 install --upgrade meson
+        shell: bash
+
+      - name: Install required packages (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install ninja pkg-config gettext
+          brew link --force gettext
         shell: bash
 
       - name: Cache vcpkg and dependencies
@@ -72,45 +74,54 @@ jobs:
             ${{ github.workspace }}/vcpkg
             ${{ github.workspace }}/build/vcpkg_installed
             ${{ github.workspace }}/vcpkg/downloads
-          key: linux-vcpkg-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
 
-      - name: Prepare vcpkg directory
+      - name: Prepare vcpkg
         run: |
           if [ ! -d "vcpkg" ]; then
             git clone https://github.com/microsoft/vcpkg.git
-          else
-            echo "vcpkg directory already exists. Skipping clone."
           fi
-        shell: bash
-
-      - name: Bootstrap vcpkg
-        run: |
           cd vcpkg
-          ./bootstrap-vcpkg.sh
+          git pull origin master
+          ./bootstrap-vcpkg.sh || ./bootstrap-vcpkg.bat
         shell: bash
 
       - name: Set VCPKG Triplet
-        run: echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
+        id: set_triplet
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            echo "VCPKG_TRIPLET=x64-windows" >> "$GITHUB_ENV"
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            echo "VCPKG_TRIPLET=x64-osx" >> "$GITHUB_ENV"
+          else
+            echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
+          fi
         shell: bash
 
-      - name: Install dependencies (with manifest mode support)
+      - name: Install dependencies via vcpkg
         run: |
-          echo "Installing dependencies using manifest mode."
-          ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET" --clean-after-build || {
-            echo "vcpkg installation failed. Cleaning buildtrees and retrying."
-            rm -rf ./vcpkg/buildtrees
-            ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET" --clean-after-build || {
-              echo "Failed to install dependencies via vcpkg even after cleanup. Exiting."
-              exit 1
-            }
-          }
+          ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET
         shell: bash
 
-      - name: Configure CMake
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
-          BUILD_DIR="build/linux-latest-${{ matrix.build_type }}"
+          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
           mkdir -p "$BUILD_DIR"
+          cmake -B "$BUILD_DIR" -S . \
+            -G "Visual Studio 17 2022" \
+            -A x64 \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
+            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
+            -DBUILD_SHARED_LIBS=OFF
+        shell: bash
 
+      - name: Configure CMake (Linux & macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
+          mkdir -p "$BUILD_DIR"
           cmake -B "$BUILD_DIR" -S . \
             -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
@@ -121,27 +132,13 @@ jobs:
 
       - name: Build
         run: |
-          BUILD_DIR="build/linux-latest-${{ matrix.build_type }}"
+          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
           cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
         shell: bash
 
-      - name: Package artifacts
-        run: |
-          BUILD_DIR="build/linux-latest-${{ matrix.build_type }}"
-          PACKAGE_NAME="bwx_sdk-linux-${{ matrix.build_type }}.zip"
-          mkdir -p packages
-          zip -r "packages/$PACKAGE_NAME" "$BUILD_DIR"
-        shell: bash
-
-      - name: Upload package artifacts
-        uses: actions/upload-artifact@v4.6.0
-        with:
-          name: bwx_sdk-linux-${{ matrix.build_type }}
-          path: packages/*.zip
-
       - name: Run tests (if any)
         run: |
-          BUILD_DIR="build/linux-latest-${{ matrix.build_type }}"
+          BUILD_DIR="build/${{ matrix.os }}-${{ matrix.build_type }}"
           cd "$BUILD_DIR"
           ctest --output-on-failure --build-config "${{ matrix.build_type }}"
         shell: bash
