@@ -148,5 +148,5 @@ This project is licensed under the [wxWidgets License](https://www.wxwidgets.org
 ## Contact
 Developed and maintained by **Bartosz Warzocha**.
 
-For any inquiries or support, please open an issue on the [GitHub repository](https://github.com/your_username/bwx_sdk/issues).
+For any inquiries or support, please open an issue on the [GitHub repository](https://github.com/bartoszwarzocha/bwx_sdk/issues).
 
