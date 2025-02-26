@@ -8,6 +8,8 @@ on:
       - 'include/**'
       - 'src/**'
       - 'examples/**'
+      - '.github/**'
+      - '.github/workflows/**'
   pull_request:
     branches:
       - master
@@ -15,85 +17,174 @@ on:
       - 'include/**'
       - 'src/**'
       - 'examples/**'
+      - '.github/**'
+      - '.github/workflows/**'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  build-macos:
-    name: Build on macOS
-    runs-on: macos-latest
+  macOS:
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        build_type: [Release, Debug]
+        build_type: [Debug, Release]
+        include:
+          - name: macOS 12 wxGTK 3
+            runner: macos-12
+            cmake_generator: Unix Makefiles
+            cmake_samples: ALL
+
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up CMake
-        uses: jwlawson/actions-setup-cmake@v1
-        with:
-          cmake-version: '3.22.0'
+    - name: Install dependencies
+      if: runner.os == 'macOS'
+      run: |
+        # Update and install dependencies using Homebrew
+        brew update
+        
+        # Basic development tools
+        brew install \
+            cmake ninja autoconf automake libtool pkg-config gettext bison flex gfortran nasm meson
 
-      - name: Install Required Packages (macOS)
-        run: |
-          brew update
-          brew install ninja pkg-config gettext
-          brew link --force gettext
-        shell: bash
+        # Font and graphics libraries
+        brew install \
+            fontconfig freetype glib gtk+3
 
-      - name: Cache vcpkg and Dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/vcpkg
-            ${{ github.workspace }}/build/vcpkg_installed
-            ${{ github.workspace }}/vcpkg/downloads
-          key: macos-vcpkg-${{ hashFiles('vcpkg.json') }}
+        # X11 libraries
+        brew install \
+            xquartz libpng zlib dbus atk
 
-      - name: Prepare vcpkg
-        run: |
-          if [ ! -d "vcpkg" ]; then
-            git clone https://github.com/microsoft/vcpkg.git
-          fi
-          cd vcpkg
-          git pull origin master
-          ./bootstrap-vcpkg.sh
-        shell: bash
+        # GObject introspection and Python bindings
+        brew install \
+            gobject-introspection pygobject3
 
-      - name: Set VCPKG Triplet
-        run: echo "VCPKG_TRIPLET=x64-osx" >> "$GITHUB_ENV"
-        shell: bash
+        # Graphics rendering libraries
+        brew install \
+            cairo pango gdk-pixbuf
 
-      - name: Install Dependencies via vcpkg (Manifest Mode)
-        run: |
-          ./vcpkg/vcpkg install --triplet $VCPKG_TRIPLET --manifest-root="${{ github.workspace }}"
-        shell: bash
+        # More X11 libraries
+        brew install \
+            xinerama xrandr xcomposite xdamage xcursor xfixes xss
 
-      - name: Configure CMake
-        run: |
-          BUILD_DIR="build/macos-${{ matrix.build_type }}"
-          mkdir -p "$BUILD_DIR"
-          cmake -B "$BUILD_DIR" -S . \
-            -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
-            -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
-            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
-            -DBUILD_SHARED_LIBS=OFF
-        shell: bash
+        # Epoxy library for OpenGL function management
+        brew install \
+            epoxy
 
-      - name: Build
-        run: |
-          BUILD_DIR="build/macos-${{ matrix.build_type }}"
-          cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
-        shell: bash
+        # Wayland and input support
+        brew install \
+            wayland libinput
 
-      - name: Run Tests (if any)
-        run: |
-          BUILD_DIR="build/macos-${{ matrix.build_type }}"
-          cd "$BUILD_DIR"
-          ctest --output-on-failure --build-config "${{ matrix.build_type }}"
-        shell: bash
+        # Audio support libraries
+        brew install \
+            alsa-lib pulseaudio xft xkbcommon
+
+        # OpenGL and EGL support
+        brew install \
+            mesa ibus
+
+    - name: Configure project with autoconf (3 attempts)
+      if: runner.os == 'macOS'
+      run: |
+        # Run autoreconf up to three times if configure.ac is present
+        if [ -f configure.ac ]; then
+          echo "Found configure.ac, starting autoreconf attempts..."
+          for attempt in {1..3}; do
+            echo "Attempt $attempt..."
+            mkdir -p build-aux/m4 build-aux/m4-autogen m4
+            aclocal --install -I build-aux/m4 && \
+            libtoolize --force --copy && \
+            autoreconf --force --install --verbose && break || {
+              echo "Attempt $attempt failed. Retrying in 10 seconds..."
+              sleep 10
+            }
+          done
+        else
+          echo "No configure.ac found. Skipping autoreconf."
+        fi
+
+    - name: Show build environment
+      run: |
+        echo "Environment Variables:"
+        env | sort
+
+        echo "Compiler Version:"
+        ${CXX:-g++} --version
+
+        echo "Disk Space:"
+        df -h /
+
+    - name: Set up vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        cd vcpkg
+        git pull
+        ./bootstrap-vcpkg.sh
+      env:
+        VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+    - name: Install vcpkg dependencies (3 attempts)
+      run: |
+        for attempt in {1..3}; do
+          echo "Attempt $attempt to install vcpkg dependencies..."
+          ./vcpkg/vcpkg install --triplet x64-osx && break || {
+            echo "vcpkg install failed. Cleaning buildtrees and retrying in 10 seconds..."
+            rm -rf ./vcpkg/buildtrees
+            sleep 10
+          }
+        done
+      env:
+        VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+    - name: Configure CMake
+      run: |
+        VCPKG_TRIPLET=x64-osx
+        BUILD_DIR="build/macos-${{ matrix.build_type }}"
+        mkdir -p "$BUILD_DIR"
+        cmake -B "$BUILD_DIR" -S . \
+          -G Ninja \
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
+          -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      env:
+        VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+    - name: Build project (3 attempts)
+      run: |
+        BUILD_DIR="build/macos-${{ matrix.build_type }}"
+        for attempt in {1..3}; do
+          echo "Attempt $attempt to build project..."
+          cmake --build "$BUILD_DIR" && break || {
+            echo "Build attempt $attempt failed. Retrying in 10 seconds..."
+            sleep 10
+          }
+        done
+
+    - name: Run tests
+      run: |
+        BUILD_DIR="build/macos-${{ matrix.build_type }}"
+        cd "$BUILD_DIR"
+        ctest -V
+
+    - name: Upload build logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4.6.0
+      with:
+        name: build-logs
+        path: |
+          ${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-osx-out.log
+          ${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-osx-err.log
