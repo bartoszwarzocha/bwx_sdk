@@ -38,27 +38,7 @@ jobs:
             runner: ubuntu-22.04
             cmake_generator: Unix Makefiles
             cmake_samples: ALL
-          - name: macOS 14 wxOSX
-            runner: macos-14
-            cmake_generator: Xcode
-          - name: macOS 14 wxIOS
-            runner: macos-14
-            cmake_generator: Xcode
-            cmake_defines: -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_FIND_ROOT_PATH=/usr/local -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
-            cmake_samples: OFF
-            cmake_tests: OFF
-          - name: Windows MSVC
-            runner: windows-latest
-            no_sudo: 1
-            cmake_defines: -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
-            cmake_generator: Ninja
-            cmake_samples: SOME
-            cmake_tests: CONSOLE_ONLY
 
-    env:
-      GTK_VERSION: ${{ matrix.gtk_version }}
-
-    # Use bash as the shell, even under MSW where the default is PowerShell.
     defaults:
       run:
         shell: bash
@@ -130,6 +110,28 @@ jobs:
         libtoolize --force --copy
         autoreconf --force --install --verbose
 
+    - name: Show build environment
+        run: |
+          echo "Environment:"
+          env | sort
+          echo
+
+          echo "Make version:"
+          make --version
+          echo
+
+          echo "Compiler version:"
+          ${CXX-g++} --version
+          echo
+
+          echo "ccache version:"
+          ccache --version || echo "ccache not available"
+          echo
+
+          echo "Free space:"
+          df -h /
+          echo
+
     - name: Set up vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
@@ -173,9 +175,21 @@ jobs:
 
     - name: Upload build logs on failure
       if: failure()
+      run: |
+        if [ -f "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log" ]; then
+          echo "Uploading autoconf-x64-linux-out.log"
+          echo "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log" > logs-to-upload.txt
+        fi
+        if [ -f "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log" ]; then
+          echo "Uploading autoconf-x64-linux-err.log"
+          echo "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log" >> logs-to-upload.txt
+        fi
+        if [ -f logs-to-upload.txt ]; then
+          tar -czf build-logs.tar.gz -T logs-to-upload.txt
+        else
+          echo "No log files found to upload."
+        fi
       uses: actions/upload-artifact@v4.6.0
       with:
         name: build-logs
-        path: |
-          ${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log
-          ${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log
+        path: build-logs.tar.gz
