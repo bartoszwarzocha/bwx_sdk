@@ -8,6 +8,8 @@ on:
       - 'include/**'
       - 'src/**'
       - 'examples/**'
+      - '.github/**'
+      - '.github/workflows/**'
   pull_request:
     branches:
       - master
@@ -15,19 +17,36 @@ on:
       - 'include/**'
       - 'src/**'
       - 'examples/**'
+      - '.github/**'
+      - '.github/workflows/**'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  windows-build:
-    name: Windows Build
-    runs-on: windows-latest
+  WINDOWS:
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        build_type: [Release, Debug]
+        build_type: [Debug, Release]
+        include:
+          - name: Windows MSVC
+            runner: windows-latest
+            no_sudo: 1
+            cmake_defines: -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+            cmake_generator: Ninja
+            cmake_samples: SOME
+            cmake_tests: CONSOLE_ONLY
+
+    defaults:
+      run:
+        shell: powershell
         
     steps:
       - name: Checkout Repository
@@ -36,12 +55,10 @@ jobs:
       - name: Set up CMake
         uses: jwlawson/actions-setup-cmake@v1
         with:
-          cmake-version: '3.22.0'
-          
+          cmake-version: '3.22.0'  
 
-      - name: Install required Windows packages
+      - name: Install dependencies
         run: choco install zip -y
-        shell: powershell
 
       - name: Cache vcpkg and dependencies
         uses: actions/cache@v3
@@ -59,21 +76,17 @@ jobs:
           } else {
             Write-Output "vcpkg directory already exists. Skipping clone."
           }
-        shell: powershell
 
       - name: Bootstrap vcpkg
         run: |
           cd vcpkg
           .\bootstrap-vcpkg.bat
-        shell: powershell
 
       - name: Set VCPKG Triplet
         run: echo "VCPKG_TRIPLET=x64-windows" | Out-File -FilePath $env:GITHUB_ENV -Append
-        shell: powershell
 
       - name: Install Dependencies via vcpkg (Manifest Mode)
         run: .\vcpkg\vcpkg.exe install --triplet x64-windows --clean-after-build
-        shell: powershell
 
       - name: Configure CMake
         run: |
@@ -88,13 +101,11 @@ jobs:
             -DVCPKG_TARGET_TRIPLET="x64-windows" `
             -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" `
             -DBUILD_SHARED_LIBS=OFF
-        shell: powershell
 
       - name: Build
         run: |
           $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
           cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
-        shell: powershell
 
       - name: Package artifacts
         run: |
@@ -104,7 +115,6 @@ jobs:
             New-Item -ItemType Directory -Force -Path "packages"
           }
           Compress-Archive -Path "$BUILD_DIR\\*" -DestinationPath "packages\\$PACKAGE_NAME"
-        shell: powershell
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4.6.0
@@ -117,4 +127,3 @@ jobs:
           $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
           cd "$BUILD_DIR"
           ctest --output-on-failure --build-config "${{ matrix.build_type }}"
-        shell: powershell
