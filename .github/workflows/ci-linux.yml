@@ -95,6 +95,8 @@ jobs:
             ${{ github.workspace }}/build/vcpkg_installed
             ${{ github.workspace }}/vcpkg/downloads
           key: linux-vcpkg-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            linux-vcpkg-
 
       - name: Prepare vcpkg
         run: |
