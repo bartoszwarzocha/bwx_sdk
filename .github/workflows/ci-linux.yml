@@ -103,6 +103,9 @@ jobs:
             libgl1-mesa-dev \
             libxxf86vm-dev \
             libaudio-dev \
+            libunwind-dev \
+            libgstreamer1.0-dev \
+            libgstreamer-plugins-base1.0-dev \
             $LIBRPI_PACKAGE
             
         # Fix the LT_SYS_SYMBOL_USCORE error in autoconf
@@ -190,7 +193,7 @@ jobs:
           echo "No log files found to upload."
 
     - name: Upload build logs
-      if: failure() && exists(build-logs.tar.gz)
+      if: failure()
       uses: actions/upload-artifact@v4.6.0
       with:
         name: build-logs
