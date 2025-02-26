@@ -79,7 +79,7 @@ jobs:
 
         # Epoxy library for OpenGL function management
         brew install \
-            epoxy
+            libepoxy
 
         # Wayland and input support
         brew install \
