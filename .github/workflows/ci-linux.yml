@@ -25,6 +25,13 @@ jobs:
         export CFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CFLAGS"
         export CXXFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CXXFLAGS"
         
+        if apt-cache show libraspberrypi-dev > /dev/null 2>&1; then
+          LIBRPI_PACKAGE="libraspberrypi-dev"
+        else
+          echo "The package libraspberrypi-dev is not available in standard repositories. Installation will be skipped."
+          LIBRPI_PACKAGE=""
+        fi
+        
         sudo apt-get update
         sudo apt-get install -y \
             build-essential \
@@ -82,7 +89,12 @@ jobs:
             libgl1-mesa-dev \
             libxxf86vm-dev \
             libaudio-dev \
-            libraspberrypi-dev
+            $LIBRPI_PACKAGE
+            
+        # Fix the LT_SYS_SYMBOL_USCORE error in autoconf
+        aclocal --install -I build-aux/m4
+        libtoolize --force --copy
+        autoreconf --force --install --verbose
 
     - name: Set up vcpkg
       run: |
