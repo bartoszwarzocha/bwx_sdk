@@ -26,19 +26,30 @@ jobs:
         python -m pip install --upgrade pip
         pip install colorama
 
-    - name: Set up vcpkg
-      uses: microsoft/vcpkg-action@v2
-      with:
-        vcpkgDirectory: ${{ runner.temp }}/vcpkg
-        vcpkgGitURL: 'https://github.com/microsoft/vcpkg'
-        vcpkgCommitId: 'master'
-        cleanAfterBuild: true
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y ninja-build cmake g++ libgtk-3-dev
 
-    - name: Configure and build with CMake
+    - name: Set up vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.sh
+      env:
+        VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+    - name: Validate vcpkg manifest
+      run: python init_lib_project.py
+
+    - name: Configure CMake
       run: |
         mkdir -p build
         cd build
-        cmake -DCMAKE_TOOLCHAIN_FILE=${{ runner.temp }}/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+        cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+      env:
+        VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+    - name: Build project
+      run: |
+        cd build
         cmake --build .
 
     - name: Run tests
