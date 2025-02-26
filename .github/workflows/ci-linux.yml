@@ -19,12 +19,16 @@ on:
       - '.github/**'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
-  runs-on: ${{ matrix.runner }}
-    name: ${{ matrix.name }}
+  LINUX:
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
@@ -50,6 +54,14 @@ jobs:
             cmake_generator: Ninja
             cmake_samples: SOME
             cmake_tests: CONSOLE_ONLY
+
+    env:
+      GTK_VERSION: ${{ matrix.gtk_version }}
+
+    # Use bash as the shell, even under MSW where the default is PowerShell.
+    defaults:
+      run:
+        shell: bash
 
     steps:
     - name: Checkout repository
