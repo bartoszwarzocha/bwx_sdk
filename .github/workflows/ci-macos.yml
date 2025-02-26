@@ -73,9 +73,9 @@ jobs:
         brew install \
             cairo pango gdk-pixbuf
 
-        # More X11 libraries (corrected libxinerama, libxrandr, and libxdamage installation)
+        # More X11 libraries (corrected libxinerama, libxrandr, libxdamage, libxcursor, libxfixes, and libxss installation)
         brew install \
-            libxinerama libxrandr libxcomposite libxdamage libxcursor xfixes xss
+            libxinerama libxrandr libxcomposite libxdamage libxcursor libxfixes libxss
 
         # Epoxy library for OpenGL function management
         brew install \
