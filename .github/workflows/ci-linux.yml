@@ -79,7 +79,13 @@ jobs:
             libegl1-mesa-dev \
             libibus-1.0-dev \
             mesa-common-dev \
-            libgl1-mesa-dev || echo "Some packages could not be installed, proceeding anyway."
+            libgl1-mesa-dev \
+            libxi-dev \
+            libxcursor-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libxxf86vm-dev \
+            libxrender-dev || echo "Some packages could not be installed, proceeding anyway."
 
       - name: Cache vcpkg and Dependencies
         uses: actions/cache@v3

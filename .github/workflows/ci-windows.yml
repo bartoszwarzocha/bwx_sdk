@@ -71,7 +71,7 @@ jobs:
         run: echo "VCPKG_TRIPLET=x64-windows" | Out-File -FilePath $env:GITHUB_ENV -Append
         shell: powershell
 
-      - name: Install dependencies
+      - name: Install Dependencies via vcpkg (Manifest Mode)
         run: .\vcpkg\vcpkg.exe install --triplet x64-windows --clean-after-build
         shell: powershell
 
@@ -81,7 +81,6 @@ jobs:
           if (!(Test-Path -Path $BUILD_DIR)) {
             New-Item -ItemType Directory -Force -Path $BUILD_DIR
           }
-
           cmake -B "$BUILD_DIR" -S "." `
             -G "Visual Studio 17 2022" `
             -A x64 `
