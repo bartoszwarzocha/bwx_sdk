@@ -106,7 +106,6 @@ jobs:
             $LIBRPI_PACKAGE
 
     - name: Configure project with autoconf (3 attempts)
-      if: runner.os != 'Windows'
       run: |
         # Run autoreconf up to three times if configure.ac is present
         if [ -f configure.ac ]; then
