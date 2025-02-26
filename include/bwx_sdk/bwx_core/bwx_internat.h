@@ -41,8 +41,6 @@ namespace bwx_sdk {
 		const wxString& GetShortName() const noexcept { return short_name; }
         
 		void SetName(const wxString& n) noexcept { name = n; }
-		
-		void SetName(const wxString& n) noexcept { name = n; }
         
 		const wxString& GetName() const noexcept { return name; }
 

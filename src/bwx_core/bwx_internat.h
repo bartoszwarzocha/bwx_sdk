@@ -79,11 +79,6 @@ namespace bwx_sdk {
 		* @brief Sets the full name for the language.
 		*/
 		void SetName(const wxString& n) noexcept { name = n; }
-		
-		/**
-		* @brief Retrieves the full name for the language.
-		*/
-		void SetName(const wxString& n) noexcept { name = n; }
         
 		/**
 		* @brief Retrieves the Unicode name for the language.
