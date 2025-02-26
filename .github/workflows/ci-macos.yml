@@ -73,7 +73,7 @@ jobs:
         brew install \
             cairo pango gdk-pixbuf
 
-        # More X11 libraries (corrected libxinerama, libxrandr, libxdamage, libxcursor, libxfixes, and libxss installation)
+        # More X11 libraries (corrected libxinerama, libxrandr, libxdamage, libxcursor, and libxfixes installation)
         brew install \
             libxinerama libxrandr libxcomposite libxdamage libxcursor libxfixes
 
@@ -81,9 +81,9 @@ jobs:
         brew install \
             libepoxy
 
-        # Wayland and input support
+        # Input support
         brew install \
-            wayland libint
+            libint
 
         # Audio support libraries
         brew install \

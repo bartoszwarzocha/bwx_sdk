@@ -24,6 +24,10 @@
 #include <wx/event.h>    // wxWidgets events
 #include <wx/thread.h>   // Thread safety with wxMutex
 
+/**
+ * @file bwx_oop.h
+ * @brief Provides a template class for advanced property management.
+ */
 
 // wxWidgets events declaration for value change notifications
 wxDECLARE_EVENT(EVT_PROPERTY_CHANGED, wxCommandEvent);

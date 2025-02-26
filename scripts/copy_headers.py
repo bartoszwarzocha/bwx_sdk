@@ -1,4 +1,4 @@
-'''
+"""
 BWX_SDK Library
 Tool for header files synchronization (src -> include)
 Copyright 2025 by Bartosz Warzocha (bartosz.warzocha@gmail.com)
@@ -9,10 +9,11 @@ How to use:
 
 Note: Source code sections between BEGIN_COPY_IGNORING and END_COPY_IGNORING
       are ignored and not copied to the include directory.
-'''
+"""
 
 import os
 import shutil
+import subprocess
 
 IGNORE_START = "#BEGIN_COPY_IGNORING"
 IGNORE_END = "#END_COPY_IGNORING"
@@ -48,8 +49,17 @@ def copy_headers_with_filter(src_dir, dest_dir):
                 dest_file = os.path.join(dest_path, file)
                 filter_and_copy_file(src_file, dest_file)
 
+def remove_doxygen_comments(target_dir):
+    script_path = os.path.join(os.path.dirname(__file__), 'remove_doxygen_comments.py')
+    try:
+        subprocess.run(['python', script_path, target_dir], check=True)
+        print(f"Deoxygen comments removed in: {target_dir}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during doxygen comment removing: {e}")
+
 if __name__ == "__main__":
     SRC_DIR = os.path.join(os.path.dirname(__file__), "..", "src")
     DEST_DIR = os.path.join(os.path.dirname(__file__), "..", "include", "bwx_sdk")
 
     copy_headers_with_filter(SRC_DIR, DEST_DIR)
+    remove_doxygen_comments(DEST_DIR)
