@@ -51,53 +51,39 @@ jobs:
     - name: Install dependencies
       if: runner.os == 'macOS'
       run: |
-        # Update and install dependencies using Homebrew
+        # Update Homebrew and install dependencies
         brew update
-        
+
         # Basic development tools
-        brew install \
-            cmake ninja autoconf automake libtool pkg-config gettext bison flex gfortran nasm meson
+        brew install cmake ninja autoconf automake libtool pkg-config gettext bison flex gfortran nasm meson
 
         # Font and graphics libraries
-        brew install \
-            fontconfig freetype glib gtk+3
+        brew install fontconfig freetype glib gtk+3
 
-        # X11 libraries
-        brew install \
-            xquartz libpng zlib dbus atk
+        # X11 libraries (with corrected package names)
+        brew install xquartz libpng zlib dbus atk libxinerama libxrandr libxcomposite libxdamage libxcursor libxfixes libxss
 
         # GObject introspection and Python bindings
-        brew install \
-            gobject-introspection pygobject3
+        brew install gobject-introspection pygobject3
 
         # Graphics rendering libraries
-        brew install \
-            cairo pango gdk-pixbuf
-
-        # More X11 libraries (corrected libxinerama installation)
-        brew install \
-            libxinerama xrandr xcomposite xdamage xcursor xfixes xss
+        brew install cairo pango gdk-pixbuf
 
         # Epoxy library for OpenGL function management
-        brew install \
-            epoxy
+        brew install epoxy
 
         # Wayland and input support
-        brew install \
-            wayland libinput
+        brew install wayland libinput
 
         # Audio support libraries
-        brew install \
-            alsa-lib pulseaudio xft xkbcommon
+        brew install alsa-lib pulseaudio xft xkbcommon
 
         # OpenGL and EGL support
-        brew install \
-            mesa ibus
+        brew install mesa ibus
 
     - name: Configure project with autoconf (3 attempts)
       if: runner.os == 'macOS'
       run: |
-        # Run autoreconf up to three times if configure.ac is present
         if [ -f configure.ac ]; then
           echo "Found configure.ac, starting autoreconf attempts..."
           for attempt in {1..3}; do
