@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  LINUX:
     runs-on: ubuntu-latest
     
     strategy:
@@ -26,7 +26,9 @@ jobs:
     - name: Set up vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
-        ./vcpkg/bootstrap-vcpkg.sh
+        cd vcpkg
+        git pull
+        ./bootstrap-vcpkg.sh
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
