@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y 
+        sudo apt-get install -y \
             ninja-build \
             cmake \
             g++ \
@@ -50,9 +50,7 @@ jobs:
             libpng-dev \
             zlib1g-dev \
             libdbus-1-dev \
-            libglib2.0-dev \
             libatk1.0-dev \
-            libx11-dev \
             libxi-dev \
             libxtst-dev \
             gobject-introspection \
