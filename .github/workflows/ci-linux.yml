@@ -52,9 +52,11 @@ jobs:
     - name: Install dependencies
       if: runner.os != 'Windows'
       run: |
+        # Set compiler flags for compatibility
         export CFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CFLAGS"
         export CXXFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CXXFLAGS"
 
+        # Check if libraspberrypi-dev package is available
         if apt-cache show libraspberrypi-dev > /dev/null 2>&1; then
           LIBRPI_PACKAGE="libraspberrypi-dev"
         else
@@ -62,44 +64,42 @@ jobs:
           LIBRPI_PACKAGE=""
         fi
 
+        # Install system dependencies
         sudo apt-get update
         sudo apt-get install -y \
             # Basic development tools
             build-essential cmake ninja-build g++ autoconf automake libtool pkg-config libtool-bin m4 gettext bison flex gfortran python3-pip \
             # Assembly language tools
             nasm \
-            # Build system generator
+            # Build system generators
             meson \
             # Font and graphics libraries
-            libfontconfig1-dev libfreetype6-dev libglib2.0-dev \
-            # GTK development libraries
-            libgtk-3-dev \
-            # X11 development libraries
+            libfontconfig1-dev libfreetype6-dev libglib2.0-dev libgtk-3-dev \
+            # X11 libraries
             libx11-dev libxext-dev libxrender-dev libpng-dev zlib1g-dev libdbus-1-dev libatk1.0-dev libxi-dev libxtst-dev \
-            # GObject introspection
+            # GObject introspection and Python bindings
             gobject-introspection python3-gi \
-            # Cairo graphics library
+            # Graphics rendering libraries
             libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev \
-            # More X11 development libraries
             libxinerama-dev libxrandr-dev libxcomposite-dev libxdamage-dev libxcursor-dev libxfixes-dev libxss-dev \
-            # Epoxy library for OpenGL function management
             libepoxy-dev \
-            # Wayland development libraries
+            # Wayland and input support
             libwayland-dev libinput-dev \
-            # Audio development libraries
+            # Audio support libraries
             libasound2-dev libpulse-dev libxft-dev libxkbcommon-dev \
-            # OpenGL and EGL development libraries
+            # OpenGL and EGL support
             libegl1-mesa-dev libibus-1.0-dev mesa-common-dev libgl1-mesa-dev libxxf86vm-dev libaudio-dev \
-            # Raspberry Pi development library (conditional)
+            # Optional Raspberry Pi support
             $LIBRPI_PACKAGE
 
-    - name: Configure project with autoconf
+    - name: Configure project with autoconf (3 attempts)
       if: runner.os != 'Windows'
       run: |
+        # Run autoreconf with up to three attempts if configure.ac is present
         if [ -f configure.ac ]; then
-          echo "Found configure.ac, running autoreconf steps with retries..."
+          echo "Found configure.ac, starting autoreconf attempts..."
           for attempt in {1..3}; do
-            echo "Attempt $attempt to run autoreconf..."
+            echo "Attempt $attempt..."
             mkdir -p build-aux/m4 build-aux/m4-autogen m4
             aclocal --install -I build-aux/m4 && \
             libtoolize --force --copy && \
@@ -109,25 +109,24 @@ jobs:
             }
           done
         else
-          echo "No configure.ac file found in the project directory. Skipping autoreconf."
+          echo "No configure.ac found. Skipping autoreconf."
         fi
 
     - name: Show build environment
       run: |
-        echo "Environment:"
+        # Display environment details
+        echo "Environment Variables:"
         env | sort
-        echo
 
-        echo "Compiler version:"
-        ${CXX-g++} --version
-        echo
+        echo "Compiler Version:"
+        ${CXX:-g++} --version
 
-        echo "Free space:"
+        echo "Disk Space:"
         df -h /
-        echo
 
     - name: Set up vcpkg
       run: |
+        # Clone vcpkg and bootstrap it
         git clone https://github.com/microsoft/vcpkg.git
         cd vcpkg
         git pull
@@ -135,12 +134,13 @@ jobs:
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
-    - name: Install vcpkg dependencies
+    - name: Install vcpkg dependencies (3 attempts)
       run: |
+        # Attempt to install dependencies via vcpkg with retries
         for attempt in {1..3}; do
           echo "Attempt $attempt to install vcpkg dependencies..."
           ./vcpkg/vcpkg install --triplet x64-linux && break || {
-            echo "Attempt $attempt failed. Cleaning buildtrees and retrying in 10 seconds..."
+            echo "vcpkg install failed. Cleaning buildtrees and retrying in 10 seconds..."
             rm -rf ./vcpkg/buildtrees
             sleep 10
           }
@@ -150,6 +150,7 @@ jobs:
 
     - name: Configure CMake
       run: |
+        # Configure the project with CMake
         VCPKG_TRIPLET=x64-linux
         BUILD_DIR="build/linux-${{ matrix.build_type }}"
         mkdir -p "$BUILD_DIR"
@@ -163,8 +164,9 @@ jobs:
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
-    - name: Build project
+    - name: Build project (3 attempts)
       run: |
+        # Build the project with retries
         BUILD_DIR="build/linux-${{ matrix.build_type }}"
         for attempt in {1..3}; do
           echo "Attempt $attempt to build project..."
@@ -176,6 +178,7 @@ jobs:
 
     - name: Run tests
       run: |
+        # Execute tests using CTest
         BUILD_DIR="build/linux-${{ matrix.build_type }}"
         cd "$BUILD_DIR"
         ctest -V
