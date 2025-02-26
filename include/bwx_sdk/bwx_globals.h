@@ -6,8 +6,23 @@
 	#include <wx/wx.h>
 #endif
 
+/**
+ * @file bwx_globals.h
+ * @brief Header file containing global definitions, macros, types, and helper functions for the BWX application.
+ *
+ * This file includes:
+ * - Memory leak diagnostics in debug mode.
+ * - Export and import definitions for building as a DLL.
+ * - Global constants for return codes and logical values.
+ * - Enumerations for gender identifiers and grammatical cases.
+ * - Macros supporting C++11 syntax enhancements.
+ * - Shortcuts for frequently used wxWidgets values.
+ * - Bitwise operations.
+ * - Loop macros and STL algorithm shortcuts.
+ */
+
 // *** MEMORY LEAKS DIAGNOSE ***
-// Opcje: _NORMAL_BLOCK/_CLIENT_BLOCK
+// Options: _NORMAL_BLOCK/_CLIENT_BLOCK
 #ifdef _DEBUG
 	#define _CRTDBG_MAP_ALLOC
 	#include <stdlib.h>
@@ -23,7 +38,7 @@
 // *** EOF MEMORY LEAKS DIAGNOSE ***
 
 /*********************************************************************************/
-/* STA£E                                                                         */
+/* CONSTANS                                                                      */
 /*********************************************************************************/
 
 #if BWX_BUILD_AS_DLL
@@ -48,42 +63,36 @@
 #define BWX_YES wxYES
 #define BWX_NO wxNO
 
-/**
-	Identyfikatory p³ci
-*/
 typedef enum
 {
-	BWX_SEX_UNKNOWN = 0x00000000, /**< Identyfikator p³ci: nieokreœlona */
-	BWX_SEX_MALE = 0x00000001, /**< Identyfikator p³ci: mêska */
-	BWX_SEX_FEMALE = 0x00000002 /**< Identyfikator p³ci: ¿eñska */
+	BWX_SEX_UNKNOWN = 0x00000000,
+	BWX_SEX_MALE = 0x00000001,
+	BWX_SEX_FEMALE = 0x00000002
 } BWX_SEX;
 
-/**
-	Odmiana przez przypadki
-*/
 typedef enum
 {
-	BWX_NOMINATIVE = wxID_HIGHEST + 1, /**< Mianownik */
-	BWX_ACCUSATIVE, /**< Dope³niacz */
-	BWX_GENITIVE, /**< Celownik */
-	BWX_DATING, /**< Biernik */
-	BWX_INSTRUMENTAL, /**< Narzêdnik */
-	BWX_LOCATIVE, /**< Miejscownik */
-	BWX_VOCATIVE /**< Wo³acz */
+	BWX_NOMINATIVE = wxID_HIGHEST + 1,
+	BWX_ACCUSATIVE,
+	BWX_GENITIVE,
+	BWX_DATING,
+	BWX_INSTRUMENTAL,
+	BWX_LOCATIVE,
+	BWX_VOCATIVE
 } BWX_CASES;
 
 /*********************************************************************************/
-/* MAKRA                                                                         */
+/* MACROS                                                                        */
 /*********************************************************************************/
 
 // C++ 11 =========================================================================
-#define _CUP unique_ptr /**< Usprawnienia C++ 11 */
-#define _CMU make_unique /**< Usprawnienia C++ 11 */
-#define _CSP shared_ptr /**< Usprawnienia C++ 11 */
-#define _CMS make_shared /**< Usprawnienia C++ 11 */
-#define _CFE for_each /**< Usprawnienia C++ 11 */
+#define _CUP unique_ptr
+#define _CMU make_unique
+#define _CSP shared_ptr
+#define _CMS make_shared
+#define _CFE for_each
 
-// Ró¿ne ==========================================================================
+// ================================================================================
 #define _NBMP_ wxNullBitmap
 #define _ES_ wxEmptyString
 
@@ -98,9 +107,9 @@ typedef enum
 
 #define bwxAPP(a) IMPLEMENT_APP(a)
 
-// Klasy ==========================================================================
-// n(T, x, f) - typ, nazwa zmiennej, nazwa dla metod
-// n(Class, T, x, f) - jw. dla statycznych (podaæ nazwê klasy)
+// Classes ========================================================================
+// n(T, x, f) - type, variable name, methods name
+// n(Class, T, x, f) - like abowe (set class name)
 
 #define _member(T, x, f) public: \
 	void Set##f(T x) { this->m_##x = x; } \
@@ -263,7 +272,7 @@ typedef enum
 
 #define _Str(n) wxString n = _ES_ // Declare string
 
-// RÓ¯NE ==========================================================================
+// ================================================================================
 #define _L(s) wxGetTranslation(s)
 
 // wxDateTime =====================================================================
@@ -295,7 +304,7 @@ typedef enum
 #define _LW(s) wxLogWarning(s)
 #define _LE(s) wxLogError(s)
 
-// Grafika ========================================================================
+// Graphics =======================================================================
 #define _PNGRC(i) wxBITMAP_PNG(i)
 #define _PNG(f) wxBitmap(f, wxBITMAP_TYPE_PNG)
 #define _JPG(f) wxBitmap(f, wxBITMAP_TYPE_JPEG)
@@ -320,7 +329,7 @@ typedef enum
 #define _greya _GA
 #define _GREYA _GA
 
-// Zdarzenia ======================================================================
+// Events =========================================================================
 #define _DET() DECLARE_EVENT_TABLE()
 #define _BET(x,y) BEGIN_EVENT_TABLE(x,y)
 #define _EET() END_EVENT_TABLE()
@@ -331,7 +340,7 @@ typedef enum
 #define BindButtonEvt(id,fn) Bind(wxEVT_BUTTON, &fn, this, id)
 #define UnbindButtonEvt(id,fn) Unbind(wxEVT_BUTTON, &fn, this, id)
 
-// Sizery =========================================================================
+// Sizers =========================================================================
 typedef int bwxMargin;
 typedef int bwxAlign;
 
@@ -343,12 +352,12 @@ typedef int bwxAlign;
 #define _ACH wxALIGN_CENTER_HORIZONTAL
 #define _ACV wxALIGN_CENTER_VERTICAL
 
-// Operacje bitowe ================================================================
-#define _AF(var, flag) var |= flag /**< Dodanie flagi bitowej flag do zmiennej var */
-#define _DF(var, flag) var &= ~(flag) /**< Usuniêcie flagi bitowej flag ze zmiennej var */
-#define _GF(var, flag) var & flag /**< Sprawdzenie flagi bitowej flag w zmiennej var */
+// ================================================================================
+#define _AF(var, flag) var |= flag
+#define _DF(var, flag) var &= ~(flag)
+#define _GF(var, flag) var & flag
 
-// Algorytmy ======================================================================
+// Algorithms =====================================================================
 #include <algorithm>
 #define _FI(a) for(int i = 0; i < a; i++)
 #define _FJ(a) for(int j = 0; j < a; j++)
@@ -385,7 +394,7 @@ typedef int bwxAlign;
 #define _ANY(v,f) std::any_of(v.begin(), v.end(), f)
 #define _NONE(v,f) std::none_of(v.begin(), v.end(), f)
 
-// Kontrolki ======================================================================
+// Controls ======================================================================
 #define _P wxPanel
 
 typedef wxSizer         wxSi;
@@ -402,7 +411,7 @@ typedef wxButton		wxBTN;
 typedef wxTextCtrl		wxTE;
 
 /*********************************************************************************/
-/* TYPY                                                                          */
+/* Types                                                                         */
 /*********************************************************************************/
 
 typedef int bwxByteFlag;

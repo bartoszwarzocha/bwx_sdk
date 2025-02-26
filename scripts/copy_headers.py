@@ -62,4 +62,4 @@ if __name__ == "__main__":
     DEST_DIR = os.path.join(os.path.dirname(__file__), "..", "include", "bwx_sdk")
 
     copy_headers_with_filter(SRC_DIR, DEST_DIR)
-    remove_doxygen_comments(DEST_DIR)
+    #remove_doxygen_comments(DEST_DIR)
