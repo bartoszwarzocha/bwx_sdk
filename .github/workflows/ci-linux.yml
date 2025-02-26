@@ -93,6 +93,9 @@ jobs:
 
       - name: Install Dependencies via vcpkg (Manifest Mode)
         run: |
+          export CFLAGS="-D_strnicmp=strncasecmp $CFLAGS"
+          export CXXFLAGS="-D_strnicmp=strncasecmp $CXXFLAGS"
+          
           RETRIES=3
           for i in $(seq 1 $RETRIES); do
             echo "Attempt $i to install dependencies via vcpkg..."
