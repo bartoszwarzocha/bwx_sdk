@@ -8,8 +8,6 @@ on:
         - 'include/**'
         - 'src/**'
         - 'examples/**'
-        - '.github/**'
-        - '.github/workflows/**'
   pull_request:
     branches:
       - master
@@ -17,8 +15,6 @@ on:
         - 'include/**'
         - 'src/**'
         - 'examples/**'
-        - '.github/**'
-        - '.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
