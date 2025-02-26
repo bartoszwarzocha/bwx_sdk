@@ -31,7 +31,7 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 - **Linux:** GCC, Clang, Ninja
 - **macOS:** AppleClang, Xcode, Ninja
 
-(Tested for: Windows 11, Ubuntu Linux 22.04, macOS 14)
+**(Tested for: Windows 11, Ubuntu Linux 22.04, macOS 14)**
 
 ---
 

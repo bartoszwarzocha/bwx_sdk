@@ -91,7 +91,7 @@ jobs:
 
         # OpenGL and EGL support
         brew install \
-            mesa ibus
+            mesa libusb
 
     - name: Configure project with autoconf (3 attempts)
       run: |
