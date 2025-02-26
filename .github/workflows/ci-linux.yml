@@ -103,12 +103,10 @@ jobs:
             libgl1-mesa-dev \
             libxxf86vm-dev \
             libaudio-dev \
-            libunwind-dev \
-            libgstreamer1.0-dev \
-            libgstreamer-plugins-base1.0-dev \
             $LIBRPI_PACKAGE
             
         # Fix the LT_SYS_SYMBOL_USCORE error in autoconf
+        mkdir -p m4 build-aux/m4 build-aux/m4-autogen
         aclocal --install -I build-aux/m4
         libtoolize --force --copy
         autoreconf --force --install --verbose
@@ -175,26 +173,3 @@ jobs:
         BUILD_DIR="build/linux-${{ matrix.build_type }}"
         cd "$BUILD_DIR"
         ctest -V
-
-    - name: Prepare logs for upload
-      if: failure()
-      run: |
-        if [ -f "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log" ]; then
-          echo "Uploading autoconf-x64-linux-out.log"
-          echo "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log" > logs-to-upload.txt
-        fi
-        if [ -f "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log" ]; then
-          echo "Uploading autoconf-x64-linux-err.log"
-          echo "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log" >> logs-to-upload.txt
-        fi
-        if [ -f logs-to-upload.txt ]; then
-          tar -czf build-logs.tar.gz -T logs-to-upload.txt
-        else
-          echo "No log files found to upload."
-
-    - name: Upload build logs
-      if: failure()
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: build-logs
-        path: build-logs.tar.gz
