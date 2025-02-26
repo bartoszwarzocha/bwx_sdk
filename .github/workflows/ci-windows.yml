@@ -25,15 +25,19 @@ jobs:
     name: Windows Build
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         build_type: [Release, Debug]
+        
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
       - name: Set up CMake
         uses: jwlawson/actions-setup-cmake@v1
         with:
           cmake-version: '3.22.0'
+          
 
       - name: Install required Windows packages
         run: choco install zip -y
