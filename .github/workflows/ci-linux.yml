@@ -65,28 +65,8 @@ jobs:
             texinfo \
             libssl-dev \
             libffi-dev \
-            libltdl-dev || echo "Some packages could not be installed, proceeding anyway."
-
-          # Build libxcrypt from source only if missing
-          if ! ldconfig -p | grep -q libxcrypt; then
-            echo "Building libxcrypt from source..."
-            wget -q https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz -O libxcrypt.tar.xz || { echo "Failed to download libxcrypt."; exit 1; }
-            tar -xf libxcrypt.tar.xz
-            cd libxcrypt-4.4.36 || { echo "Extraction failed."; exit 1; }
-
-            # Ensure necessary tools and macros are available for autoreconf
-            export ACLOCAL_PATH="/usr/share/aclocal"
-            autoreconf -fiv || { echo "autoreconf failed."; cat config.log || true; exit 1; }
-
-            ./configure --prefix=/usr || { echo "configure failed."; exit 1; }
-            make -j$(nproc) || { echo "make failed."; exit 1; }
-            sudo make install || { echo "make install failed."; exit 1; }
-            cd ..
-            rm -rf libxcrypt-4.4.36 libxcrypt.tar.xz
-          else
-            echo "libxcrypt is already installed."
-          fi
-        shell: bash
+            libltdl-dev \
+            libibus-1.0-dev || echo "Some packages could not be installed, proceeding anyway."
 
       - name: Cache vcpkg and Dependencies
         uses: actions/cache@v3
