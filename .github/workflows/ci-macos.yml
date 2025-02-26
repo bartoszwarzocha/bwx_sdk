@@ -5,20 +5,20 @@ on:
     branches:
       - master
     paths:
-      - 'include/**'
-      - 'src/**'
-      - 'examples/**'
-      - '.github/**'
-      - '.github/workflows/**'
+        - 'include/**'
+        - 'src/**'
+        - 'examples/**'
+        - '.github/**'
+        - '.github/workflows/**'
   pull_request:
     branches:
       - master
     paths:
-      - 'include/**'
-      - 'src/**'
-      - 'examples/**'
-      - '.github/**'
-      - '.github/workflows/**'
+        - 'include/**'
+        - 'src/**'
+        - 'examples/**'
+        - '.github/**'
+        - '.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
@@ -36,9 +36,9 @@ jobs:
       matrix:
         build_type: [Debug, Release]
         include:
-          - name: macOS 14
-            runner: macos-14
-            cmake_generator: Xcode
+            - name: macOS 14
+              runner: macos-14
+              cmake_generator: Xcode
 
     defaults:
       run:

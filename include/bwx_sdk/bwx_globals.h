@@ -6,21 +6,6 @@
 	#include <wx/wx.h>
 #endif
 
-/**
- * @file bwx_globals.h
- * @brief Header file containing global definitions, macros, types, and helper functions for the BWX application.
- *
- * This file includes:
- * - Memory leak diagnostics in debug mode.
- * - Export and import definitions for building as a DLL.
- * - Global constants for return codes and logical values.
- * - Enumerations for gender identifiers and grammatical cases.
- * - Macros supporting C++11 syntax enhancements.
- * - Shortcuts for frequently used wxWidgets values.
- * - Bitwise operations.
- * - Loop macros and STL algorithm shortcuts.
- */
-
 // *** MEMORY LEAKS DIAGNOSE ***
 // Options: _NORMAL_BLOCK/_CLIENT_BLOCK
 #ifdef _DEBUG
@@ -37,9 +22,7 @@
 #endif
 // *** EOF MEMORY LEAKS DIAGNOSE ***
 
-/*********************************************************************************/
 /* CONSTANS                                                                      */
-/*********************************************************************************/
 
 #if BWX_BUILD_AS_DLL
 	#define BWX_EXPORT __declspec(dllexport)
@@ -54,8 +37,6 @@
 	#define BWX_IMPORT_DATA(type)
 	#define BWX_IMPORT_EVT(name, type)
 #endif
-
-
 
 #define BWX_OK 0
 #define BWX_FAIL -1
@@ -81,9 +62,7 @@ typedef enum
 	BWX_VOCATIVE
 } BWX_CASES;
 
-/*********************************************************************************/
 /* MACROS                                                                        */
-/*********************************************************************************/
 
 // C++ 11 =========================================================================
 #define _CUP unique_ptr
@@ -410,9 +389,7 @@ typedef wxStaticBitmap	wxSBMP;
 typedef wxButton		wxBTN;
 typedef wxTextCtrl		wxTE;
 
-/*********************************************************************************/
 /* Types                                                                         */
-/*********************************************************************************/
 
 typedef int bwxByteFlag;
 

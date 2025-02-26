@@ -1,15 +1,3 @@
-'''
-BWX_SDK Library
-Tool for removing of the doxygen comments from the source code
-Copyright 2025 by Bartosz Warzocha (bartosz.warzocha@gmail.com)
-wxWidgets licence
-
-How to use:
-    python remove_doxygen_comments.py <path>
-Example:
-    python remove_doxygen_comments.py ./
-'''
-
 import os
 import re
 import argparse
@@ -18,29 +6,50 @@ def remove_doxygen_comments_from_file(file_path):
     try:
         # Try to open the file with UTF-8 encoding
         with open(file_path, 'r', encoding='utf-8') as file:
-            code = file.read()
+            lines = file.readlines()
     except UnicodeDecodeError:
         # If UTF-8 decoding fails, use 'latin1' encoding as a fallback
         with open(file_path, 'r', encoding='latin1') as file:
-            code = file.read()
+            lines = file.readlines()
 
-    # Regex patterns to remove only the targeted Doxygen comments:
-    patterns = [
-        r'/\*\*[\s\S]*?\*/',  # Block comments /** ... */
-        r'/\*!([\s\S]*?)\*/', # Block comments /*! ... */
-        r'///<.*$',           # Line comments ///<
-        r'//!.*$'             # Line comments //! 
-    ]
+    cleaned_lines = []
+    inside_block_comment = False
 
-    for pattern in patterns:
-        code = re.sub(pattern, '', code, flags=re.MULTILINE)
+    for line in lines:
+        stripped_line = line.strip()
 
-    # Remove consecutive empty lines
-    code = re.sub(r'\n{3,}', '\n\n', code)
+        # Handle block comments /** ... */ and /*! ... */
+        if inside_block_comment:
+            if re.search(r'\*/', line):
+                inside_block_comment = False
+            continue
+
+        if re.match(r'\s*/\*\*', line) or re.match(r'\s*/\*!', line):
+            if not re.search(r'\*/', line):  # Start of multi-line block comment
+                inside_block_comment = True
+            continue
+
+        # Remove inline comments: ///< and //! at the end of a line with code
+        line = re.sub(r'\s*///<.*$', '', line)
+        line = re.sub(r'\s*//!.*$', '', line)
+
+        # If the line is not empty after removals, keep it
+        if stripped_line or (cleaned_lines and cleaned_lines[-1].strip()):
+            cleaned_lines.append(line)
+        else:
+            # Preserve a single empty line between code sections
+            if cleaned_lines and cleaned_lines[-1].strip() != '':
+                cleaned_lines.append('\n')
+
+    # Remove leading and trailing empty lines
+    while cleaned_lines and not cleaned_lines[0].strip():
+        cleaned_lines.pop(0)
+    while cleaned_lines and not cleaned_lines[-1].strip():
+        cleaned_lines.pop()
 
     # Write the cleaned code back to the file
     with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(code)
+        file.writelines(cleaned_lines)
 
 def process_directory(directory):
     extensions = ('.cpp', '.c', '.h', '.hpp', '.cxx', '.cc')
