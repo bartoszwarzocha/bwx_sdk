@@ -30,11 +30,11 @@ jobs:
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
-    - name: Update vcpkg and retry installation
+    - name: Install vcpkg dependencies
       run: |
-        ./vcpkg/vcpkg update
-        ./vcpkg/vcpkg install
-      continue-on-error: true
+        ./vcpkg/vcpkg install --triplet x64-linux
+      env:
+        VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
     - name: Configure CMake
       run: |
