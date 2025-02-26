@@ -85,7 +85,10 @@ jobs:
             libxrandr-dev \
             libxinerama-dev \
             libxxf86vm-dev \
-            libxrender-dev || echo "Some packages could not be installed, proceeding anyway."
+            libxrender-dev \
+            nasm \
+            libaudio-dev \
+            libraspberrypi-dev || echo "Some packages could not be installed, proceeding anyway."
 
       - name: Cache vcpkg and Dependencies
         uses: actions/cache@v3
