@@ -36,10 +36,9 @@ jobs:
       matrix:
         build_type: [Debug, Release]
         include:
-          - name: macOS 12 wxGTK 3
-            runner: macos-12
-            cmake_generator: Unix Makefiles
-            cmake_samples: ALL
+          - name: macOS 14
+            runner: macos-14
+            cmake_generator: Xcode
 
     defaults:
       run:
