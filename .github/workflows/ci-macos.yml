@@ -75,7 +75,7 @@ jobs:
 
         # More X11 libraries (corrected libxinerama, libxrandr, libxdamage, libxcursor, libxfixes, and libxss installation)
         brew install \
-            libxinerama libxrandr libxcomposite libxdamage libxcursor libxfixes libxss
+            libxinerama libxrandr libxcomposite libxdamage libxcursor libxfixes xss
 
         # Epoxy library for OpenGL function management
         brew install \

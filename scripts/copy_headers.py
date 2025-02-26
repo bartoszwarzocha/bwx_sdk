@@ -1,3 +1,16 @@
+'''
+BWX_SDK Library
+Tool for header files synchronization (src -> include)
+Copyright 2025 by Bartosz Warzocha (bartosz.warzocha@gmail.com)
+wxWidgets licence
+
+How to use:
+    python copy_headers.py
+
+Note: Source code sections between BEGIN_COPY_IGNORING and END_COPY_IGNORING
+      are ignored and not copied to the include directory.
+'''
+
 import os
 import shutil
 

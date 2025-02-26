@@ -1,5 +1,6 @@
 '''
 BWX_SDK Library
+Tool for the CMakeLists.txt generation for sublibraries
 Copyright 2025 by Bartosz Warzocha (bartosz.warzocha@gmail.com)
 wxWidgets licence
 
