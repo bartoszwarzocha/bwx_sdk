@@ -38,7 +38,6 @@ jobs:
         with:
           cmake-version: '3.22.0'
           
-
       - name: Install Required Packages (Linux)
         run: |
           sudo apt-get update
@@ -68,7 +67,6 @@ jobs:
             libffi-dev \
             libltdl-dev \
             libibus-1.0-dev \
-            
             libasound2-dev \
             libpulse-dev \
             libx11-dev \
@@ -97,7 +95,7 @@ jobs:
             ${{ github.workspace }}/vcpkg
             ${{ github.workspace }}/build/vcpkg_installed
             ${{ github.workspace }}/vcpkg/downloads
-          key: linux-vcpkg-${{ hashFiles('vcpkg.json') }}
+          key: linux-vcpkg-${{ hashFiles('vcpkg.json', 'CMakeLists.txt') }}
           restore-keys: |
             linux-vcpkg-
 
