@@ -93,8 +93,11 @@ jobs:
 
       - name: Install Dependencies via vcpkg (Manifest Mode)
         run: |
-          export CFLAGS="-D_strnicmp=strncasecmp $CFLAGS"
-          export CXXFLAGS="-D_strnicmp=strncasecmp $CXXFLAGS"
+          export CFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CFLAGS"
+          export CXXFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CXXFLAGS"
+          
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libpulse-dev libx11-dev libibus-1.0-dev mesa-common-dev libgl1-mesa-dev
           
           RETRIES=3
           for i in $(seq 1 $RETRIES); do
