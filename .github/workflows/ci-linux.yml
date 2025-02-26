@@ -9,6 +9,7 @@ on:
       - 'src/**'
       - 'examples/**'
       - '.github/**'
+      - '.github/workflows/**'
   pull_request:
     branches:
       - master
@@ -17,6 +18,7 @@ on:
       - 'src/**'
       - 'examples/**'
       - '.github/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
@@ -61,48 +63,34 @@ jobs:
         fi
 
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build g++ autoconf automake libtool pkg-config libtool-bin m4 gettext bison flex gfortran python3-pip
         sudo apt-get install -y \
+            # Basic development tools
+            build-essential cmake ninja-build g++ autoconf automake libtool pkg-config libtool-bin m4 gettext bison flex gfortran python3-pip \
+            # Assembly language tools
             nasm \
+            # Build system generator
             meson \
-            libfontconfig1-dev \
-            libfreetype6-dev \
-            libglib2.0-dev \
+            # Font and graphics libraries
+            libfontconfig1-dev libfreetype6-dev libglib2.0-dev \
+            # GTK development libraries
             libgtk-3-dev \
-            libx11-dev \
-            libxext-dev \
-            libxrender-dev \
-            libpng-dev \
-            zlib1g-dev \
-            libdbus-1-dev \
-            libatk1.0-dev \
-            libxi-dev \
-            libxtst-dev \
-            gobject-introspection \
-            python3-gi \
-            libcairo2-dev \
-            libpango1.0-dev \
-            libgdk-pixbuf2.0-dev \
-            libxinerama-dev \
-            libxrandr-dev \
-            libxcomposite-dev \
-            libxdamage-dev \
-            libxcursor-dev \
-            libxfixes-dev \
-            libxss-dev \
+            # X11 development libraries
+            libx11-dev libxext-dev libxrender-dev libpng-dev zlib1g-dev libdbus-1-dev libatk1.0-dev libxi-dev libxtst-dev \
+            # GObject introspection
+            gobject-introspection python3-gi \
+            # Cairo graphics library
+            libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev \
+            # More X11 development libraries
+            libxinerama-dev libxrandr-dev libxcomposite-dev libxdamage-dev libxcursor-dev libxfixes-dev libxss-dev \
+            # Epoxy library for OpenGL function management
             libepoxy-dev \
-            libwayland-dev \
-            libinput-dev \
-            libasound2-dev \
-            libpulse-dev \
-            libxft-dev \
-            libxkbcommon-dev \
-            libegl1-mesa-dev \
-            libibus-1.0-dev \
-            mesa-common-dev \
-            libgl1-mesa-dev \
-            libxxf86vm-dev \
-            libaudio-dev \
+            # Wayland development libraries
+            libwayland-dev libinput-dev \
+            # Audio development libraries
+            libasound2-dev libpulse-dev libxft-dev libxkbcommon-dev \
+            # OpenGL and EGL development libraries
+            libegl1-mesa-dev libibus-1.0-dev mesa-common-dev libgl1-mesa-dev libxxf86vm-dev libaudio-dev \
+            # Raspberry Pi development library (conditional)
             $LIBRPI_PACKAGE
 
     - name: Configure project with autoconf
@@ -128,10 +116,6 @@ jobs:
       run: |
         echo "Environment:"
         env | sort
-        echo
-
-        echo "Make version:"
-        make --version
         echo
 
         echo "Compiler version:"
@@ -198,21 +182,9 @@ jobs:
 
     - name: Upload build logs on failure
       if: failure()
-      run: |
-        LOGS_TO_UPLOAD=""
-        for log in "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log" "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log"; do
-          if [ -f "$log" ]; then
-            echo "Found log: $log"
-            LOGS_TO_UPLOAD+="$log "
-          fi
-        done
-
-        if [ -n "$LOGS_TO_UPLOAD" ]; then
-          tar -czf build-logs.tar.gz $LOGS_TO_UPLOAD
-        else
-          echo "No log files found to upload."
-        fi
       uses: actions/upload-artifact@v4.6.0
       with:
         name: build-logs
-        path: build-logs.tar.gz
+        path: |
+          ${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log
+          ${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log
