@@ -173,7 +173,7 @@ jobs:
         cd "$BUILD_DIR"
         ctest -V
 
-    - name: Upload build logs on failure
+    - name: Prepare logs for upload
       if: failure()
       run: |
         if [ -f "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log" ]; then
@@ -188,7 +188,9 @@ jobs:
           tar -czf build-logs.tar.gz -T logs-to-upload.txt
         else
           echo "No log files found to upload."
-        fi
+
+    - name: Upload build logs
+      if: failure() && exists(build-logs.tar.gz)
       uses: actions/upload-artifact@v4.6.0
       with:
         name: build-logs
