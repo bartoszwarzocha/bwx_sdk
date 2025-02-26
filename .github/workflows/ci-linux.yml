@@ -3,18 +3,53 @@ name: LINUX
 on:
   push:
     branches:
-      - main
+      - master
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+      - '.github/**'
   pull_request:
     branches:
-      - main
+      - master
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  LINUX:
-    runs-on: ubuntu-latest
-
+  runs-on: ${{ matrix.runner }}
+    name: ${{ matrix.name }}
     strategy:
+      fail-fast: false
       matrix:
         build_type: [Debug, Release]
+        include:
+          - name: Ubuntu 22.04 wxGTK 3
+            runner: ubuntu-22.04
+            cmake_generator: Unix Makefiles
+            cmake_samples: ALL
+          - name: macOS 14 wxOSX
+            runner: macos-14
+            cmake_generator: Xcode
+          - name: macOS 14 wxIOS
+            runner: macos-14
+            cmake_generator: Xcode
+            cmake_defines: -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_FIND_ROOT_PATH=/usr/local -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
+            cmake_samples: OFF
+            cmake_tests: OFF
+          - name: Windows MSVC
+            runner: windows-latest
+            no_sudo: 1
+            cmake_defines: -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+            cmake_generator: Ninja
+            cmake_samples: SOME
+            cmake_tests: CONSOLE_ONLY
 
     steps:
     - name: Checkout repository
@@ -33,23 +68,9 @@ jobs:
         fi
         
         sudo apt-get update
+        sudo apt-get install -y build-essential cmake ninja-build g++ autoconf automake libtool pkg-config libtool-bin m4 gettext bison flex gfortran python3-pip
         sudo apt-get install -y \
-            build-essential \
-            cmake \
-            ninja-build \
-            g++ \
-            autoconf \
-            automake \
-            libtool \
-            pkg-config \
-            libtool-bin \
-            m4 \
             nasm \
-            gettext \
-            bison \
-            flex \
-            gfortran \
-            python3-pip \
             meson \
             libfontconfig1-dev \
             libfreetype6-dev \
