@@ -31,10 +31,19 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 - **Linux:** GCC, Clang, Ninja
 - **macOS:** AppleClang, Xcode, Ninja
 
+(Tested for: Windows 11, Ubuntu Linux 22.04, macOS 14)
+
 ---
 
 ## Library documentation
 The library is supplied with a doxygen configuration file with which you can generate HTML and man documentation.
+
+#### Usage:
+```bash
+cd docs/doxygen/
+doxygen ./doxyfile
+```
+
 If you need documentation in the form of a CHM file, please enable the GENERATE_HTMLHELP parameter and disable the HTML_DYNAMIC_MENUS parameter in the doxygen file and generate the documentation again. You will get a set of files ready to build a CHM help file.
 
 ---
@@ -89,26 +98,23 @@ cmake --build . --config Release
 
 ## Directory Structure
 ```
-├── .github/            # GitHub workflows (CI/CD)
-├── docs/               # Library documentation
-│   └── doxygen/        # Doxygen configuration
-├── examples/           # Example applications demonstrating usage
-│   └── example_app/
-│       ├── CMakeLists.txt
-│       └── main.cpp    # Example application source code
-├── include/            # Public header files
+├── .github/              # GitHub workflows (CI/CD)
+├── docs/                 # Library documentation
+│   └── doxygen/          # Doxygen configuration
+├── examples/             # Example applications demonstrating usage
+├── include/              # Public header files
 │   └── bwx_sdk/
-│       ├── bwx_globals.h
-│       ├── [specific libraries folders]/
-├── scripts/            # Helper scripts
-├── src/                # Source files
-├── vcpkg.json          # Dependency manifest
-├── CMakeLists.txt      # Project-wide CMake configuration
-├── init_lib_project.py # Python script for automated setup and build
-├── init_lib_project.bat# Windows wrapper script
-├── init_lib_project.sh # Unix-like systems wrapper script
-├── LICENSE.md          # License information
-└── README.md           # Project documentation (this file)
+│       ├── bwx_globals.h # Common BWX SDK globals
+│       └── [specific libraries folders]/
+├── scripts/              # Helper scripts
+├── src/                  # Source files
+├── vcpkg.json            # Dependency manifest
+├── CMakeLists.txt        # Project-wide CMake configuration
+├── init_lib_project.py   # Python script for automated setup and build
+├── init_lib_project.bat  # Windows wrapper script
+├── init_lib_project.sh   # Unix-like systems wrapper script
+├── LICENSE.md            # License information
+└── README.md             # Project documentation (this file)
 ```
 
 ---
