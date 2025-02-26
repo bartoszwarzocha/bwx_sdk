@@ -83,7 +83,7 @@ jobs:
 
         # Wayland and input support
         brew install \
-            wayland libinput
+            wayland libint
 
         # Audio support libraries
         brew install \
