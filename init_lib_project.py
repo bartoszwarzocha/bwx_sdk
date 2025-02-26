@@ -192,7 +192,7 @@ def build_project(build_dir, config):
 
 def main():
     print("=" * 60)
-    print(f"Starting Serengeti project setup for {platform.system()}")
+    print(f"Starting BWX SDK project setup for {platform.system()}")
     print("=" * 60)
 
     validate_vcpkg_manifest()
@@ -218,3 +218,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

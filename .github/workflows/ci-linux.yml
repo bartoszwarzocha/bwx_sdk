@@ -11,20 +11,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-
-    - name: Install required Python packages
-      run: |
-        python -m pip install --upgrade pip
-        pip install colorama
 
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y ninja-build cmake g++ libgtk-3-dev
@@ -36,23 +30,28 @@ jobs:
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
-    - name: Validate vcpkg manifest
-      run: python init_lib_project.py
-
     - name: Configure CMake
       run: |
-        mkdir -p build
-        cd build
-        cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+        VCPKG_TRIPLET=x64-linux
+        BUILD_DIR="build/linux-${{ matrix.build_type }}"
+        mkdir -p "$BUILD_DIR"
+        cmake -B "$BUILD_DIR" -S . \
+          -G Ninja \
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
+          -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
     - name: Build project
       run: |
-        cd build
-        cmake --build .
+        BUILD_DIR="build/linux-${{ matrix.build_type }}"
+        cmake --build "$BUILD_DIR"
 
     - name: Run tests
       run: |
-        cd build
+        BUILD_DIR="build/linux-${{ matrix.build_type }}"
+        cd "$BUILD_DIR"
         ctest -V

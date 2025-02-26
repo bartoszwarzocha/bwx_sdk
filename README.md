@@ -15,7 +15,7 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 - Extended classes for core wxWidgets components.
 - Utilities for simplifying common tasks with wxWidgets.
 - Cross-platform compatibility (Windows, Linux, macOS).
-- Support for both static and shared library builds.
+- Support for both static and shared (Windows) library builds.
 - Examples demonstrating library usage.
 
 ---
