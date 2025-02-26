@@ -22,6 +22,29 @@
 
 namespace bwx_sdk {
 
+	/**
+	 * @class bwxCmdLineParser
+	 * @brief A command line parser class for the BWXSDK library.
+	 *
+	 * The `bwxCmdLineParser` class extends the functionality of `wxCmdLineParser`
+	 * and provides easy-to-use methods for adding and processing command line options.
+	 *
+	 * @details
+	 * This class allows you to add various types of options, such as string options,
+	 * numerical options, double precision options, and date options. You can also add
+	 * mandatory and optional options, as well as positional parameters.
+	 *
+	 * Example usage:
+	 * @code
+	 * bwxCmdLineParser parser(argc, argv);
+	 * parser.AddHelp("h", "help", "Displays help");
+	 * parser.AddStringOptional("o", "output", "Path to the output file");
+	 * if (!parser.Parse()) {
+	 *     return 1;
+	 * }
+	 * wxString outputPath = parser.GetString("output", "default.txt");
+	 * @endcode
+	 */
 	class bwxCmdLineParser : public wxCmdLineParser
 	{
 	public:

@@ -87,7 +87,7 @@ jobs:
 
         # Audio support libraries
         brew install \
-            alsa-lib pulseaudio libxft libxkbcommon
+            pulseaudio libxft libxkbcommon
 
         # OpenGL and EGL support
         brew install \
