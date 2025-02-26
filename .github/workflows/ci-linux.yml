@@ -3,163 +3,45 @@ name: LINUX
 on:
   push:
     branches:
-      - master
-    paths:
-      - 'include/**'
-      - 'src/**'
-      - 'examples/**'
+      - main
   pull_request:
     branches:
-      - master
-    paths:
-      - 'include/**'
-      - 'src/**'
-      - 'examples/**'
-  workflow_dispatch:
-
-permissions:
-  contents: read
+      - main
 
 jobs:
-  linux-build:
-    name: Linux Build
+  build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        build_type: [Release, Debug]
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up CMake
-        uses: jwlawson/actions-setup-cmake@v1
-        with:
-          cmake-version: '3.22.0'
-          
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
 
-      - name: Install Required Packages (Linux)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            autoconf \
-            automake \
-            libtool \
-            pkg-config \
-            ninja-build \
-            build-essential \
-            libglib2.0-dev \
-            libfontconfig1-dev \
-            libfreetype6-dev \
-            libpng-dev \
-            libxrender-dev \
-            libxcb1-dev \
-            libxcb-render0-dev \
-            libxcb-shm0-dev \
-            meson \
-            gperf \
-            bison \
-            flex \
-            m4 \
-            gettext \
-            texinfo \
-            libssl-dev \
-            libffi-dev \
-            libltdl-dev \
-            libibus-1.0-dev \
-            
-            libasound2-dev \
-            libpulse-dev \
-            libx11-dev \
-            libxft-dev \
-            libxext-dev \
-            libwayland-dev \
-            libxkbcommon-dev \
-            libegl1-mesa-dev \
-            libibus-1.0-dev \
-            mesa-common-dev \
-            libgl1-mesa-dev \
-            libxi-dev \
-            libxcursor-dev \
-            libxrandr-dev \
-            libxinerama-dev \
-            libxxf86vm-dev \
-            libxrender-dev \
-            nasm \
-            libaudio-dev \
-            libraspberrypi-dev || echo "Some packages could not be installed, proceeding anyway."
+    - name: Install required Python packages
+      run: |
+        python -m pip install --upgrade pip
+        pip install colorama
 
-      - name: Cache vcpkg and Dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/vcpkg
-            ${{ github.workspace }}/build/vcpkg_installed
-            ${{ github.workspace }}/vcpkg/downloads
-          key: linux-vcpkg-${{ hashFiles('vcpkg.json', 'CMakeLists.txt') }}
-          restore-keys: |
-            linux-vcpkg-
+    - name: Set up vcpkg
+      uses: microsoft/vcpkg-action@v2
+      with:
+        vcpkgDirectory: ${{ runner.temp }}/vcpkg
+        vcpkgGitURL: 'https://github.com/microsoft/vcpkg'
+        vcpkgCommitId: 'master'
+        cleanAfterBuild: true
 
-      - name: Prepare vcpkg
-        run: |
-          if [ ! -d "vcpkg" ]; then
-            git clone https://github.com/microsoft/vcpkg.git
-          fi
-          cd vcpkg
-          git pull --rebase origin master
-          ./bootstrap-vcpkg.sh || { echo "vcpkg bootstrap failed."; exit 1; }
-        shell: bash
+    - name: Configure and build with CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_TOOLCHAIN_FILE=${{ runner.temp }}/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+        cmake --build .
 
-      - name: Set VCPKG Triplet
-        run: echo "VCPKG_TRIPLET=x64-linux" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Install Dependencies via vcpkg (Manifest Mode)
-        run: |
-          export CFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CFLAGS"
-          export CXXFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CXXFLAGS" 
-          
-          RETRIES=3
-          for i in $(seq 1 $RETRIES); do
-            echo "Attempt $i to install dependencies via vcpkg..."
-            if ./vcpkg/vcpkg install --triplet "$VCPKG_TRIPLET"; then
-              echo "vcpkg install succeeded."
-              break
-            else
-              echo "vcpkg install failed on attempt $i. Cleaning buildtrees and retrying..."
-              rm -rf ./vcpkg/buildtrees
-              if [ "$i" -eq "$RETRIES" ]; then
-                echo "vcpkg install failed after $RETRIES attempts. Exiting."
-                exit 1
-              fi
-              sleep 10
-            fi
-          done
-        shell: bash
-
-      - name: Configure CMake
-        run: |
-          BUILD_DIR="build/linux-${{ matrix.build_type }}"
-          mkdir -p "$BUILD_DIR"
-          cmake -B "$BUILD_DIR" -S . \
-            -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
-            -DVCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" \
-            -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}" \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-        shell: bash
-
-      - name: Build
-        run: |
-          BUILD_DIR="build/linux-${{ matrix.build_type }}"
-          cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
-        shell: bash
-
-      - name: Run Tests (if any)
-        run: |
-          BUILD_DIR="build/linux-${{ matrix.build_type }}"
-          cd "$BUILD_DIR"
-          ctest --output-on-failure --build-config "${{ matrix.build_type }}"
-        shell: bash
+    - name: Run tests
+      run: |
+        cd build
+        ctest -V
