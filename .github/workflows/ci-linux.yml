@@ -111,26 +111,26 @@ jobs:
         autoreconf --force --install --verbose
 
     - name: Show build environment
-        run: |
-          echo "Environment:"
-          env | sort
-          echo
+      run: |
+        echo "Environment:"
+        env | sort
+        echo
 
-          echo "Make version:"
-          make --version
-          echo
+        echo "Make version:"
+        make --version
+        echo
 
-          echo "Compiler version:"
-          ${CXX-g++} --version
-          echo
+        echo "Compiler version:"
+        ${CXX-g++} --version
+        echo
 
-          echo "ccache version:"
-          ccache --version || echo "ccache not available"
-          echo
+        echo "ccache version:"
+        ccache --version || echo "ccache not available"
+        echo
 
-          echo "Free space:"
-          df -h /
-          echo
+        echo "Free space:"
+        df -h /
+        echo
 
     - name: Set up vcpkg
       run: |
