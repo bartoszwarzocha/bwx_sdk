@@ -9,6 +9,7 @@ on:
       - 'src/**'
       - 'examples/**'
       - '.github/**'
+      - '.github/workflows/**'
   pull_request:
     branches:
       - master
@@ -17,6 +18,7 @@ on:
       - 'src/**'
       - 'examples/**'
       - '.github/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
@@ -198,21 +200,9 @@ jobs:
 
     - name: Upload build logs on failure
       if: failure()
-      run: |
-        LOGS_TO_UPLOAD=""
-        for log in "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log" "${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log"; do
-          if [ -f "$log" ]; then
-            echo "Found log: $log"
-            LOGS_TO_UPLOAD+="$log "
-          fi
-        done
-
-        if [ -n "$LOGS_TO_UPLOAD" ]; then
-          tar -czf build-logs.tar.gz $LOGS_TO_UPLOAD
-        else
-          echo "No log files found to upload."
-        fi
       uses: actions/upload-artifact@v4.6.0
       with:
         name: build-logs
-        path: build-logs.tar.gz
+        path: |
+          ${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log
+          ${{ github.workspace }}/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log
