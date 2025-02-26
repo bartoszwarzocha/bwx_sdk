@@ -22,6 +22,9 @@ jobs:
 
     - name: Install dependencies
       run: |
+        export CFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CFLAGS"
+        export CXXFLAGS="-D_strnicmp=strncasecmp -I/usr/include/audio -I/opt/vc/include $CXXFLAGS"
+        
         sudo apt-get update
         sudo apt-get install -y \
             build-essential \
@@ -34,6 +37,7 @@ jobs:
             pkg-config \
             libtool-bin \
             m4 \
+            nasm \
             gettext \
             bison \
             flex \
@@ -67,7 +71,18 @@ jobs:
             libxss-dev \
             libepoxy-dev \
             libwayland-dev \
-            libinput-dev
+            libinput-dev \
+            libasound2-dev \
+            libpulse-dev \
+            libxft-dev \
+            libxkbcommon-dev \
+            libegl1-mesa-dev \
+            libibus-1.0-dev \
+            mesa-common-dev \
+            libgl1-mesa-dev \
+            libxxf86vm-dev \
+            libaudio-dev \
+            libraspberrypi-dev
 
     - name: Set up vcpkg
       run: |
