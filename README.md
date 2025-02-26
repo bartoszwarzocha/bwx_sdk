@@ -98,23 +98,24 @@ cmake --build . --config Release
 
 ## Directory Structure
 ```
-├── .github/              # GitHub workflows (CI/CD)
-├── docs/                 # Library documentation
-│   └── doxygen/          # Doxygen configuration
-├── examples/             # Example applications demonstrating usage
-├── include/              # Public header files
-│   └── bwx_sdk/
-│       ├── bwx_globals.h # Common BWX SDK globals
-│       └── [specific libraries folders]/
-├── scripts/              # Helper scripts
-├── src/                  # Source files
-├── vcpkg.json            # Dependency manifest
-├── CMakeLists.txt        # Project-wide CMake configuration
-├── init_lib_project.py   # Python script for automated setup and build
-├── init_lib_project.bat  # Windows wrapper script
-├── init_lib_project.sh   # Unix-like systems wrapper script
-├── LICENSE.md            # License information
-└── README.md             # Project documentation (this file)
+[bwx_sdk]
+    ├── .github/              # GitHub workflows (CI/CD)
+    ├── docs/                 # Library documentation
+    │   └── doxygen/          # Doxygen configuration
+    ├── examples/             # Example applications demonstrating usage
+    ├── include/              # Public header files
+    │   └── bwx_sdk/
+    │       ├── bwx_globals.h # Common BWX SDK globals
+    │       └── [specific libraries folders]/
+    ├── scripts/              # Helper scripts
+    ├── src/                  # Source files
+    ├── vcpkg.json            # Dependency manifest
+    ├── CMakeLists.txt        # Project-wide CMake configuration
+    ├── init_lib_project.py   # Python script for automated setup and build
+    ├── init_lib_project.bat  # Windows wrapper script
+    ├── init_lib_project.sh   # Unix-like systems wrapper script
+    ├── LICENSE.md            # License information
+    └── README.md             # Project documentation (this file)
 ```
 
 ---
