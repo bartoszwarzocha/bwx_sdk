@@ -1,3 +1,10 @@
+'''
+BWX_SDK Library
+Tool for removing of the doxygen comments from C++ src files
+Copyright 2025 by Bartosz Warzocha (bartosz.warzocha@gmail.com)
+wxWidgets licence
+'''
+
 import os
 import re
 import argparse

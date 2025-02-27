@@ -62,12 +62,12 @@ namespace bwx_sdk {
 
 	void bwxCmdLineParser::AddHelp(const wxString& short_name, const wxString& long_name, const wxString& description)
 	{
-		this->AddSwitch(short_name, long_name, description, wxCMD_LINE_VAL_NONE | wxCMD_LINE_OPTION_HELP);
+		this->AddSwitch(short_name, long_name, description, static_cast<wxCmdLineEntryFlags>(wxCMD_LINE_VAL_NONE) | wxCMD_LINE_OPTION_HELP);
 	}
 
 	void bwxCmdLineParser::AddSwitchOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
 	{
-		int flags = wxCMD_LINE_VAL_NONE | wxCMD_LINE_PARAM_OPTIONAL;
+		int flags = static_cast<int>(wxCMD_LINE_VAL_NONE) | wxCMD_LINE_PARAM_OPTIONAL;
 		if (!visible) flags |= wxCMD_LINE_HIDDEN;
 		this->AddSwitch(short_name, long_name, description + this->Optional(), flags);
 	}

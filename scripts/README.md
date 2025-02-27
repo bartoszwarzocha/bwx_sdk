@@ -12,6 +12,7 @@ A collection of tools for managing header files, generating CMake configuration 
   - [remove_doxygen_comments.py](#remove_doxygen_commentspy)
   - [install_dependencies_linux.sh](#install_dependencies_linuxsh)
   - [install_dependencies_macos.sh](#install_dependencies_macossh)
+  - [make_my_src_beauty.py](#make_my_src_beauty)
 - [License](#license)
 
 ---
@@ -37,11 +38,15 @@ All tools are designed to work seamlessly with the `BWX_SDK` build environment.
 python copy_headers.py
 ```
 
+#### Note:
+**clang-format** is required for make_my_src_beauty.py calling
+
 #### Description:
 - Copies all `.h` and `.hpp` files from `../src` to `../include/bwx_sdk`.
 - Code sections between `#BEGIN_COPY_IGNORING` and `#END_COPY_IGNORING` are ignored during the copy.
 - Automatically creates necessary destination directories.
-- Invokes `remove_doxygen_comments.py` to clean up copied header files.
+- Warning! Invokes `remove_doxygen_comments.py` to clean up copied header files.
+- Warning! Invokes `make_my_src_beauty.py` to format cleaned header files.
 
 ---
 
@@ -94,6 +99,9 @@ python remove_doxygen_comments.py ../include/bwx_sdk
 ./install_dependencies_linux.sh
 ```
 
+#### Note:
+The script has been prepared on the basis of dependencies guaranteeing the correct build of the project in GitHub for the chosen platform (see .github/workflows) and does not guarantee the correct installation of all dependencies on your operating system. You may need to install other dependencies in case of project configuration, compilation or linking errors.
+
 #### Description:
 - Installs required packages using `apt`.
 - Sets up `vcpkg` if not already present.
@@ -115,6 +123,9 @@ python remove_doxygen_comments.py ../include/bwx_sdk
 ./install_dependencies_macos.sh
 ```
 
+#### Note:
+The script has been prepared on the basis of dependencies guaranteeing the correct build of the project in GitHub for the chosen platform (see .github/workflows) and does not guarantee the correct installation of all dependencies on your operating system. You may need to install other dependencies in case of project configuration, compilation or linking errors.
+
 #### Description:
 - Uses `brew` to install required packages.
 - Sets up `vcpkg` if not already present.
@@ -125,6 +136,26 @@ python remove_doxygen_comments.py ../include/bwx_sdk
   - Audio and input support
   - OpenGL and EGL support
 - Prompts the user before installing each component.
+
+---
+
+### `make_my_src_beauty.py`
+**Purpose:** Format src files with **clang-format**.
+
+#### Usage:
+```bash
+python make_my_src_beauty.py <DIRECTORY>
+```
+
+#### Example:
+```bash
+python make_my_src_beauty.py ../include/bwx_sdk
+```
+
+#### Description:
+- Processes files with extensions: `.cpp`, `.c`, `.h`, `.hpp`, `.cxx`, `.cc`.
+- Formates sorce code using **clang-formatter** (required installation).
+- Removes empty lines.
 
 ---
 

@@ -13,7 +13,11 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 
 ## Features
 - Extended classes for core wxWidgets components.
-- Utilities for simplifying common tasks with wxWidgets.
+- Utilities for simplifying common tasks with wxWidgets:
+    - comfortable and easy to use command line parser
+    - lightweight and powerful JSON parser and serializer
+    - easy to use internationalization stuff
+    and others...
 - Cross-platform compatibility (Windows, Linux, macOS).
 - Support for both static and shared (Windows) library builds.
 - Examples demonstrating library usage.

@@ -48,22 +48,6 @@ namespace bwx_sdk {
 		return i;
 	}
 
-	int bwxRand(int min, int max)
-	{
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_int_distribution<> dis(min, max);
-		return dis(gen);
-	}
-
-	double bwxRand(double min, double max)
-	{
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_real_distribution<> dis(min, max);
-		return dis(gen);
-	}
-
 	int bwxNextMultiple(int m, int value)
 	{
 		return m * ((value + (m - 1)) / m);
