@@ -111,6 +111,7 @@ cmake --build . --config Release
     │   └── bwx_sdk/
     │       ├── bwx_globals.h # Common BWX SDK globals
     │       └── [specific libraries folders]/
+    ├── locale/               # Multilanguage library files
     ├── scripts/              # Helper scripts
     ├── src/                  # Source files
     ├── vcpkg.json            # Dependency manifest
