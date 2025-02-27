@@ -12,6 +12,8 @@ Makefile
 *.sln
 *.vcxproj*
 *.xcodeproj/
+lib/
+bin/
 
 # --- vcpkg ---
 vcpkg_installed/
@@ -41,4 +43,7 @@ vcpkg_installed/
 *.bak
 .env
 docs/html/
+docs/latex/
 docs/man/
+.clang-format
+PUBLISH.py

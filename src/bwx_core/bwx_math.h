@@ -12,6 +12,9 @@
 #define _BWX_MATH_H_
 
 #include <math.h>
+#include <cstdlib>
+#include <ctime>
+#include <type_traits>
 
 #include "bwx_sdk/bwx_globals.h"
 
@@ -64,24 +67,27 @@ namespace bwx_sdk {
 	int bwxNextPower2(int x);
 
 	/**
-	 * @brief Generates a random integer within the inclusive range [min, max].
+	 * @brief Returns the previous power of 2 less than or equal to the given number.
 	 *
-	 * @param min The minimum value.
-	 * @param max The maximum value.
-	 * @return A random integer between min and max.
+	 * @param x The number for which to find the previous power of 2.
+	 * @return The largest power of 2 that is less than or equal to x.
 	 */
-	int bwxRand(int min, int max);
+	template <typename T>
+    T bwxRand(T min, T max) {
+        static_assert(std::is_arithmetic<T>::value, "bwxRand requires a numeric type.");
 
-	/**
-	 * @brief Generates a random double within the inclusive range [min, max].
-	 *
-	 * @param min The minimum value.
-	 * @param max The maximum value.
-	 * @return A random double between min and max.
-	 */
-	double bwxRand(double min, double max);
+        static bool initialized = false;
+        if (!initialized) {
+            std::srand(static_cast<unsigned int>(std::time(0)));
+            initialized = true;
+        }
 
-	//template <class T> T bwxRand(T min, T max);
+        if (std::is_integral<T>::value) {
+            return min + std::rand() % ((max - min) + 1);
+        } else {
+            return min + static_cast<T>(std::rand()) / (static_cast<T>(RAND_MAX / (max - min)));
+        }
+    }
 
 	/**
 	 * @brief Returns the smallest multiple of m that is greater than or equal to value.

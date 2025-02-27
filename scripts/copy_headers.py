@@ -70,6 +70,14 @@ def remove_doxygen_comments(target_dir):
         print(f"Deoxygen comments removed in: {target_dir}")
     except subprocess.CalledProcessError as e:
         print(f"Error during doxygen comment removing: {e}")
+        
+def make_my_src_beauty(target_dir):
+    script_path = os.path.join(os.path.dirname(__file__), 'make_my_src_beauty.py')
+    try:
+        subprocess.run([PYTHON_CMD, script_path, target_dir], check=True)
+        print(f"Files formated in: {target_dir}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during files formatting: {e}")
 
 if __name__ == "__main__":
     SRC_DIR = os.path.join(os.path.dirname(__file__), "..", "src")
@@ -77,3 +85,4 @@ if __name__ == "__main__":
 
     copy_headers_with_filter(SRC_DIR, DEST_DIR)
     remove_doxygen_comments(DEST_DIR)
+    make_my_src_beauty(DEST_DIR)

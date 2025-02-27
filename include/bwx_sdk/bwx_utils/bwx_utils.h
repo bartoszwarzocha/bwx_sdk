@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // Name:        bwx_utils.h
 // Purpose:     BWXSDK
 // Author:      Bartosz Warzocha
@@ -8,6 +8,12 @@
 // Licence:		wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
+// WARNING! This is a lightweight, automatically formatted version of the file.
+// The file has been processed by clang-format and Python scripts of the project.
+// (https://github.com/bartoszwarzocha/bwx_sdk/tree/master/scripts)
+// Full versions of source code files, including hidden sections and Doxygen comments,
+// can be found in the 'src' directory.
+
 #ifndef _BWX_UTILS_H_
 #define _BWX_UTILS_H_
 
@@ -15,7 +21,7 @@
 
 namespace bwx_sdk {
 
-	wxColour bwxMixColours(const wxColour& col1, const wxColour& col2, double factor);
+wxColour bwxMixColours(const wxColour& col1, const wxColour& col2, double factor);
 
 }
 

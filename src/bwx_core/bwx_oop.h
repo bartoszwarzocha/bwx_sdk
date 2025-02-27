@@ -11,18 +11,18 @@
 #ifndef _BWXOOP_H_
 #define _BWXOOP_H_
 
-#include <algorithm>     // Sorting and algorithms
-#include <chrono>        // Timestamp handling
-#include <deque>         // History storage
-#include <functional>    // Callbacks and predicates
-#include <map>           // Map container
-#include <optional>      // Optional value handling
-#include <stdexcept>     // Exception handling
-#include <type_traits>   // Type traits and static assertions
-#include <vector>        // Temporary storage for sorting
+#include <algorithm>
+#include <chrono>
+#include <deque>
+#include <functional>
+#include <map>
+#include <optional>
+#include <stdexcept>
+#include <type_traits>
+#include <vector>
 
-#include <wx/event.h>    // wxWidgets events
-#include <wx/thread.h>   // Thread safety with wxMutex
+#include <wx/event.h>
+#include <wx/thread.h>
 
 /**
  * @file bwx_oop.h
