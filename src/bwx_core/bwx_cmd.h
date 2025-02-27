@@ -99,7 +99,7 @@ namespace bwx_sdk {
 		wxString GetOptionalString() { return this->optional_str; }
 
 		
-		void SetHelpInfoString(const wxString& s) { this->help_info_str = wxString::Format(wxT("\n%s\n"), s); }
+		void SetHelpInfoString(const wxString& s) { this->help_info_str = wxString::Format("\n%s\n", s); }
 		wxString GetHelpInfoString() { return this->help_info_str; }
 
 		/* General settings */
@@ -109,7 +109,7 @@ namespace bwx_sdk {
 		 *
 		 * @param switch_chars String containing the switch characters.
 		 */
-		void SetSwitches(const wxString& switch_chars = wxT("/-"));
+		void SetSwitches(const wxString& switch_chars = "/-");
 
 		/**
 		 * @brief Adds a help switch to the parser.
@@ -120,7 +120,7 @@ namespace bwx_sdk {
 		 * @param long_name Long name of the help switch.
 		 * @param description Description of the help switch.
 		 */
-		void AddHelp(const wxString& short_name = wxT("h"), const wxString& long_name = wxT("help"), const wxString& description = wxT("Shows this help"));
+		void AddHelp(const wxString& short_name = "h", const wxString& long_name = "help", const wxString& description = wxT("Shows this help"));
 
 		/* Options with names */
 

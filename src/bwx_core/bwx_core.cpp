@@ -25,21 +25,21 @@ namespace bwx_sdk {
 	void bwxStdPathsInfo(void)
 	{
 		wxMessageBox(
-			wxT("GetAppDocumentsDir(): " + wxStandardPaths::Get().GetAppDocumentsDir() + "\n")
-			+ wxT("GetConfigDir(): " + wxStandardPaths::Get().GetConfigDir() + "\n")
-			+ wxT("GetDataDir(): " + wxStandardPaths::Get().GetDataDir() + "\n")
-			+ wxT("GetDocumentsDir(): " + wxStandardPaths::Get().GetDocumentsDir() + "\n")
-			+ wxT("GetExecutablePath(): " + wxStandardPaths::Get().GetExecutablePath() + "\n")
+			"GetAppDocumentsDir(): " + wxStandardPaths::Get().GetAppDocumentsDir() + "\n"
+			+ "GetConfigDir(): " + wxStandardPaths::Get().GetConfigDir() + "\n"
+			+ "GetDataDir(): " + wxStandardPaths::Get().GetDataDir() + "\n"
+			+ "GetDocumentsDir(): " + wxStandardPaths::Get().GetDocumentsDir() + "\n"
+			+ "GetExecutablePath(): " + wxStandardPaths::Get().GetExecutablePath() + "\n"
 #if defined(__WXGTK__)
-			+wxT("GetInstallPrefix(): " + wxStandardPaths::Get().GetInstallPrefix() + "\n")
+			+"GetInstallPrefix(): " + wxStandardPaths::Get().GetInstallPrefix() + "\n"
 #endif
-			+ wxT("GetLocalDataDir(): " + wxStandardPaths::Get().GetLocalDataDir() + "\n")
-			+ wxT("GetPluginsDir(): " + wxStandardPaths::Get().GetPluginsDir() + "\n")
-			+ wxT("GetResourcesDir(): " + wxStandardPaths::Get().GetResourcesDir() + "\n")
-			+ wxT("GetTempDir(): " + wxStandardPaths::Get().GetTempDir() + "\n")
-			+ wxT("GetUserConfigDir(): " + wxStandardPaths::Get().GetUserConfigDir() + "\n")
-			+ wxT("GetUserDataDir(): " + wxStandardPaths::Get().GetUserDataDir() + "\n")
-			+ wxT("GetUserLocalDataDir(): " + wxStandardPaths::Get().GetUserLocalDataDir() + "\n"),
+			+ "GetLocalDataDir(): " + wxStandardPaths::Get().GetLocalDataDir() + "\n"
+			+ "GetPluginsDir(): " + wxStandardPaths::Get().GetPluginsDir() + "\n"
+			+ "GetResourcesDir(): " + wxStandardPaths::Get().GetResourcesDir() + "\n"
+			+ "GetTempDir(): " + wxStandardPaths::Get().GetTempDir() + "\n"
+			+ "GetUserConfigDir(): " + wxStandardPaths::Get().GetUserConfigDir() + "\n"
+			+ "GetUserDataDir(): " + wxStandardPaths::Get().GetUserDataDir() + "\n"
+			+ "GetUserLocalDataDir(): " + wxStandardPaths::Get().GetUserLocalDataDir() + "\n",
 			wxEmptyString,
 			wxOK
 		);

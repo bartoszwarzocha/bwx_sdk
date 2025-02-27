@@ -14,10 +14,10 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 ## Features
 - Extended classes for core wxWidgets components.
 - Utilities for simplifying common tasks with wxWidgets:
-    - comfortable and easy to use command line parser
-    - lightweight and powerful JSON parser and serializer
+    - comfortable command line parser
+    - lightweight JSON parser and serializer (merge, diff, transform etc.)
     - easy to use internationalization stuff
-    and others...
+    - and others...
 - Cross-platform compatibility (Windows, Linux, macOS).
 - Support for both static and shared (Windows) library builds.
 - Examples demonstrating library usage.
@@ -172,3 +172,5 @@ Developed and maintained by **Bartosz Warzocha**.
 
 For any inquiries or support, please open an issue on the [GitHub repository](https://github.com/bartoszwarzocha/bwx_sdk/issues).
 
+---
+© 2025 Bartosz Warzocha (bartosz.warzocha@gmail.com)

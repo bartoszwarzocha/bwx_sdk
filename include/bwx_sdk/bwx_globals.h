@@ -271,10 +271,10 @@ private:                                                                        
 #define _CC(s) (const_cast<char*>((const char*)s.mb_str()))
 
 #define _SF wxString::Format
-#define _SFD(a) _SF(wxT("%d"), a)
-#define _SFF(a) _SF(wxT("%f"), a)
-#define _SFx(a) _SF(wxT("%x"), a)
-#define _SFX(a) _SF(wxT("%X"), a)
+#define _SFD(a) _SF("%d", a)
+#define _SFF(a) _SF("%f", a)
+#define _SFx(a) _SF("%x", a)
+#define _SFX(a) _SF("%X", a)
 #define _FromSI(a) std::atoi(a)
 #define _FromSD(a) strtod((const char*)a.mb_str(), NULL)
 #define _SF1(f, a) _SF(f, a)

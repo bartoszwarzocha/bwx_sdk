@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: BWX_SDK 1.0.0\n"
-"POT-Creation-Date: 2025-02-27 19:17+0100\n"
-"PO-Revision-Date: 2025-02-27 19:26+0100\n"
+"POT-Creation-Date: 2025-02-27 20:11+0100\n"
+"PO-Revision-Date: 2025-02-27 20:11+0100\n"
 "Last-Translator: Bartosz Warzocha <bartosz.warzocha@gmail.com>\n"
 "Language-Team: \n"
 "Language: pl_PL\n"
@@ -38,80 +38,9 @@ msgstr ""
 "Aby uzyskać więcej informacji uruchom aplikację z parametrem -h, /h lub --"
 "help."
 
-#: bwx_core/bwx_cmd.h:102
-#, c-format
-msgid ""
-"\n"
-"%s\n"
-msgstr ""
-
-#: bwx_core/bwx_cmd.h:112
-msgid "/-"
-msgstr ""
-
-#: bwx_core/bwx_cmd.h:123
-msgid "h"
-msgstr ""
-
-#: bwx_core/bwx_cmd.h:123
-msgid "help"
-msgstr ""
-
 #: bwx_core/bwx_cmd.h:123
 msgid "Shows this help"
 msgstr "Wyświetla niniejszą pomoc"
-
-#: bwx_core/bwx_core.cpp:28
-msgid "GetAppDocumentsDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:29
-msgid "GetConfigDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:30
-msgid "GetDataDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:31
-msgid "GetDocumentsDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:32
-msgid "GetExecutablePath(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:34
-msgid "GetInstallPrefix(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:36
-msgid "GetLocalDataDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:37
-msgid "GetPluginsDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:38
-msgid "GetResourcesDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:39
-msgid "GetTempDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:40
-msgid "GetUserConfigDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:41
-msgid "GetUserDataDir(): "
-msgstr ""
-
-#: bwx_core/bwx_core.cpp:42
-msgid "GetUserLocalDataDir(): "
-msgstr ""
 
 #: bwx_core/bwx_core.cpp:78
 msgid "No resource left to create a new thread"
@@ -185,38 +114,18 @@ msgstr "Błąd muteksa: %s"
 msgid "Parse JSON error at %zu: wrong structure"
 msgstr "Błąd parsowania JSON na %zu: niewłaściwa struktura"
 
-#: bwx_globals.h:261
-#, c-format
-msgid "%d"
-msgstr ""
-
-#: bwx_globals.h:262
-#, c-format
-msgid "%f"
-msgstr ""
-
-#: bwx_globals.h:263
-#, c-format
-msgid "%x"
-msgstr ""
-
-#: bwx_globals.h:264
-#, c-format
-msgid "%X"
-msgstr ""
-
-#: bwx_globals.h:296
+#: bwx_globals.h:309
 msgid "Error!"
 msgstr "Błąd!"
 
-#: bwx_globals.h:297
+#: bwx_globals.h:310
 msgid "Warning"
 msgstr "Ostrzeżenie"
 
-#: bwx_globals.h:298
+#: bwx_globals.h:311
 msgid "Information"
 msgstr "Informacja"
 
-#: bwx_globals.h:299 bwx_globals.h:300
+#: bwx_globals.h:312 bwx_globals.h:313
 msgid "Question..."
 msgstr "Pytanie..."
