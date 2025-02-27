@@ -5,16 +5,18 @@ on:
     branches:
       - master
     paths:
-        - 'include/**'
-        - 'src/**'
-        - 'examples/**'
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+      - '.github/**'
   pull_request:
     branches:
       - master
     paths:
-        - 'include/**'
-        - 'src/**'
-        - 'examples/**'
+      - 'include/**'
+      - 'src/**'
+      - 'examples/**'
+      - '.github/**'
   workflow_dispatch:
 
 concurrency:

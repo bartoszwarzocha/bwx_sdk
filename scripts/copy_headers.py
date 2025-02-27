@@ -14,9 +14,23 @@ Note: Source code sections between BEGIN_COPY_IGNORING and END_COPY_IGNORING
 import os
 import shutil
 import subprocess
+import sys
 
 IGNORE_START = "#BEGIN_COPY_IGNORING"
 IGNORE_END = "#END_COPY_IGNORING"
+
+def detect_python_command():
+    """Sprawdza, czy `python` jest dostępny, jeśli nie - używa `python3`."""
+    for cmd in ["python", "python3"]:
+        try:
+            result = subprocess.run([cmd, "--version"], capture_output=True, text=True, check=True)
+            if "Python" in result.stdout or "Python" in result.stderr:
+                return cmd
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            continue
+    raise RuntimeError("No valid Python interpreter found.")
+
+PYTHON_CMD = detect_python_command()
 
 def filter_and_copy_file(src_file, dest_file):
     os.makedirs(os.path.dirname(dest_file), exist_ok=True)
@@ -52,7 +66,7 @@ def copy_headers_with_filter(src_dir, dest_dir):
 def remove_doxygen_comments(target_dir):
     script_path = os.path.join(os.path.dirname(__file__), 'remove_doxygen_comments.py')
     try:
-        subprocess.run(['python', script_path, target_dir], check=True)
+        subprocess.run([PYTHON_CMD, script_path, target_dir], check=True)
         print(f"Deoxygen comments removed in: {target_dir}")
     except subprocess.CalledProcessError as e:
         print(f"Error during doxygen comment removing: {e}")
