@@ -9,7 +9,7 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 [![WINDOWS](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-windows.yml)
 [![MACOS](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-macos.yml)
 [![License](https://img.shields.io/badge/License-wxWidgets-orange)](https://www.wxwidgets.org/about/licence/)
-![Version](https://img.shields.io/badge/Version-Under_construction-blue)
+[![Version](https://img.shields.io/badge/Version-Under_construction-blue)](https://github.com/bartoszwarzocha/bwx_sdk)
 
 #### From author...
 <span style="color:#0096FF">_The library is a collection of solutions I have developed in over 25 years of programming work with the [wxWidgets](https://www.wxwidgets.org/) library. It addresses a variety of programming problems for various domains, often going beyond the implementation of the GUI itself, but with a focus on maintaining consistency with [wxWidgets](https://www.wxwidgets.org/).
