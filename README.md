@@ -8,6 +8,12 @@ The library is cross-platform, supporting **Windows**, **Linux**, and **macOS**,
 [![LINUX](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-linux.yml)
 [![WINDOWS](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-windows.yml)
 [![MACOS](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/bartoszwarzocha/bwx_sdk/actions/workflows/ci-macos.yml)
+[![License](https://img.shields.io/badge/License-wxWidgets-orange)](https://www.wxwidgets.org/about/licence/)
+![Version](https://img.shields.io/badge/Version-Under_construction-blue)
+
+#### From author...
+<span style="color:#0096FF">_The library is a collection of solutions I have developed in over 25 years of programming work with the [wxWidgets](https://www.wxwidgets.org/) library. It addresses a variety of programming problems for various domains, often going beyond the implementation of the GUI itself, but with a focus on maintaining consistency with [wxWidgets](https://www.wxwidgets.org/).
+The current GitHub version is still under construction (it's a long way to first release) and comes from my personal collection and is constantly being added to, while the code is updated and rewritten for modern C++. **I hope you find this stuff useful and are inspired to discover more uses for the fantastic [wxWidgets](https://www.wxwidgets.org/) library.**_</span>
 
 ---
 
