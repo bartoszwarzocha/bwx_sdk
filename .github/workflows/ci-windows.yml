@@ -105,49 +105,49 @@ jobs:
           $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
           cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
 
-      - name: Determine Compiler Version
-        id: compiler_info
-        run: |
-          # Znajdź domyślną ścieżkę do Visual Studio
-          $VSWHERE = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          if (Test-Path $VSWHERE) {
-            $VS_PATH = & $VSWHERE -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-            Write-Output "Found Visual Studio at $VS_PATH"
-          } else {
-            Write-Output "vswhere.exe not found, cannot determine Visual Studio path."
-            exit 1
-          }
-
-          $VCVARS_PATH = "$VS_PATH\VC\Auxiliary\Build\vcvars64.bat"
-          if (Test-Path $VCVARS_PATH) {
-            cmd /c "call `"$VCVARS_PATH`" && cl.exe" > compiler_version.txt
-          } else {
-            Write-Output "vcvars64.bat not found, cannot configure environment."
-            exit 1
-          }
-
-          $COMPILER_VERSION = Get-Content compiler_version.txt | Select-String "Version" | ForEach-Object { $_ -match 'Version (\d+\.\d+\.\d+)' ; $matches[1] }
-          Write-Output "compiler_version=$COMPILER_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-
-      - name: Package artifacts
-        run: |
-          $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
-          $VERSION = "${{ matrix.build_type }}-${{ env.compiler_version }}-x64"
-          $PACKAGE_NAME = "bwx_sdk-$VERSION.zip"
-          if (!(Test-Path -Path "packages")) {
-            New-Item -ItemType Directory -Force -Path "packages"
-          }
-          Compress-Archive -Path `
-            "bin", "lib", "include", `
-            "README.md", "LICENSE.md" `
-            -DestinationPath "packages\\$PACKAGE_NAME"
-
-      - name: Upload package artifacts
-        uses: actions/upload-artifact@v4.6.0
-        with:
-          name: bwx_sdk-${{ matrix.build_type }}
-          path: packages/*.zip
+#      - name: Determine Compiler Version
+#        id: compiler_info
+#        run: |
+#          # Znajdź domyślną ścieżkę do Visual Studio
+#          $VSWHERE = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+#          if (Test-Path $VSWHERE) {
+#            $VS_PATH = & $VSWHERE -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+#            Write-Output "Found Visual Studio at $VS_PATH"
+#          } else {
+#            Write-Output "vswhere.exe not found, cannot determine Visual Studio path."
+#            exit 1
+#          }
+#
+#          $VCVARS_PATH = "$VS_PATH\VC\Auxiliary\Build\vcvars64.bat"
+#          if (Test-Path $VCVARS_PATH) {
+#            cmd /c "call `"$VCVARS_PATH`" && cl.exe" > compiler_version.txt
+#          } else {
+#            Write-Output "vcvars64.bat not found, cannot configure environment."
+#            exit 1
+#          }
+#
+#          $COMPILER_VERSION = Get-Content compiler_version.txt | Select-String "Version" | ForEach-Object { $_ -match 'Version (\d+\.\d+\.\d+)' ; $matches[1] }
+#          Write-Output "compiler_version=$COMPILER_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Append
+#
+#
+#      - name: Package artifacts
+#        run: |
+#          $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
+#          $VERSION = "${{ matrix.build_type }}-${{ env.compiler_version }}-x64"
+#          $PACKAGE_NAME = "bwx_sdk-$VERSION.zip"
+#          if (!(Test-Path -Path "packages")) {
+#            New-Item -ItemType Directory -Force -Path "packages"
+#          }
+#          Compress-Archive -Path `
+#            "bin", "lib", "include", `
+#            "README.md", "LICENSE.md" `
+#            -DestinationPath "packages\\$PACKAGE_NAME"
+#
+#      - name: Upload package artifacts
+#        uses: actions/upload-artifact@v4.6.0
+#        with:
+#          name: bwx_sdk-${{ matrix.build_type }}
+#          path: packages/*.zip
 
       - name: Run tests (if any)
         run: |
