@@ -45,6 +45,21 @@ The current GitHub version is still under construction (it's a long way to first
 
 ---
 
+## **CI/CD – GitHub Actions (_.github/workflows/..._)**  
+### **Purpose:**  
+Automatically build and optionally test the project on **Windows**, **Linux**, and **macOS**.  
+
+### **What Does the Pipeline Do?**  
+- Automatically builds the project after each source code **push** and **pull request** to master branch.  
+- Installs system dependencies and dependencies from `vcpkg.json`.  
+- Compiles the project in **Release** and **Debig** mode.  
+- (Optional) Runs tests if defined.
+- In release publish mode packs files to release pack.
+
+_Results can be found in the **Actions** tab on GitHub._
+
+---
+
 ## Library documentation
 The library is supplied with a doxygen configuration file with which you can generate HTML and man documentation.
 
