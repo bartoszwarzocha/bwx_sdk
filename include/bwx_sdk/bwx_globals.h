@@ -6,12 +6,22 @@
 #include <wx/wx.h>
 #endif
 
+#include <algorithm>
+#include <chrono>
+#include <deque>
+#include <functional>
+#include <map>
+#include <optional>
+#include <stdexcept>
+#include <type_traits>
+#include <vector>
+
 // *** MEMORY LEAKS DIAGNOSE ***
 // Options: _NORMAL_BLOCK/_CLIENT_BLOCK
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
 #include <crtdbg.h>
+#include <stdlib.h>
 #define _new new (_CLIENT_BLOCK, __FILE__, __LINE__)
 #define bwxMemStat(x)         \
     _CrtMemState _##x;        \

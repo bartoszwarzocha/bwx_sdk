@@ -6,6 +6,16 @@
 #include <wx/wx.h>
 #endif
 
+#include <algorithm>
+#include <chrono>
+#include <deque>
+#include <functional>
+#include <map>
+#include <optional>
+#include <stdexcept>
+#include <type_traits>
+#include <vector>
+
 // *** MEMORY LEAKS DIAGNOSE ***
 // Options: _NORMAL_BLOCK/_CLIENT_BLOCK
 #ifdef _DEBUG

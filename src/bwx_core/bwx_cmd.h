@@ -89,38 +89,38 @@ namespace bwx_sdk {
 		 *
 		 * @param s Optional string.
 		 */
-		void SetOptionalString(const wxString& s) { this->optional_str = s; }
+		void SetOptionalString(const wxString& s) { this->m_optionalStr = s; }
 
 		/**
 		 * @brief Gets the optional string.
 		 *
 		 * @return Optional string.
 		 */
-		wxString GetOptionalString() { return this->optional_str; }
+		wxString GetOptionalString() { return this->m_optionalStr; }
 
 		
-		void SetHelpInfoString(const wxString& s) { this->help_info_str = wxString::Format("\n%s\n", s); }
-		wxString GetHelpInfoString() { return this->help_info_str; }
+		void SetHelpInfoString(const wxString& s) { this->m_helpInfoStr = wxString::Format("\n%s\n", s); }
+		wxString GetHelpInfoString() { return this->m_helpInfoStr; }
 
 		/* General settings */
 
 		/**
 		 * @brief Sets the characters used to identify switches.
 		 *
-		 * @param switch_chars String containing the switch characters.
+		 * @param switchChars String containing the switch characters.
 		 */
-		void SetSwitches(const wxString& switch_chars = "/-");
+		void SetSwitches(const wxString& switchChars = "/-");
 
 		/**
 		 * @brief Adds a help switch to the parser.
 		 *
 		 * The help switch will display usage information.
 		 *
-		 * @param short_name Short name of the help switch.
-		 * @param long_name Long name of the help switch.
+		 * @param shortName Short name of the help switch.
+		 * @param longName Long name of the help switch.
 		 * @param description Description of the help switch.
 		 */
-		void AddHelp(const wxString& short_name = "h", const wxString& long_name = "help", const wxString& description = wxT("Shows this help"));
+		void AddHelp(const wxString& shortName = "h", const wxString& longName = "help", const wxString& description = wxT("Shows this help"));
 
 		/* Options with names */
 
@@ -130,104 +130,104 @@ namespace bwx_sdk {
 		 * This method adds a command line switch that is optional. If not visible,
 		 * the switch is hidden from the help output.
 		 *
-		 * @param short_name Short name of the switch.
-		 * @param long_name Long name of the switch.
+		 * @param shortName Short name of the switch.
+		 * @param longName Long name of the switch.
 		 * @param description Description of the switch.
 		 * @param visible Flag indicating whether the switch is visible.
 		 */
-		void AddSwitchOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddSwitchOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds a mandatory switch.
 		 *
 		 * This method adds a command line switch that is mandatory.
 		 *
-		 * @param short_name Short name of the switch.
-		 * @param long_name Long name of the switch.
+		 * @param shortName Short name of the switch.
+		 * @param longName Long name of the switch.
 		 * @param description Description of the switch.
 		 * @param visible Flag indicating whether the switch is visible.
 		 */
-		void AddSwitchMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddSwitchMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds an optional string option.
 		 *
-		 * @param short_name Short name of the option.
-		 * @param long_name Long name of the option.
+		 * @param shortName Short name of the option.
+		 * @param longName Long name of the option.
 		 * @param description Description of the option.
 		 * @param visible Flag indicating whether the option is visible.
 		 */
-		void AddStringOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddStringOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds a mandatory string option.
 		 *
-		 * @param short_name Short name of the option.
-		 * @param long_name Long name of the option.
+		 * @param shortName Short name of the option.
+		 * @param longName Long name of the option.
 		 * @param description Description of the option.
 		 * @param visible Flag indicating whether the option is visible.
 		 */
-		void AddStringMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddStringMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds an optional numerical option.
 		 *
-		 * @param short_name Short name of the option.
-		 * @param long_name Long name of the option.
+		 * @param shortName Short name of the option.
+		 * @param longName Long name of the option.
 		 * @param description Description of the option.
 		 * @param visible Flag indicating whether the option is visible.
 		 */
-		void AddNumberOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddNumberOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds a mandatory numerical option.
 		 *
-		 * @param short_name Short name of the option.
-		 * @param long_name Long name of the option.
+		 * @param shortName Short name of the option.
+		 * @param longName Long name of the option.
 		 * @param description Description of the option.
 		 * @param visible Flag indicating whether the option is visible.
 		 */
-		void AddNumberMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddNumberMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds an optional double precision option.
 		 *
-		 * @param short_name Short name of the option.
-		 * @param long_name Long name of the option.
+		 * @param shortName Short name of the option.
+		 * @param longName Long name of the option.
 		 * @param description Description of the option.
 		 * @param visible Flag indicating whether the option is visible.
 		 */
-		void AddDoubleOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddDoubleOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds a mandatory double precision option.
 		 *
-		 * @param short_name Short name of the option.
-		 * @param long_name Long name of the option.
+		 * @param shortName Short name of the option.
+		 * @param longName Long name of the option.
 		 * @param description Description of the option.
 		 * @param visible Flag indicating whether the option is visible.
 		 */
-		void AddDoubleMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddDoubleMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds an optional date option.
 		 *
-		 * @param short_name Short name of the option.
-		 * @param long_name Long name of the option.
+		 * @param shortName Short name of the option.
+		 * @param longName Long name of the option.
 		 * @param description Description of the option.
 		 * @param visible Flag indicating whether the option is visible.
 		 */
-		void AddDateOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddDateOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 		
 		/**
 		 * @brief Adds a mandatory date option.
 		 *
-		 * @param short_name Short name of the option.
-		 * @param long_name Long name of the option.
+		 * @param shortName Short name of the option.
+		 * @param longName Long name of the option.
 		 * @param description Description of the option.
 		 * @param visible Flag indicating whether the option is visible.
 		 */
-		void AddDateMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible = true);
+		void AddDateMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible = true);
 
 		/* Parameters */
 
@@ -410,17 +410,17 @@ namespace bwx_sdk {
 		 */
 		void Init();
 
-		wxString optional_str; ///< Optional string.
-		wxString help_info_str; ///< Help information string.
+		wxString m_optionalStr; ///< Optional string.
+		wxString m_helpInfoStr; ///< Help information string.
 
 		/**
 		 * @brief Returns the optional string.
 		 *
 		 * @return Optional string.
 		 */
-		wxString Optional() { return " " + this->optional_str; }
+		wxString Optional() { return " " + this->m_optionalStr; }
 
-		int argc; ///< Number of arguments.
+		int m_argc; ///< Number of arguments.
 	};
 
 }

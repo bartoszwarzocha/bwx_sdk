@@ -30,24 +30,24 @@ namespace bwx_sdk {
 		UseShortCatalogNames();
 	}
 
-	bwxInternat::bwxInternat(const wxString& short_name, const wxString& name, const wxString& uname, wxLanguage wx_lang_code) : wxLocale() {
+	bwxInternat::bwxInternat(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode) : wxLocale() {
 		AddLanguageSystemDefault();
-		AddLanguage(short_name, name, uname, wx_lang_code);
-		SetDefaultAppLanguage(short_name, name, uname, wx_lang_code);
+		AddLanguage(shortName, name, uname, wxLangCode);
+		SetDefaultAppLanguage(shortName, name, uname, wxLangCode);
 		UseShortCatalogNames();
 	}
 
-	bool bwxInternat::Init(const wxString& short_name) {
+	bool bwxInternat::Init(const wxString& shortName) {
 		wxLanguage tmp_lang = wxLANGUAGE_UNKNOWN;
 
-		if (short_name.IsEmpty()) {
+		if (shortName.IsEmpty()) {
 			tmp_lang = static_cast<wxLanguage>(wxLocale::GetSystemLanguage());
 			if (tmp_lang == wxLANGUAGE_UNKNOWN)
-				tmp_lang = default_lang.GetWxLangCode();
+				tmp_lang = m_defaultLang.GetWxLangCode();
 		}
 		else {
-			auto it = lang_map.find(short_name);
-			if (it != lang_map.end())
+			auto it = m_langMap.find(shortName);
+			if (it != m_langMap.end())
 				tmp_lang = it->second.GetWxLangCode();
 		}
 
@@ -66,7 +66,7 @@ namespace bwx_sdk {
 	}
 
 	bool bwxInternat::InitByName(const wxString& name) {
-		for (const auto& pair : lang_map) {
+		for (const auto& pair : m_langMap) {
 			if (pair.second.GetName().IsSameAs(name)) {
 				return Init(pair.second.GetShortName());
 			}
@@ -74,16 +74,16 @@ namespace bwx_sdk {
 		return false;
 	}
 
-	void bwxInternat::SetDefaultAppLanguage(const wxString& short_name, const wxString& name, const wxString& uname, wxLanguage wx_lang_code) noexcept {
-		default_lang = bwxLanguage(short_name, name, uname, wx_lang_code);
+	void bwxInternat::SetDefaultAppLanguage(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode) noexcept {
+		m_defaultLang = bwxLanguage(shortName, name, uname, wxLangCode);
 	}
 
 	void bwxInternat::AddLanguage(const bwxLanguage& l) {
-		lang_map[l.GetShortName()] = l; // Replace emplace with direct assignment
+		m_langMap[l.GetShortName()] = l; // Replace emplace with direct assignment
 	}
 
-	void bwxInternat::AddLanguage(const wxString& short_name, const wxString& name, const wxString& uname, wxLanguage wx_lang_code) {
-		lang_map[short_name] = bwxLanguage(short_name, name, uname, wx_lang_code); // Assignment compatible with wxHashMap
+	void bwxInternat::AddLanguage(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode) {
+		m_langMap[shortName] = bwxLanguage(shortName, name, uname, wxLangCode); // Assignment compatible with wxHashMap
 	}
 
 	void bwxInternat::AddLanguageSystemDefault() {
@@ -104,25 +104,25 @@ namespace bwx_sdk {
 
 	wxArrayString bwxInternat::GetLangNames() const {
 		wxArrayString ret;
-		for (const auto& pair : lang_map) {
+		for (const auto& pair : m_langMap) {
 			ret.Add(pair.second.GetName());
 		}
 		return ret;
 	}
 
 	void bwxInternat::ResetToDefaultLanguage() {
-		Init(default_lang.GetShortName());
+		Init(m_defaultLang.GetShortName());
 	}
 
-	bool bwxInternat::LoadCatalogs(const wxLanguageInfo* lang_info) {
-		wxFileName localePath(wxGetCwd(), lang_folder);
+	bool bwxInternat::LoadCatalogs(const wxLanguageInfo* langInfo) {
+		wxFileName localePath(wxGetCwd(), m_langFolder);
 		AddCatalogLookupPathPrefix(localePath.GetFullPath());
 
-		wxString locale_name = lang_info->CanonicalName.SubString(0, 1);
+		wxString locale_name = langInfo->CanonicalName.SubString(0, 1);
 		std::vector<wxString> catalogs = {
 			locale_name,
-			locale_name + (use_short_catalog_names ? "-s" : "_system"),
-			locale_name + (use_short_catalog_names ? "-b" : "_bwx")
+			locale_name + (m_useShortCatalogNames ? "-s" : "_system"),
+			locale_name + (m_useShortCatalogNames ? "-b" : "_bwx")
 		};
 
 		bool success = true;
@@ -135,4 +135,4 @@ namespace bwx_sdk {
 		return success;
 	}
 
-} // namespace bwx_sdk
+}

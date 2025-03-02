@@ -35,50 +35,50 @@ public:
 
     /* Sets & Gets */
 
-    void SetOptionalString(const wxString& s) { this->optional_str = s; }
+    void SetOptionalString(const wxString& s) { this->m_optionalStr = s; }
 
-    wxString GetOptionalString() { return this->optional_str; }
+    wxString GetOptionalString() { return this->m_optionalStr; }
 
-    void SetHelpInfoString(const wxString& s) { this->help_info_str = wxString::Format(wxT("\n%s\n"), s); }
-    wxString GetHelpInfoString() { return this->help_info_str; }
+    void SetHelpInfoString(const wxString& s) { this->m_helpInfoStr = wxString::Format("\n%s\n", s); }
+    wxString GetHelpInfoString() { return this->m_helpInfoStr; }
 
     /* General settings */
 
-    void SetSwitches(const wxString& switch_chars = wxT("/-"));
+    void SetSwitches(const wxString& switchChars = "/-");
 
-    void AddHelp(const wxString& short_name = wxT("h"), const wxString& long_name = wxT("help"),
+    void AddHelp(const wxString& shortName = "h", const wxString& longName = "help",
                  const wxString& description = wxT("Shows this help"));
 
     /* Options with names */
 
-    void AddSwitchOptional(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddSwitchOptional(const wxString& shortName, const wxString& longName, const wxString& description,
                            bool visible = true);
 
-    void AddSwitchMandatory(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddSwitchMandatory(const wxString& shortName, const wxString& longName, const wxString& description,
                             bool visible = true);
 
-    void AddStringOptional(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddStringOptional(const wxString& shortName, const wxString& longName, const wxString& description,
                            bool visible = true);
 
-    void AddStringMandatory(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddStringMandatory(const wxString& shortName, const wxString& longName, const wxString& description,
                             bool visible = true);
 
-    void AddNumberOptional(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddNumberOptional(const wxString& shortName, const wxString& longName, const wxString& description,
                            bool visible = true);
 
-    void AddNumberMandatory(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddNumberMandatory(const wxString& shortName, const wxString& longName, const wxString& description,
                             bool visible = true);
 
-    void AddDoubleOptional(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddDoubleOptional(const wxString& shortName, const wxString& longName, const wxString& description,
                            bool visible = true);
 
-    void AddDoubleMandatory(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddDoubleMandatory(const wxString& shortName, const wxString& longName, const wxString& description,
                             bool visible = true);
 
-    void AddDateOptional(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddDateOptional(const wxString& shortName, const wxString& longName, const wxString& description,
                          bool visible = true);
 
-    void AddDateMandatory(const wxString& short_name, const wxString& long_name, const wxString& description,
+    void AddDateMandatory(const wxString& shortName, const wxString& longName, const wxString& description,
                           bool visible = true);
 
     /* Parameters */
@@ -124,12 +124,12 @@ public:
 private:
     void Init();
 
-    wxString optional_str;
-    wxString help_info_str;
+    wxString m_optionalStr;
+    wxString m_helpInfoStr;
 
-    wxString Optional() { return " " + this->optional_str; }
+    wxString Optional() { return " " + this->m_optionalStr; }
 
-    int argc;
+    int m_argc;
 };
 
 }  // namespace bwx_sdk

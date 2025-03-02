@@ -98,7 +98,7 @@ public:
 
     wxString SerializePretty(int indentLevel = 4) const;
 
-    wxString GetLastError() const { return lastError; }
+    wxString GetLastError() const { return m_lastError; }
 
     //
 
@@ -176,9 +176,9 @@ public:
     bwxJSON Map(std::function<bwxJsonValue(const wxString&, const bwxJsonValue&)> transform) const;
 
 private:
-    std::unordered_map<wxString, bwxJsonValue> data;
+    std::unordered_map<wxString, bwxJsonValue> m_data;
 
-    wxString lastError;
+    wxString m_lastError;
 
     wxString EscapeString(const wxString& str) const;
 

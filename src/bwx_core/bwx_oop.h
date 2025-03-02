@@ -30,9 +30,9 @@
  */
 
 // wxWidgets events declaration for value change notifications
-wxDECLARE_EVENT(EVT_PROPERTY_CHANGED, wxCommandEvent);
-wxDECLARE_EVENT(EVT_PROPERTY_VECTOR_CHANGED, wxCommandEvent);
-wxDECLARE_EVENT(EVT_PROPERTY_MAP_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_BWXPROPERTY_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_BWXPROPERTY_VECTOR_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_BWXPROPERTY_MAP_CHANGED, wxCommandEvent);
 
 //-----------------------------------------------------------------------------------
 
@@ -79,15 +79,15 @@ namespace bwx_sdk {
                           size_t historyLimit = 0,
                           std::optional<std::chrono::seconds> undoTimeout = std::nullopt,
                           wxEvtHandler* eventHandler = nullptr)
-            : value_(defaultValue),
-              defaultValue_(defaultValue),
-              validator_(std::move(validator)),
-              onChange_(std::move(onChange)),
-              onReject_(std::move(onReject)),
-              historyLimit_(historyLimit),
-              undoTimeout_(undoTimeout),
-              eventHandler_(eventHandler),
-              lastChangeTime_(std::chrono::system_clock::now()) {}
+            : m_value(defaultValue),
+              m_defaultValue(defaultValue),
+              m_validator(std::move(validator)),
+              m_onChange(std::move(onChange)),
+              m_onReject(std::move(onReject)),
+              m_historyLimit(historyLimit),
+              m_undoTimeout(undoTimeout),
+              m_eventHandler(eventHandler),
+              m_lastChangeTime(std::chrono::system_clock::now()) {}
 
         /**
          * @brief Assigns a new value to the property.
@@ -104,21 +104,21 @@ namespace bwx_sdk {
          * @param newValue Value to set.
          */
         void set(const T& newValue) {
-            wxMutexLocker lock(mutex_);
-            if (readOnly_) return;
+            wxMutexLocker lock(m_mutex);
+            if (m_readOnly) return;
 
-            if (validator_ && !validator_(newValue)) {
-                if (onReject_) onReject_(newValue);
+            if (m_validator && !m_validator(newValue)) {
+                if (m_onReject) m_onReject(newValue);
                 return;
             }
 
-            if (newValue != value_) {
-                recordHistory(value_);
+            if (newValue != m_value) {
+                recordHistory(m_value);
                 clearRedoHistory();
-                if (onChange_) onChange_(value_, newValue);
+                if (m_onChange) m_onChange(m_value, newValue);
 
-                value_ = newValue;
-                lastChangeTime_ = std::chrono::system_clock::now();
+                m_value = newValue;
+                m_lastChangeTime = std::chrono::system_clock::now();
 
                 notifyChange();
                 propagateBinding(newValue);
@@ -130,8 +130,8 @@ namespace bwx_sdk {
          * @return Constant reference to the value.
          */
         [[nodiscard]] const T& get() const noexcept {
-            wxMutexLocker lock(mutex_);
-            return value_;
+            wxMutexLocker lock(m_mutex);
+            return m_value;
         }
 
         /**
@@ -140,9 +140,9 @@ namespace bwx_sdk {
          */
         const char* AsCStr() const {
             if constexpr (std::is_same_v<T, std::string>) {
-                return value_.c_str();
+                return m_value.c_str();
             } else if constexpr (std::is_same_v<T, wxString>) {
-                return value_.mb_str().data();
+                return m_value.mb_str().data();
             } else {
                 static_assert(std::is_same_v<T, std::string> || std::is_same_v<T, wxString>,
                               "AsCStr() is only supported for std::string or wxString.");
@@ -154,7 +154,7 @@ namespace bwx_sdk {
          * @brief Resets the value to its default.
          */
         void reset() {
-            set(defaultValue_);
+            set(m_defaultValue);
         }
 
         /**
@@ -162,8 +162,8 @@ namespace bwx_sdk {
          * @param validator Validator function to set.
          */
         void setValidator(Validator validator) {
-            wxMutexLocker lock(mutex_);
-            validator_ = std::move(validator);
+            wxMutexLocker lock(m_mutex);
+            m_validator = std::move(validator);
         }
 
         /**
@@ -171,8 +171,8 @@ namespace bwx_sdk {
          * @param onChange Callback to set.
          */
         void setOnChangeCallback(ChangeCallback onChange) {
-            wxMutexLocker lock(mutex_);
-            onChange_ = std::move(onChange);
+            wxMutexLocker lock(m_mutex);
+            m_onChange = std::move(onChange);
         }
 
         /**
@@ -180,8 +180,8 @@ namespace bwx_sdk {
          * @param onReject Callback to set.
          */
         void setOnRejectCallback(RejectCallback onReject) {
-            wxMutexLocker lock(mutex_);
-            onReject_ = std::move(onReject);
+            wxMutexLocker lock(m_mutex);
+            m_onReject = std::move(onReject);
         }
 
         /**
@@ -189,8 +189,8 @@ namespace bwx_sdk {
          * @param readOnly True to enable, false to disable.
          */
         void setReadOnly(bool readOnly) {
-            wxMutexLocker lock(mutex_);
-            readOnly_ = readOnly;
+            wxMutexLocker lock(m_mutex);
+            m_readOnly = readOnly;
         }
 
         /**
@@ -198,8 +198,8 @@ namespace bwx_sdk {
          * @return True if read-only, false otherwise.
          */
         [[nodiscard]] bool isReadOnly() const noexcept {
-            wxMutexLocker lock(mutex_);
-            return readOnly_;
+            wxMutexLocker lock(m_mutex);
+            return m_readOnly;
         }
 
         /**
@@ -207,21 +207,21 @@ namespace bwx_sdk {
          * @return True if successful, false otherwise.
          */
         bool undo() {
-            wxMutexLocker lock(mutex_);
-            if (undoHistory_.empty()) return false;
+            wxMutexLocker lock(m_mutex);
+            if (m_undoHistory.empty()) return false;
 
             auto now = std::chrono::system_clock::now();
-            if (undoTimeout_ && std::chrono::duration_cast<std::chrono::seconds>(now - lastChangeTime_) > *undoTimeout_) {
+            if (m_undoTimeout && std::chrono::duration_cast<std::chrono::seconds>(now - m_lastChangeTime) > *m_undoTimeout) {
                 return false;
             }
 
-            redoHistory_.push_front(value_);
-            value_ = undoHistory_.front();
-            undoHistory_.pop_front();
-            lastChangeTime_ = now;
+            m_redoHistory.push_front(m_value);
+            m_value = m_undoHistory.front();
+            m_undoHistory.pop_front();
+            m_lastChangeTime = now;
 
             notifyChange();
-            propagateBinding(value_);
+            propagateBinding(m_value);
             return true;
         }
 
@@ -230,16 +230,16 @@ namespace bwx_sdk {
          * @return True if successful, false otherwise.
          */
         bool redo() {
-            wxMutexLocker lock(mutex_);
-            if (redoHistory_.empty()) return false;
+            wxMutexLocker lock(m_mutex);
+            if (m_redoHistory.empty()) return false;
 
-            undoHistory_.push_front(value_);
-            value_ = redoHistory_.front();
-            redoHistory_.pop_front();
-            lastChangeTime_ = std::chrono::system_clock::now();
+            m_undoHistory.push_front(m_value);
+            m_value = m_redoHistory.front();
+            m_redoHistory.pop_front();
+            m_lastChangeTime = std::chrono::system_clock::now();
 
             notifyChange();
-            propagateBinding(value_);
+            propagateBinding(m_value);
             return true;
         }
 
@@ -248,10 +248,10 @@ namespace bwx_sdk {
          * @param limit Number of history entries to retain.
          */
         void setHistoryLimit(size_t limit) {
-            wxMutexLocker lock(mutex_);
-            historyLimit_ = limit;
-            trimHistory(undoHistory_);
-            trimHistory(redoHistory_);
+            wxMutexLocker lock(m_mutex);
+            m_historyLimit = limit;
+            trimHistory(m_undoHistory);
+            trimHistory(m_redoHistory);
         }
 
         /**
@@ -259,17 +259,17 @@ namespace bwx_sdk {
          * @return History limit.
          */
         [[nodiscard]] size_t getHistoryLimit() const noexcept {
-            wxMutexLocker lock(mutex_);
-            return historyLimit_;
+            wxMutexLocker lock(m_mutex);
+            return m_historyLimit;
         }
 
         /**
          * @brief Clears the undo and redo histories.
          */
         void clearHistory() {
-            wxMutexLocker lock(mutex_);
-            undoHistory_.clear();
-            redoHistory_.clear();
+            wxMutexLocker lock(m_mutex);
+            m_undoHistory.clear();
+            m_redoHistory.clear();
         }
 
         /**
@@ -277,8 +277,8 @@ namespace bwx_sdk {
          * @param timeout Timeout duration.
          */
         void setUndoTimeout(std::chrono::seconds timeout) {
-            wxMutexLocker lock(mutex_);
-            undoTimeout_ = timeout;
+            wxMutexLocker lock(m_mutex);
+            m_undoTimeout = timeout;
         }
 
         /**
@@ -286,8 +286,8 @@ namespace bwx_sdk {
          * @return Optional undo timeout.
          */
         [[nodiscard]] std::optional<std::chrono::seconds> getUndoTimeout() const noexcept {
-            wxMutexLocker lock(mutex_);
-            return undoTimeout_;
+            wxMutexLocker lock(m_mutex);
+            return m_undoTimeout;
         }
 
         /**
@@ -295,82 +295,82 @@ namespace bwx_sdk {
          * @return Last change timestamp.
          */
         Timestamp getLastChangeTime() const {
-            wxMutexLocker lock(mutex_);
-            return lastChangeTime_;
+            wxMutexLocker lock(m_mutex);
+            return m_lastChangeTime;
         }
 
         /**
          * @brief Binds another property to synchronize value changes.
          * @param other Property to bind to.
          */
-        void bind(Property<T>& other) {
-            wxMutexLocker lock(mutex_);
-            boundProperties_.push_back(&other);
+        void bind(bwxProperty<T>& other) {
+            wxMutexLocker lock(m_mutex);
+            m_boundProperties.push_back(&other);
         }
 
         // Arithmetic operators
-        Property<T>& operator+=(const T& rhs) { set(value_ + rhs); return *this; }
-        Property<T>& operator-=(const T& rhs) { set(value_ - rhs); return *this; }
-        Property<T>& operator*=(const T& rhs) { set(value_ * rhs); return *this; }
-        Property<T>& operator/=(const T& rhs) { set(value_ / rhs); return *this; }
+        bwxProperty<T>& operator+=(const T& rhs) { set(m_value + rhs); return *this; }
+        bwxProperty<T>& operator-=(const T& rhs) { set(m_value - rhs); return *this; }
+        bwxProperty<T>& operator*=(const T& rhs) { set(m_value * rhs); return *this; }
+        bwxProperty<T>& operator/=(const T& rhs) { set(m_value / rhs); return *this; }
 
         // Comparison operators
-        bool operator==(const T& rhs) const { return value_ == rhs; }
-        bool operator!=(const T& rhs) const { return value_ != rhs; }
-        bool operator<(const T& rhs) const { return value_ < rhs; }
-        bool operator<=(const T& rhs) const { return value_ <= rhs; }
-        bool operator>(const T& rhs) const { return value_ > rhs; }
-        bool operator>=(const T& rhs) const { return value_ >= rhs; }
+        bool operator==(const T& rhs) const { return m_value == rhs; }
+        bool operator!=(const T& rhs) const { return m_value != rhs; }
+        bool operator<(const T& rhs) const { return m_value < rhs; }
+        bool operator<=(const T& rhs) const { return m_value <= rhs; }
+        bool operator>(const T& rhs) const { return m_value > rhs; }
+        bool operator>=(const T& rhs) const { return m_value >= rhs; }
 
     private:
         /** @brief Records the current value into the undo history. */
         void recordHistory(const T& oldValue) {
-            if (historyLimit_ == 0) return;
-            undoHistory_.push_front(oldValue);
-            trimHistory(undoHistory_);
+            if (m_historyLimit == 0) return;
+            m_undoHistory.push_front(oldValue);
+            trimHistory(m_undoHistory);
         }
 
         /** @brief Clears the redo history. */
         void clearRedoHistory() {
-            redoHistory_.clear();
+            m_redoHistory.clear();
         }
 
         /** @brief Trims the history to respect the configured limit. */
         void trimHistory(std::deque<T>& history) {
-            while (history.size() > historyLimit_) {
+            while (history.size() > m_historyLimit) {
                 history.pop_back();
             }
         }
 
         /** @brief Notifies listeners through callbacks and wxWidgets events. */
         void notifyChange() {
-            if (eventHandler_) {
+            if (m_eventHandler) {
                 wxCommandEvent evt(EVT_BWXPROPERTY_CHANGED);
-                eventHandler_->AddPendingEvent(evt);
+                m_eventHandler->AddPendingEvent(evt);
             }
         }
 
         /** @brief Propagates value changes to bound properties. */
         void propagateBinding(const T& newValue) {
-            for (auto* boundProp : boundProperties_) {
+            for (auto* boundProp : m_boundProperties) {
                 if (boundProp) boundProp->set(newValue);
             }
         }
 
-        T value_{};                                    ///< Current value of the property.
-        T defaultValue_{};                              ///< Default value used for resets.
-        Validator validator_ = nullptr;                 ///< Validator function for new values.
-        ChangeCallback onChange_ = nullptr;             ///< Callback for value changes.
-        RejectCallback onReject_ = nullptr;             ///< Callback for rejected values.
-        size_t historyLimit_ = 0;                       ///< Undo/redo history limit.
-        std::optional<std::chrono::seconds> undoTimeout_ = std::nullopt; ///< Undo operation timeout.
-        bool readOnly_ = false;                         ///< Read-only mode flag.
-        wxEvtHandler* eventHandler_ = nullptr;          ///< wxWidgets event handler.
-        Timestamp lastChangeTime_;                      ///< Timestamp of the last modification.
-        std::deque<T> undoHistory_;                     ///< Undo history.
-        std::deque<T> redoHistory_;                     ///< Redo history.
-        std::vector<Property<T>*> boundProperties_;     ///< Bound properties for synchronization.
-        mutable wxMutex mutex_;                         ///< Mutex for thread safety.
+        T m_value{};                                    ///< Current value of the property.
+        T m_defaultValue{};                              ///< Default value used for resets.
+        Validator m_validator = nullptr;                 ///< Validator function for new values.
+        ChangeCallback m_onChange = nullptr;             ///< Callback for value changes.
+        RejectCallback m_onReject = nullptr;             ///< Callback for rejected values.
+        size_t m_historyLimit = 0;                       ///< Undo/redo history limit.
+        std::optional<std::chrono::seconds> m_undoTimeout = std::nullopt; ///< Undo operation timeout.
+        bool m_readOnly = false;                         ///< Read-only mode flag.
+        wxEvtHandler* m_eventHandler = nullptr;          ///< wxWidgets event handler.
+        Timestamp m_lastChangeTime;                      ///< Timestamp of the last modification.
+        std::deque<T> m_undoHistory;                     ///< Undo history.
+        std::deque<T> m_redoHistory;                     ///< Redo history.
+        std::vector<bwxProperty<T>*> m_boundProperties;     ///< Bound properties for synchronization.
+        mutable wxMutex m_mutex;                         ///< Mutex for thread safety.
     };
     
     //-----------------------------------------------------------------------------------
@@ -409,11 +409,11 @@ namespace bwx_sdk {
 			ChangeCallback callback = nullptr,
 			size_t historyLimit = 0,
 			size_t capacityLimit = 0)
-			: eventHandler_(handler),
-			onChange_(std::move(callback)),
-			historyLimit_(historyLimit),
-			capacityLimit_(capacityLimit),
-			lastChangeTime_(std::chrono::system_clock::now()) {}
+			: m_eventHandler(handler),
+			m_onChange(std::move(callback)),
+			m_historyLimit(historyLimit),
+			m_capacityLimit(capacityLimit),
+			m_lastChangeTime(std::chrono::system_clock::now()) {}
 
 		/**
 		 * @brief Adds a value to the vector.
@@ -421,15 +421,15 @@ namespace bwx_sdk {
 		 * @throws std::overflow_error If capacity limit is reached.
 		 */
 		void add(const T& value) {
-			wxMutexLocker lock(mutex_);
-			if (readOnly_) return;
-			if (capacityLimit_ > 0 && data_.size() >= capacityLimit_) {
+			wxMutexLocker lock(m_mutex);
+			if (m_readOnly) return;
+			if (m_capacityLimit > 0 && m_data.size() >= m_capacityLimit) {
 				throw std::overflow_error("Capacity limit reached");
 			}
 
 			recordHistory();
-			data_.push_back(value);
-			lastChangeTime_ = std::chrono::system_clock::now();
+			m_data.push_back(value);
+			m_lastChangeTime = std::chrono::system_clock::now();
 			notifyChange();
 		}
 
@@ -439,8 +439,8 @@ namespace bwx_sdk {
 		 * @return Optional containing the value if valid, otherwise std::nullopt.
 		 */
 		std::optional<T> get(size_t index) const {
-			wxMutexLocker lock(mutex_);
-			return (index < data_.size()) ? std::optional<T>(data_[index]) : std::nullopt;
+			wxMutexLocker lock(m_mutex);
+			return (index < m_data.size()) ? std::optional<T>(m_data[index]) : std::nullopt;
 		}
 
 		/**
@@ -450,18 +450,18 @@ namespace bwx_sdk {
 		 * @throws std::out_of_range If the index is invalid.
 		 */
 		T& at(size_t index) {
-			wxMutexLocker lock(mutex_);
-			if (index >= data_.size()) throw std::out_of_range("Index out of range");
-			return data_[index];
+			wxMutexLocker lock(m_mutex);
+			if (index >= m_data.size()) throw std::out_of_range("Index out of range");
+			return m_data[index];
 		}
 
 		/**
 		 * @brief Clears all elements from the vector.
 		 */
 		void clear() {
-			wxMutexLocker lock(mutex_);
+			wxMutexLocker lock(m_mutex);
 			recordHistory();
-			data_.clear();
+			m_data.clear();
 			notifyChange();
 		}
 
@@ -470,22 +470,22 @@ namespace bwx_sdk {
 		 * @return Number of elements in the vector.
 		 */
 		size_t size() const {
-			wxMutexLocker lock(mutex_);
-			return data_.size();
+			wxMutexLocker lock(m_mutex);
+			return m_data.size();
 		}
 
-		typename std::vector<T>::iterator begin() { return data_.begin(); }
-		typename std::vector<T>::iterator end() { return data_.end(); }
-		typename std::vector<T>::const_iterator cbegin() const { return data_.cbegin(); }
-		typename std::vector<T>::const_iterator cend() const { return data_.cend(); }
+		typename std::vector<T>::iterator begin() { return m_data.begin(); }
+		typename std::vector<T>::iterator end() { return m_data.end(); }
+		typename std::vector<T>::const_iterator cbegin() const { return m_data.cbegin(); }
+		typename std::vector<T>::const_iterator cend() const { return m_data.cend(); }
 
 		/**
 		 * @brief Enables or disables read-only mode.
 		 * @param readOnly True to enable, false to disable modifications.
 		 */
 		void setReadOnly(bool readOnly) {
-			wxMutexLocker lock(mutex_);
-			readOnly_ = readOnly;
+			wxMutexLocker lock(m_mutex);
+			m_readOnly = readOnly;
 		}
 
 		/**
@@ -493,8 +493,8 @@ namespace bwx_sdk {
 		 * @return True if read-only, otherwise false.
 		 */
 		bool isReadOnly() const noexcept {
-			wxMutexLocker lock(mutex_);
-			return readOnly_;
+			wxMutexLocker lock(m_mutex);
+			return m_readOnly;
 		}
 
 		/**
@@ -502,12 +502,12 @@ namespace bwx_sdk {
 		 * @return True if successful, false otherwise.
 		 */
 		bool undo() {
-			wxMutexLocker lock(mutex_);
-			if (undoHistory_.empty()) return false;
+			wxMutexLocker lock(m_mutex);
+			if (m_undoHistory.empty()) return false;
 
-			redoHistory_.push_front(data_);
-			data_ = undoHistory_.front();
-			undoHistory_.pop_front();
+			m_redoHistory.push_front(m_data);
+			m_data = m_undoHistory.front();
+			m_undoHistory.pop_front();
 			notifyChange();
 			return true;
 		}
@@ -517,12 +517,12 @@ namespace bwx_sdk {
 		 * @return True if successful, false otherwise.
 		 */
 		bool redo() {
-			wxMutexLocker lock(mutex_);
-			if (redoHistory_.empty()) return false;
+			wxMutexLocker lock(m_mutex);
+			if (m_redoHistory.empty()) return false;
 
-			undoHistory_.push_front(data_);
-			data_ = redoHistory_.front();
-			redoHistory_.pop_front();
+			m_undoHistory.push_front(m_data);
+			m_data = m_redoHistory.front();
+			m_redoHistory.pop_front();
 			notifyChange();
 			return true;
 		}
@@ -532,10 +532,10 @@ namespace bwx_sdk {
 		 * @param limit Number of history entries to retain.
 		 */
 		void setHistoryLimit(size_t limit) {
-			wxMutexLocker lock(mutex_);
-			historyLimit_ = limit;
-			trimHistory(undoHistory_);
-			trimHistory(redoHistory_);
+			wxMutexLocker lock(m_mutex);
+			m_historyLimit = limit;
+			trimHistory(m_undoHistory);
+			trimHistory(m_redoHistory);
 		}
 
 		/**
@@ -543,17 +543,17 @@ namespace bwx_sdk {
 		 * @return Configured history limit.
 		 */
 		size_t getHistoryLimit() const noexcept {
-			wxMutexLocker lock(mutex_);
-			return historyLimit_;
+			wxMutexLocker lock(m_mutex);
+			return m_historyLimit;
 		}
 
 		/**
 		 * @brief Clears the undo and redo history.
 		 */
 		void clearHistory() {
-			wxMutexLocker lock(mutex_);
-			undoHistory_.clear();
-			redoHistory_.clear();
+			wxMutexLocker lock(m_mutex);
+			m_undoHistory.clear();
+			m_redoHistory.clear();
 		}
 
 		/**
@@ -561,8 +561,8 @@ namespace bwx_sdk {
 		 * @param limit Maximum allowed number of elements.
 		 */
 		void setCapacityLimit(size_t limit) {
-			wxMutexLocker lock(mutex_);
-			capacityLimit_ = limit;
+			wxMutexLocker lock(m_mutex);
+			m_capacityLimit = limit;
 			trimToCapacity();
 		}
 
@@ -571,8 +571,8 @@ namespace bwx_sdk {
 		 * @return Configured capacity limit.
 		 */
 		size_t getCapacityLimit() const noexcept {
-			wxMutexLocker lock(mutex_);
-			return capacityLimit_;
+			wxMutexLocker lock(m_mutex);
+			return m_capacityLimit;
 		}
 
 		/**
@@ -580,8 +580,8 @@ namespace bwx_sdk {
 		 * @return Timestamp of the last change.
 		 */
 		Timestamp getLastChangeTime() const {
-			wxMutexLocker lock(mutex_);
-			return lastChangeTime_;
+			wxMutexLocker lock(m_mutex);
+			return m_lastChangeTime;
 		}
 
 		/**
@@ -589,8 +589,8 @@ namespace bwx_sdk {
 		 * @param callback Callback function to be invoked.
 		 */
 		void setOnChangeCallback(ChangeCallback callback) {
-			wxMutexLocker lock(mutex_);
-			onChange_ = std::move(callback);
+			wxMutexLocker lock(m_mutex);
+			m_onChange = std::move(callback);
 		}
 
 		/**
@@ -598,8 +598,8 @@ namespace bwx_sdk {
 		 * @param handler Pointer to the event handler.
 		 */
 		void setEventHandler(wxEvtHandler* handler) {
-			wxMutexLocker lock(mutex_);
-			eventHandler_ = handler;
+			wxMutexLocker lock(m_mutex);
+			m_eventHandler = handler;
 		}
 
 		/**
@@ -608,14 +608,14 @@ namespace bwx_sdk {
 		 * @return Pointer to the C-string or nullptr if invalid or unsupported.
 		 */
 		const char* AsCStr(size_t index = 0) const {
-			wxMutexLocker lock(mutex_);
-			if (index >= data_.size()) return nullptr;
+			wxMutexLocker lock(m_mutex);
+			if (index >= m_data.size()) return nullptr;
 
 			if constexpr (std::is_same_v<T, std::string>) {
-				return data_[index].c_str();
+				return m_data[index].c_str();
 			}
 			else if constexpr (std::is_same_v<T, wxString>) {
-				return data_[index].mb_str().data();
+				return m_data[index].mb_str().data();
 			}
 			else {
 				static_assert(std::is_same_v<T, std::string> || std::is_same_v<T, wxString>,
@@ -627,67 +627,67 @@ namespace bwx_sdk {
 	private:
 		/** @brief Notifies registered listeners via callbacks and wxWidgets events. */
 		void notifyChange() {
-			if (onChange_) onChange_();
-			if (eventHandler_) {
-				wxCommandEvent evt(EVT_PROPERTY_VECTOR_CHANGED);
-				eventHandler_->AddPendingEvent(evt);
+			if (m_onChange) m_onChange();
+			if (m_eventHandler) {
+				wxCommandEvent evt(EVT_BWXPROPERTY_VECTOR_CHANGED);
+				m_eventHandler->AddPendingEvent(evt);
 			}
 		}
 
 		/** @brief Records the current vector state into the undo history. */
 		void recordHistory() {
-			if (historyLimit_ == 0) return;
-			undoHistory_.push_front(data_);
-			trimHistory(undoHistory_);
-			redoHistory_.clear();
+			if (m_historyLimit == 0) return;
+			m_undoHistory.push_front(m_data);
+			trimHistory(m_undoHistory);
+			m_redoHistory.clear();
 		}
 
 		/** @brief Trims the history deque to comply with the history limit. */
 		void trimHistory(std::deque<std::vector<T>>& history) {
-			while (history.size() > historyLimit_) {
+			while (history.size() > m_historyLimit) {
 				history.pop_back();
 			}
 		}
 
 		/** @brief Ensures the vector respects the capacity limit by removing oldest elements. */
 		void trimToCapacity() {
-			while (capacityLimit_ > 0 && data_.size() > capacityLimit_) {
-				data_.erase(data_.begin());
+			while (m_capacityLimit > 0 && m_data.size() > m_capacityLimit) {
+				m_data.erase(m_data.begin());
 			}
 		}
 
-		std::vector<T> data_{};                          ///< Internal vector storing elements.
-		size_t historyLimit_ = 0;                        ///< Undo/redo history limit.
-		size_t capacityLimit_ = 0;                       ///< Maximum allowed vector capacity.
-		std::deque<std::vector<T>> undoHistory_;        ///< Undo history states.
-		std::deque<std::vector<T>> redoHistory_;        ///< Redo history states.
-		wxEvtHandler* eventHandler_ = nullptr;           ///< wxWidgets event handler.
-		ChangeCallback onChange_ = nullptr;              ///< Callback for vector changes.
-		Timestamp lastChangeTime_;                       ///< Last modification timestamp.
-		bool readOnly_ = false;                          ///< Read-only mode flag.
-		mutable wxMutex mutex_;                          ///< Mutex for thread-safe access.
+		std::vector<T> m_data{};                          ///< Internal vector storing elements.
+		size_t m_historyLimit = 0;                        ///< Undo/redo history limit.
+		size_t m_capacityLimit = 0;                       ///< Maximum allowed vector capacity.
+		std::deque<std::vector<T>> m_undoHistory;        ///< Undo history states.
+		std::deque<std::vector<T>> m_redoHistory;        ///< Redo history states.
+		wxEvtHandler* m_eventHandler = nullptr;           ///< wxWidgets event handler.
+		ChangeCallback m_onChange = nullptr;              ///< Callback for vector changes.
+		Timestamp m_lastChangeTime;                       ///< Last modification timestamp.
+		bool m_readOnly = false;                          ///< Read-only mode flag.
+		mutable wxMutex m_mutex;                          ///< Mutex for thread-safe access.
 	};
 
 	//-----------------------------------------------------------------------------------
 
 	/**
- * @brief Template class representing a map-based property with advanced features.
- *
- * This class manages a map of key-value pairs with the following functionalities:
- * - Insertion, retrieval, and removal of elements with thread safety.
- * - Undo/redo support with configurable history limits.
- * - Read-only mode to prevent modifications.
- * - wxWidgets event notifications and callback handling on data changes.
- * - Timestamp tracking of the last modification.
- * - Iterators for standard container traversal.
- * - Optional value retrieval for safe access.
- * - Capacity management to limit the number of elements.
- * - Data filtering and sorting capabilities.
- * - Conversion of values to C-style strings when applicable.
- *
- * @tparam K Type of the keys in the map.
- * @tparam V Type of the values in the map.
- */
+	 * @brief Template class representing a map-based property with advanced features.
+	 *
+	 * This class manages a map of key-value pairs with the following functionalities:
+	 * - Insertion, retrieval, and removal of elements with thread safety.
+	 * - Undo/redo support with configurable history limits.
+	 * - Read-only mode to prevent modifications.
+	 * - wxWidgets event notifications and callback handling on data changes.
+	 * - Timestamp tracking of the last modification.
+	 * - Iterators for standard container traversal.
+	 * - Optional value retrieval for safe access.
+	 * - Capacity management to limit the number of elements.
+	 * - Data filtering and sorting capabilities.
+	 * - Conversion of values to C-style strings when applicable.
+	 *
+	 * @tparam K Type of the keys in the map.
+	 * @tparam V Type of the values in the map.
+	 */
 	template <typename K, typename V>
 	class bwxPropertyMap {
 	public:
@@ -705,11 +705,11 @@ namespace bwx_sdk {
 			ChangeCallback callback = nullptr,
 			size_t historyLimit = 0,
 			size_t capacityLimit = 0)
-			: eventHandler_(handler),
-			onChange_(std::move(callback)),
-			historyLimit_(historyLimit),
-			capacityLimit_(capacityLimit),
-			lastChangeTime_(std::chrono::system_clock::now()) {}
+			: m_eventHandler(handler),
+			m_onChange(std::move(callback)),
+			m_historyLimit(historyLimit),
+			m_capacityLimit(capacityLimit),
+			m_lastChangeTime(std::chrono::system_clock::now()) {}
 
 		/**
 		 * @brief Inserts or updates a value associated with a key.
@@ -718,16 +718,16 @@ namespace bwx_sdk {
 		 * @throws std::overflow_error If the capacity limit is reached.
 		 */
 		void set(const K& key, const V& value) {
-			wxMutexLocker lock(mutex_);
-			if (readOnly_) return;
+			wxMutexLocker lock(m_mutex);
+			if (m_readOnly) return;
 
-			if (capacityLimit_ > 0 && data_.size() >= capacityLimit_ && data_.find(key) == data_.end()) {
+			if (m_capacityLimit > 0 && m_data.size() >= m_capacityLimit && m_data.find(key) == m_data.end()) {
 				throw std::overflow_error("Capacity limit reached");
 			}
 
 			recordHistory();
-			data_[key] = value;
-			lastChangeTime_ = std::chrono::system_clock::now();
+			m_data[key] = value;
+			m_lastChangeTime = std::chrono::system_clock::now();
 			notifyChange();
 		}
 
@@ -737,9 +737,10 @@ namespace bwx_sdk {
 		 * @return Optional containing the value if found, otherwise std::nullopt.
 		 */
 		std::optional<V> get(const K& key) const {
-			wxMutexLocker lock(mutex_);
-			auto it = data_.find(key);
-			return (it != data_.end()) ? std::optional<V>(it->second) : std::nullopt;
+			wxMutexLocker lock(m_mutex);
+			auto it = m_data.find(key);
+			if (it != m_data.end()) return std::make_optional(it->second);
+			return std::nullopt;
 		}
 
 		/**
@@ -749,9 +750,9 @@ namespace bwx_sdk {
 		 * @throws std::out_of_range If the key does not exist.
 		 */
 		const V& getRef(const K& key) const {
-			wxMutexLocker lock(mutex_);
-			auto it = data_.find(key);
-			if (it == data_.end()) throw std::out_of_range("Key not found");
+			wxMutexLocker lock(m_mutex);
+			auto it = m_data.find(key);
+			if (it == m_data.end()) throw std::out_of_range("Key not found");
 			return it->second;
 		}
 
@@ -759,9 +760,9 @@ namespace bwx_sdk {
 		 * @brief Clears all elements from the map.
 		 */
 		void clear() {
-			wxMutexLocker lock(mutex_);
+			wxMutexLocker lock(m_mutex);
 			recordHistory();
-			data_.clear();
+			m_data.clear();
 			notifyChange();
 		}
 
@@ -770,22 +771,22 @@ namespace bwx_sdk {
 		 * @return Current size of the map.
 		 */
 		size_t size() const {
-			wxMutexLocker lock(mutex_);
-			return data_.size();
+			wxMutexLocker lock(m_mutex);
+			return m_data.size();
 		}
 
-		typename std::map<K, V>::iterator begin() { return data_.begin(); }
-		typename std::map<K, V>::iterator end() { return data_.end(); }
-		typename std::map<K, V>::const_iterator cbegin() const { return data_.cbegin(); }
-		typename std::map<K, V>::const_iterator cend() const { return data_.cend(); }
+		typename std::map<K, V>::iterator begin() { return m_data.begin(); }
+		typename std::map<K, V>::iterator end() { return m_data.end(); }
+		typename std::map<K, V>::const_iterator cbegin() const { return m_data.cbegin(); }
+		typename std::map<K, V>::const_iterator cend() const { return m_data.cend(); }
 
 		/**
 		 * @brief Enables or disables read-only mode.
 		 * @param readOnly True to enable read-only mode, false to disable it.
 		 */
 		void setReadOnly(bool readOnly) {
-			wxMutexLocker lock(mutex_);
-			readOnly_ = readOnly;
+			wxMutexLocker lock(m_mutex);
+			m_readOnly = readOnly;
 		}
 
 		/**
@@ -793,8 +794,8 @@ namespace bwx_sdk {
 		 * @return True if read-only mode is enabled, otherwise false.
 		 */
 		bool isReadOnly() const noexcept {
-			wxMutexLocker lock(mutex_);
-			return readOnly_;
+			wxMutexLocker lock(m_mutex);
+			return m_readOnly;
 		}
 
 		/**
@@ -802,12 +803,12 @@ namespace bwx_sdk {
 		 * @return True if undo was successful, false otherwise.
 		 */
 		bool undo() {
-			wxMutexLocker lock(mutex_);
-			if (undoHistory_.empty()) return false;
+			wxMutexLocker lock(m_mutex);
+			if (m_undoHistory.empty()) return false;
 
-			redoHistory_.push_front(data_);
-			data_ = undoHistory_.front();
-			undoHistory_.pop_front();
+			m_redoHistory.push_front(m_data);
+			m_data = m_undoHistory.front();
+			m_undoHistory.pop_front();
 			notifyChange();
 			return true;
 		}
@@ -817,12 +818,12 @@ namespace bwx_sdk {
 		 * @return True if redo was successful, false otherwise.
 		 */
 		bool redo() {
-			wxMutexLocker lock(mutex_);
-			if (redoHistory_.empty()) return false;
+			wxMutexLocker lock(m_mutex);
+			if (m_redoHistory.empty()) return false;
 
-			undoHistory_.push_front(data_);
-			data_ = redoHistory_.front();
-			redoHistory_.pop_front();
+			m_undoHistory.push_front(m_data);
+			m_data = m_redoHistory.front();
+			m_redoHistory.pop_front();
 			notifyChange();
 			return true;
 		}
@@ -832,10 +833,10 @@ namespace bwx_sdk {
 		 * @param limit Number of history entries to retain.
 		 */
 		void setHistoryLimit(size_t limit) {
-			wxMutexLocker lock(mutex_);
-			historyLimit_ = limit;
-			trimHistory(undoHistory_);
-			trimHistory(redoHistory_);
+			wxMutexLocker lock(m_mutex);
+			m_historyLimit = limit;
+			trimHistory(m_undoHistory);
+			trimHistory(m_redoHistory);
 		}
 
 		/**
@@ -843,17 +844,17 @@ namespace bwx_sdk {
 		 * @return History limit value.
 		 */
 		size_t getHistoryLimit() const noexcept {
-			wxMutexLocker lock(mutex_);
-			return historyLimit_;
+			wxMutexLocker lock(m_mutex);
+			return m_historyLimit;
 		}
 
 		/**
 		 * @brief Clears the undo and redo histories.
 		 */
 		void clearHistory() {
-			wxMutexLocker lock(mutex_);
-			undoHistory_.clear();
-			redoHistory_.clear();
+			wxMutexLocker lock(m_mutex);
+			m_undoHistory.clear();
+			m_redoHistory.clear();
 		}
 
 		/**
@@ -861,8 +862,8 @@ namespace bwx_sdk {
 		 * @param limit Maximum number of elements allowed.
 		 */
 		void setCapacityLimit(size_t limit) {
-			wxMutexLocker lock(mutex_);
-			capacityLimit_ = limit;
+			wxMutexLocker lock(m_mutex);
+			m_capacityLimit = limit;
 			trimToCapacity();
 		}
 
@@ -871,8 +872,8 @@ namespace bwx_sdk {
 		 * @return Capacity limit value.
 		 */
 		size_t getCapacityLimit() const noexcept {
-			wxMutexLocker lock(mutex_);
-			return capacityLimit_;
+			wxMutexLocker lock(m_mutex);
+			return m_capacityLimit;
 		}
 
 		/**
@@ -880,8 +881,8 @@ namespace bwx_sdk {
 		 * @return Timestamp of the most recent change.
 		 */
 		Timestamp getLastChangeTime() const {
-			wxMutexLocker lock(mutex_);
-			return lastChangeTime_;
+			wxMutexLocker lock(m_mutex);
+			return m_lastChangeTime;
 		}
 
 		/**
@@ -889,8 +890,8 @@ namespace bwx_sdk {
 		 * @param callback Callback function to be triggered.
 		 */
 		void setOnChangeCallback(ChangeCallback callback) {
-			wxMutexLocker lock(mutex_);
-			onChange_ = std::move(callback);
+			wxMutexLocker lock(m_mutex);
+			m_onChange = std::move(callback);
 		}
 
 		/**
@@ -898,8 +899,8 @@ namespace bwx_sdk {
 		 * @param handler Pointer to the wxWidgets event handler.
 		 */
 		void setEventHandler(wxEvtHandler* handler) {
-			wxMutexLocker lock(mutex_);
-			eventHandler_ = handler;
+			wxMutexLocker lock(m_mutex);
+			m_eventHandler = handler;
 		}
 
 		/**
@@ -908,9 +909,9 @@ namespace bwx_sdk {
 		 * @return Pointer to the C-string or nullptr if unsupported or not found.
 		 */
 		const char* AsCStr(const K& key) const {
-			wxMutexLocker lock(mutex_);
-			auto it = data_.find(key);
-			if (it == data_.end()) return nullptr;
+			wxMutexLocker lock(m_mutex);
+			auto it = m_data.find(key);
+			if (it == m_data.end()) return nullptr;
 
 			if constexpr (std::is_same_v<V, std::string>) {
 				return it->second.c_str();
@@ -919,54 +920,89 @@ namespace bwx_sdk {
 				return it->second.mb_str().data();
 			}
 			else {
-				static_assert(std::is_same_v<V, std::string> || std::is_same_v<V, wxString>,
-					"AsCStr() is only supported for std::string or wxString.");
-				return nullptr;
+				return nullptr; // Zapobiega b³êdowi kompilacji dla innych typów
 			}
+		}
+
+		/**
+		 * @brief Retrieves a reference to the value associated with a key.
+		 * If the key does not exist, a default-constructed value is inserted.
+		 * @param key Key whose associated value is to be retrieved.
+		 * @return Reference to the associated value.
+		 */
+		V& operator[](const K& key) {
+			wxMutexLocker lock(m_mutex);
+			if (m_readOnly) {
+				throw std::runtime_error("Modification not allowed in read-only mode");
+			}
+
+			recordHistory();
+			auto it = m_data.find(key);
+			if (it == m_data.end()) {
+				m_data[key] = V(); // Wymusza inicjalizacjê, jeœli brak domyœlnego konstruktora
+			}
+			m_lastChangeTime = std::chrono::system_clock::now();
+			notifyChange();
+			return m_data[key];
+		}
+
+		/**
+		 * @brief Retrieves a constant reference to the value associated with a key.
+		 * @param key Key whose associated value is to be retrieved.
+		 * @return Constant reference to the associated value.
+		 * @throws std::out_of_range If the key does not exist.
+		 */
+		const V& operator[](const K& key) const {
+			wxMutexLocker lock(m_mutex);
+			auto it = m_data.find(key);
+			if (it == m_data.end()) {
+				throw std::out_of_range("Key not found");
+			}
+			return it->second;
 		}
 
 	private:
 		/** @brief Notifies listeners through callbacks and wxWidgets events. */
 		void notifyChange() {
-			if (onChange_) onChange_();
-			if (eventHandler_) {
-				wxCommandEvent evt(EVT_PROPERTY_MAP_CHANGED);
-				eventHandler_->AddPendingEvent(evt);
+			if (m_onChange) m_onChange();
+			if (m_eventHandler) {
+				wxCommandEvent evt(EVT_BWXPROPERTY_MAP_CHANGED);
+				m_eventHandler->AddPendingEvent(evt);
 			}
 		}
 
 		/** @brief Records the current state into the undo history. */
 		void recordHistory() {
-			if (historyLimit_ == 0) return;
-			undoHistory_.push_front(data_);
-			trimHistory(undoHistory_);
-			redoHistory_.clear();
+			if (m_historyLimit == 0) return;
+			m_undoHistory.push_front(m_data);
+			trimHistory(m_undoHistory);
+			m_redoHistory.clear();
 		}
 
 		/** @brief Trims the history to respect the configured limit. */
 		void trimHistory(std::deque<std::map<K, V>>& history) {
-			while (history.size() > historyLimit_) {
+			while (history.size() > m_historyLimit) {
 				history.pop_back();
 			}
 		}
 
 		/** @brief Ensures the map respects the capacity limit by removing oldest entries. */
 		void trimToCapacity() {
-			while (capacityLimit_ > 0 && data_.size() > capacityLimit_) {
-				data_.erase(data_.begin());
+			while (m_capacityLimit > 0 && m_data.size() > m_capacityLimit) {
+				m_data.erase(m_data.begin());
 			}
 		}
 
-		std::map<K, V> data_{};                          ///< Internal map storing key-value pairs.
-		size_t historyLimit_ = 0;                        ///< Undo/redo history limit.
-		size_t capacityLimit_ = 0;                       ///< Maximum allowed number of elements.
-		std::deque<std::map<K, V>> undoHistory_;         ///< Undo history states.
-		std::deque<std::map<K, V>> redoHistory_;         ///< Redo history states.
-		wxEvtHandler* eventHandler_ = nullptr;           ///< wxWidgets event handler.
-		ChangeCallback onChange_ = nullptr;              ///< Callback function for changes.
-		Timestamp lastChangeTime_;                       ///< Timestamp of the last change.
-		bool readOnly_ = false;                          ///< Read-only mode flag.
-		mutable wxMutex mutex_;                          ///< Mutex for thread-safe access.
+		std::map<K, V> m_data{};                          ///< Internal map storing key-value pairs.
+		size_t m_historyLimit = 0;                        ///< Undo/redo history limit.
+		size_t m_capacityLimit = 0;                       ///< Maximum allowed number of elements.
+		std::deque<std::map<K, V>> m_undoHistory;         ///< Undo history states.
+		std::deque<std::map<K, V>> m_redoHistory;         ///< Redo history states.
+		wxEvtHandler* m_eventHandler = nullptr;           ///< wxWidgets event handler.
+		ChangeCallback m_onChange = nullptr;              ///< Callback function for changes.
+		Timestamp m_lastChangeTime;                       ///< Timestamp of the last change.
+		bool m_readOnly = false;                          ///< Read-only mode flag.
+		mutable wxMutex m_mutex;                          ///< Mutex for thread-safe access.
 	};
 
 }

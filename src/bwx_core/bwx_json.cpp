@@ -31,15 +31,15 @@ namespace bwx_sdk {
     {
         if (defaultValue.has_value())
         {
-            data["default"] = defaultValue;
+            m_data["default"] = defaultValue;
         }
     }
     
     bwxJSON::bwxJSON(const bwxJSON& other)
-    : data(other.data), lastError(other.lastError) {}
+    : m_data(other.m_data), m_lastError(other.m_lastError) {}
     
     bwxJSON::bwxJSON(bwxJSON&& other) noexcept
-    : data(std::move(other.data)), lastError(std::move(other.lastError)) {}
+    : m_data(std::move(other.m_data)), m_lastError(std::move(other.m_lastError)) {}
 
     bool bwxJSON::LoadFromFile(const wxString& filename)
     {
@@ -90,8 +90,8 @@ namespace bwx_sdk {
     bool bwxJSON::ParseFromString(const wxString& jsonText)
     {
         size_t pos = 0;
-        data.clear();
-        lastError.Clear();
+        m_data.clear();
+        m_lastError.Clear();
 
         pos = SkipWhitespace(jsonText, pos);
 
@@ -102,7 +102,7 @@ namespace bwx_sdk {
             return true;
         }
 
-        lastError = wxString::Format(wxT("Parse JSON error at %zu: wrong structure"), pos);
+        m_lastError = wxString::Format(wxT("Parse JSON error at %zu: wrong structure"), pos);
         return false;
     }
 
@@ -110,7 +110,7 @@ namespace bwx_sdk {
     {
         wxString jsonText = "{";
 
-        for (const auto& [key, value] : data)
+        for (const auto& [key, value] : m_data)
         {
             jsonText += "\"" + key + "\":" + JsonValueToString(value) + ",";
         }
@@ -129,53 +129,53 @@ namespace bwx_sdk {
 
     bool bwxJSON::HasKey(const wxString& key) const
     {
-        return data.find(key) != data.end();
+        return m_data.find(key) != m_data.end();
     }
 
     void bwxJSON::RemoveKey(const wxString& key)
     {
-        data.erase(key);
+        m_data.erase(key);
     }
 
     std::vector<wxString> bwxJSON::GetKeys() const
     {
         std::vector<wxString> keys;
-        for (const auto& [key, _] : data)
+        for (const auto& [key, _] : m_data)
             keys.push_back(key);
         return keys;
     }
 
     void bwxJSON::SetValue(const wxString& key, const bwxJsonValue& value)
     {
-        data[key] = value;
+        m_data[key] = value;
     }
 
     bwxJsonValue bwxJSON::GetValue(const wxString& key, const bwxJsonValue& defaultValue) const
     {
-        auto it = data.find(key);
-        return (it != data.end()) ? it->second : defaultValue;
+        auto it = m_data.find(key);
+        return (it != m_data.end()) ? it->second : defaultValue;
     }
 
     void bwxJSON::AppendToArray(const wxString& key, const bwxJsonValue& value)
     {
-        if (!data[key].has_value())
+        if (!m_data[key].has_value())
         {
-            data[key].emplace(std::vector<bwxJsonValueHelper>());
+            m_data[key].emplace(std::vector<bwxJsonValueHelper>());
         }
 
-        if (std::holds_alternative<std::vector<bwxJsonValueHelper>>(*data[key]))
+        if (std::holds_alternative<std::vector<bwxJsonValueHelper>>(*m_data[key]))
         {
-            std::get<std::vector<bwxJsonValueHelper>>(*data[key]).emplace_back(bwxJsonValueHelper{ value });
+            std::get<std::vector<bwxJsonValueHelper>>(*m_data[key]).emplace_back(bwxJsonValueHelper{ value });
         }
     }
 
     std::vector<bwxJsonValue> bwxJSON::GetArray(const wxString& key) const
     {
-        if (!HasKey(key) || !data.at(key).has_value() || !std::holds_alternative<std::vector<bwxJsonValueHelper>>(*data.at(key)))
+        if (!HasKey(key) || !m_data.at(key).has_value() || !std::holds_alternative<std::vector<bwxJsonValueHelper>>(*m_data.at(key)))
             return {};
 
         std::vector<bwxJsonValue> result;
-        for (const auto& val : std::get<std::vector<bwxJsonValueHelper>>(*data.at(key)))
+        for (const auto& val : std::get<std::vector<bwxJsonValueHelper>>(*m_data.at(key)))
         {
             result.push_back(val.value);
         }
@@ -184,10 +184,10 @@ namespace bwx_sdk {
 
     void bwxJSON::RemoveFromArray(const wxString& key, size_t index)
     {
-        if (!HasKey(key) || !std::holds_alternative<std::vector<bwxJsonValueHelper>>(*data[key]))
+        if (!HasKey(key) || !std::holds_alternative<std::vector<bwxJsonValueHelper>>(*m_data[key]))
             return;
 
-        auto& arr = std::get<std::vector<bwxJsonValueHelper>>(*data[key]);
+        auto& arr = std::get<std::vector<bwxJsonValueHelper>>(*m_data[key]);
         if (index < arr.size())
             arr.erase(arr.begin() + index);
     }
@@ -197,7 +197,7 @@ namespace bwx_sdk {
         if (HasKey(key))
             return GetValue(key);
 
-        for (const auto& [_, v] : data)
+        for (const auto& [_, v] : m_data)
         {
             if (v.has_value() && std::holds_alternative<std::shared_ptr<bwxJSON>>(*v))
             {
@@ -213,7 +213,7 @@ namespace bwx_sdk {
     {
         std::vector<std::pair<wxString, bwxJsonValue>> sortedData;
 
-        for (const auto& [key, value] : data)
+        for (const auto& [key, value] : m_data)
         {
             sortedData.emplace_back(key, value);
         }
@@ -221,16 +221,16 @@ namespace bwx_sdk {
         std::sort(sortedData.begin(), sortedData.end(),
             [](const auto& a, const auto& b) { return a.first < b.first; });
 
-        data.clear();
+        m_data.clear();
         for (const auto& [key, value] : sortedData)
         {
-            data.emplace(key, value);
+            m_data.emplace(key, value);
         }
     }
 
     bool bwxJSON::operator==(const bwxJSON& other) const
     {
-        return data == other.data;
+        return m_data == other.m_data;
     }
 
     bool bwxJSON::operator!=(const bwxJSON& other) const
@@ -240,13 +240,13 @@ namespace bwx_sdk {
 
     bwxJsonValue& bwxJSON::operator[](const wxString& key)
     {
-        return data[key];
+        return m_data[key];
     }
 
     const bwxJsonValue& bwxJSON::operator[](const wxString& key) const
     {
-        auto it = data.find(key);
-        if (it != data.end())
+        auto it = m_data.find(key);
+        if (it != m_data.end())
             return it->second;
 
         static bwxJsonValue emptyValue = std::nullopt;
@@ -255,18 +255,18 @@ namespace bwx_sdk {
 
     bool bwxJSON::IsValid() const
     {
-        return !data.empty();
+        return !m_data.empty();
     }
 
     size_t bwxJSON::GetSize() const
 	{
-		return data.size();
+		return m_data.size();
 	}
 
     wxString bwxJSON::GetKey(size_t index) const
 	{
-		if (index >= data.size()) return wxString();
-		auto it = data.begin();
+		if (index >= m_data.size()) return wxString();
+		auto it = m_data.begin();
 		std::advance(it, index);
 		return it->first;
 	}
@@ -404,7 +404,7 @@ namespace bwx_sdk {
         {
             pos = SkipWhitespace(text, pos);
             if (pos >= text.Length()) {
-                lastError = wxString::Format("Unexpected end of JSON at position %zu - missing closing `}`", pos);
+                m_lastError = wxString::Format("Unexpected end of JSON at position %zu - missing closing `}`", pos);
                 return std::nullopt;
             }
 
@@ -412,7 +412,7 @@ namespace bwx_sdk {
             pos = SkipWhitespace(text, pos);
 
             if (text[pos] != ':') {
-                lastError = wxString::Format("JSON syntax error at position %zu: Expected `:` after key", pos);
+                m_lastError = wxString::Format("JSON syntax error at position %zu: Expected `:` after key", pos);
                 return std::nullopt;
             }
             pos++;
@@ -425,7 +425,7 @@ namespace bwx_sdk {
         }
 
         if (pos >= text.Length()) {
-            lastError = wxString::Format("Unexpected end of JSON at position %zu - missing closing `}`", pos);
+            m_lastError = wxString::Format("Unexpected end of JSON at position %zu - missing closing `}`", pos);
             return std::nullopt;
         }
 
@@ -442,7 +442,7 @@ namespace bwx_sdk {
         {
             pos = SkipWhitespace(text, pos);
             if (pos >= text.Length()) {
-                lastError = wxString::Format("Unexpected end of JSON at position %zu - missing closing `]`", pos);
+                m_lastError = wxString::Format("Unexpected end of JSON at position %zu - missing closing `]`", pos);
                 return std::nullopt;
             }
 
@@ -452,7 +452,7 @@ namespace bwx_sdk {
         }
 
         if (pos >= text.Length()) {
-            lastError = wxString::Format("Unexpected end of JSON at position %zu - missing closing `]`", pos);
+            m_lastError = wxString::Format("Unexpected end of JSON at position %zu - missing closing `]`", pos);
             return std::nullopt;
         }
 
@@ -515,10 +515,10 @@ namespace bwx_sdk {
 
         jsonText += "{\n";
         currentIndent += indentLevel;
-        size_t count = data.size();
+        size_t count = m_data.size();
         size_t index = 0;
 
-        for (const auto& [key, value] : data) {
+        for (const auto& [key, value] : m_data) {
             addIndent();
             jsonText += "\"" + key + "\": ";
             serialize(value, 1);
@@ -631,22 +631,22 @@ namespace bwx_sdk {
     // Iterators
     bwxJSON::iterator bwxJSON::begin()
     {
-        return data.begin();
+        return m_data.begin();
     }
 
     bwxJSON::iterator bwxJSON::end()
     {
-        return data.end();
+        return m_data.end();
     }
 
     bwxJSON::const_iterator bwxJSON::begin() const
     {
-        return data.begin();
+        return m_data.begin();
     }
 
     bwxJSON::const_iterator bwxJSON::end() const
     {
-        return data.end();
+        return m_data.end();
     }
 
     //
@@ -661,7 +661,7 @@ namespace bwx_sdk {
     std::shared_ptr<bwxJSON> bwxJSON::Clone() const
     {
         auto copy = std::make_shared<bwxJSON>();
-		copy->data = data; // Copy whole map of values
+		copy->m_data = m_data; // Copy whole map of values
         return copy;
     }
 
@@ -669,7 +669,7 @@ namespace bwx_sdk {
 	{
 		if (this != &other)
 		{
-			data = other.data;
+			m_data = other.m_data;
 		}
 		return *this;
 	}
@@ -677,16 +677,16 @@ namespace bwx_sdk {
     //
     void bwxJSON::Merge(const bwxJSON& other, bool overwriteExisting)
     {
-        for (const auto& [key, value] : other.data)
+        for (const auto& [key, value] : other.m_data)
         {
             if (!HasKey(key) || overwriteExisting)
             {
-                data[key] = value;
+                m_data[key] = value;
             }
-            else if (std::holds_alternative<std::shared_ptr<bwxJSON>>(*data[key]) &&
+            else if (std::holds_alternative<std::shared_ptr<bwxJSON>>(*m_data[key]) &&
                 std::holds_alternative<std::shared_ptr<bwxJSON>>(*value))
             {
-                std::get<std::shared_ptr<bwxJSON>>(*data[key])->Merge(*std::get<std::shared_ptr<bwxJSON>>(*value), overwriteExisting);
+                std::get<std::shared_ptr<bwxJSON>>(*m_data[key])->Merge(*std::get<std::shared_ptr<bwxJSON>>(*value), overwriteExisting);
             }
         }
     }
@@ -696,7 +696,7 @@ namespace bwx_sdk {
         bwxJSON diffResult;
 
         // Checking keys present in `this` but not in `other`
-        for (const auto& [key, value] : data)
+        for (const auto& [key, value] : m_data)
         {
             if (!other.HasKey(key))
             {
@@ -709,7 +709,7 @@ namespace bwx_sdk {
         }
 
         // Checking keys present in `other` but not in `this`
-        for (const auto& [key, value] : other.data)
+        for (const auto& [key, value] : other.m_data)
         {
             if (!HasKey(key))
             {
@@ -722,15 +722,15 @@ namespace bwx_sdk {
 
     void bwxJSON::Patch(const bwxJSON& patchData)
     {
-        for (const auto& [key, value] : patchData.data)
+        for (const auto& [key, value] : patchData.m_data)
         {
             if (value.has_value())
             {
-				data[key] = value; // Update or add new value
+				m_data[key] = value; // Update or add new value
             }
             else
             {
-				data.erase(key); // Remove value
+				m_data.erase(key); // Remove value
             }
         }
     }
@@ -742,7 +742,7 @@ namespace bwx_sdk {
         std::function<void(const wxString&, const bwxJSON&, bwxJSON&)> flattenHelper =
             [&](const wxString& prefix, const bwxJSON& obj, bwxJSON& result)
             {
-                for (const auto& [key, value] : obj.data)
+                for (const auto& [key, value] : obj.m_data)
                 {
                     wxString newKey = prefix.IsEmpty() ? key : prefix + separator + key;
 
@@ -765,7 +765,7 @@ namespace bwx_sdk {
     {
         bwxJSON unflattenedJson;
 
-        for (const auto& [flatKey, value] : flatJson.data)
+        for (const auto& [flatKey, value] : flatJson.m_data)
         {
             wxString key = flatKey;
             bwxJSON* current = &unflattenedJson;
@@ -798,7 +798,7 @@ namespace bwx_sdk {
         std::function<void(const wxString&, const bwxJSON&, std::vector<wxString>&)> searchHelper =
             [&](const wxString& prefix, const bwxJSON& obj, std::vector<wxString>& results)
             {
-                for (const auto& [currentKey, value] : obj.data)
+                for (const auto& [currentKey, value] : obj.m_data)
                 {
                     wxString newPath = prefix.IsEmpty() ? currentKey : prefix + "." + currentKey;
 
@@ -825,7 +825,7 @@ namespace bwx_sdk {
         std::function<void(const wxString&, const bwxJSON&, std::vector<wxString>&)> searchHelper =
             [&](const wxString& prefix, const bwxJSON& obj, std::vector<wxString>& results)
             {
-                for (const auto& [currentKey, value] : obj.data)
+                for (const auto& [currentKey, value] : obj.m_data)
                 {
                     wxString newPath = prefix.IsEmpty() ? currentKey : prefix + "." + currentKey;
 
@@ -849,7 +849,7 @@ namespace bwx_sdk {
     {
         bwxJSON filteredJson;
 
-        for (const auto& [key, value] : data)
+        for (const auto& [key, value] : m_data)
         {
             if (predicate(key, value))
             {
@@ -858,7 +858,7 @@ namespace bwx_sdk {
             else if (value.has_value() && std::holds_alternative<std::shared_ptr<bwxJSON>>(*value))
             {
                 auto nested = std::get<std::shared_ptr<bwxJSON>>(*value)->Filter(predicate);
-                if (!nested.data.empty())
+                if (!nested.m_data.empty())
                 {
                     filteredJson.SetValue(key, std::make_shared<bwxJSON>(nested));
                 }
@@ -872,7 +872,7 @@ namespace bwx_sdk {
     {
         std::unordered_map<wxString, bwxJsonValue> newData;
 
-        for (auto& [key, value] : data)
+        for (auto& [key, value] : m_data)
         {
             wxString newKey = key;
             bwxJsonValue newValue = value;
@@ -887,14 +887,14 @@ namespace bwx_sdk {
             newData[newKey] = newValue;
         }
 
-        data = std::move(newData);
+        m_data = std::move(newData);
     }
 
     bwxJSON bwxJSON::Map(std::function<bwxJsonValue(const wxString&, const bwxJsonValue&)> transform) const
     {
         bwxJSON mappedJson;
 
-        for (const auto& [key, value] : data)
+        for (const auto& [key, value] : m_data)
         {
             if (value.has_value() && std::holds_alternative<std::shared_ptr<bwxJSON>>(*value))
             {

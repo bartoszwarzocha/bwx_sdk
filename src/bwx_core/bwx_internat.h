@@ -14,6 +14,7 @@
 #include <wx/intl.h>
 #include <wx/filename.h>
 #include <wx/log.h>
+
 #include <algorithm>
 #include <vector>
 
@@ -40,7 +41,7 @@ namespace bwx_sdk {
 		 * Initializes the language with default values.
 		 */
         bwxLanguage() noexcept
-            : wx_lang_code(wxLANGUAGE_DEFAULT), short_name(wxEmptyString), uname(wxEmptyString), name("System default") {}
+            : m_wxLangCode(wxLANGUAGE_DEFAULT), m_shortName(wxEmptyString), m_uname(wxEmptyString), m_name("System default") {}
 
 		/**
 		 * @brief Constructs a bwxLanguage object with specified parameters.
@@ -51,55 +52,55 @@ namespace bwx_sdk {
 		 * @param wxl wxWidgets language code.
 		 */
         bwxLanguage(const wxString& sn, const wxString& n, const wxString& un, wxLanguage wxl) noexcept
-            : wx_lang_code(wxl), short_name(sn), uname(un), name(n) {}
+            : m_wxLangCode(wxl), m_shortName(sn), m_uname(un), m_name(n) {}
 
 		/**
 		 * @brief Sets the wxWidgets language code.
 		 *
 		 * @param l The wxWidgets language code to set.
 		 */
-        void SetWxLangCode(wxLanguage l) noexcept { wx_lang_code = l; }
+        void SetWxLangCode(wxLanguage l) noexcept { m_wxLangCode = l; }
 
 		/**
 		* @brief Retrieves the wxWidgets language code.
 		*/
-        wxLanguage GetWxLangCode() const noexcept { return wx_lang_code; }
+        wxLanguage GetWxLangCode() const noexcept { return m_wxLangCode; }
         
 		/**
 		* @brief Sets the short name for the language.
 		*/
-		void SetShortName(const wxString& sn) noexcept { short_name = sn; }
+		void SetShortName(const wxString& sn) noexcept { m_shortName = sn; }
         
 		/**
 		* @brief Retrieves the short name for the language.
 		*/
-		const wxString& GetShortName() const noexcept { return short_name; }
+		const wxString& GetShortName() const noexcept { return m_shortName; }
         
 		/**
 		* @brief Sets the full name for the language.
 		*/
-		void SetName(const wxString& n) noexcept { name = n; }
+		void SetName(const wxString& n) noexcept { m_name = n; }
         
 		/**
 		* @brief Retrieves the Unicode name for the language.
 		*/
-		const wxString& GetName() const noexcept { return name; }
+		const wxString& GetName() const noexcept { return m_name; }
 
 		/**
 		* @brief Sets the Unicode name for the language.
 		*/
-        void SetUnicodeName(const wxString& n) noexcept { uname = n; }
+        void SetUnicodeName(const wxString& n) noexcept { m_uname = n; }
         
 		/**
 		* @brief Retrieves the Unicode name for the language.
 		*/
-		wxString GetUnicodeName() const noexcept { return uname.IsEmpty() ? name : uname; }
+		wxString GetUnicodeName() const noexcept { return m_uname.IsEmpty() ? m_name : m_uname; }
 
     private:
-		wxLanguage wx_lang_code; ///< wxWidgets language code
-		wxString short_name; ///< Short name
-        wxString uname; ///< Unicode name
-		wxString name; ///< Full name
+		wxLanguage m_wxLangCode; ///< wxWidgets language code
+		wxString m_shortName; ///< Short name
+        wxString m_uname; ///< Unicode name
+		wxString m_name; ///< Full name
     };
 
 	WX_DECLARE_STRING_HASH_MAP(bwxLanguage, LangMap); ///< Hash map for language storage
@@ -135,12 +136,12 @@ namespace bwx_sdk {
 		 * Adds the system default language, then adds the language defined by the provided parameters,
 		 * sets it as the default, and enables the use of short catalog names.
 		 *
-		 * @param short_name Short identifier for the language.
+		 * @param shortName Short identifier for the language.
 		 * @param name Full name of the language.
 		 * @param uname Unique name for the language.
-		 * @param wx_lang_code wxWidgets language code.
+		 * @param wxLangCode wxWidgets language code.
 		 */
-        bwxInternat(const wxString& short_name, const wxString& name, const wxString& uname, wxLanguage wx_lang_code);
+        bwxInternat(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode);
 
 		/**
 		 * @brief Initializes the locale using a language short name.
@@ -149,10 +150,10 @@ namespace bwx_sdk {
 		 * is unknown, the default language is used instead. Once the language code is determined,
 		 * the locale is initialized and the language catalogs are loaded.
 		 *
-		 * @param short_name The short name of the language to initialize.
+		 * @param shortName The short name of the language to initialize.
 		 * @return True if initialization and catalog loading succeeded; false otherwise.
 		 */
-        bool Init(const wxString& short_name = wxEmptyString);
+        bool Init(const wxString& shortName = wxEmptyString);
 
 		/**
 		 * @brief Initializes the locale by the full language name.
@@ -172,22 +173,22 @@ namespace bwx_sdk {
 		* 
 		*  @param l A bwxLanguage object representing the language to set.
 		*/
-        void SetDefaultAppLanguage(const bwxLanguage& l) noexcept { default_lang = l; }
+        void SetDefaultAppLanguage(const bwxLanguage& l) noexcept { m_defaultLang = l; }
         
 		/**
 		 * @brief Sets the default application language.
 		 *
 		 * Updates the default language used by the application.
 		 *
-		 * @param short_name Short identifier for the language.
+		 * @param shortName Short identifier for the language.
 		 * @param name Full name of the language.
 		 * @param uname Unique name for the language.
-		 * @param wx_lang_code wxWidgets language code.
+		 * @param wxLangCode wxWidgets language code.
 		 */
-		void SetDefaultAppLanguage(const wxString& short_name, const wxString& name, const wxString& uname, wxLanguage wx_lang_code) noexcept;
+		void SetDefaultAppLanguage(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode) noexcept;
 
-        bwxLanguage GetDefaultAppLanguage() const noexcept { return default_lang; }
-        wxLanguage GetDefaultAppLanguageCode() const noexcept { return default_lang.GetWxLangCode(); }
+        bwxLanguage GetDefaultAppLanguage() const noexcept { return m_defaultLang; }
+        wxLanguage GetDefaultAppLanguageCode() const noexcept { return m_defaultLang.GetWxLangCode(); }
 
 		/**
 		 * @brief Adds a language to the internal language map.
@@ -199,12 +200,12 @@ namespace bwx_sdk {
 		/**
 		 * @brief Adds a language to the internal language map using parameters.
 		 *
-		 * @param short_name Short identifier for the language.
+		 * @param shortName Short identifier for the language.
 		 * @param name Full name of the language.
 		 * @param uname Unique name for the language.
-		 * @param wx_lang_code wxWidgets language code.
+		 * @param wxLangCode wxWidgets language code.
 		 */
-        void AddLanguage(const wxString& short_name, const wxString& name, const wxString& uname, wxLanguage wx_lang_code);
+        void AddLanguage(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode);
         
 		/**
 		 * @brief Adds the system default language.
@@ -237,11 +238,11 @@ namespace bwx_sdk {
 		 */
         wxArrayString GetLangNames() const;
 
-        void SetLangFolderName(const wxString& name) noexcept { lang_folder = name; }
-        const wxString& GetLangFolderName() const noexcept { return lang_folder; }
+        void SetLangFolderName(const wxString& name) noexcept { m_langFolder = name; }
+        const wxString& GetLangFolderName() const noexcept { return m_langFolder; }
 
-        void UseShortCatalogNames() noexcept { use_short_catalog_names = true; }
-        void DontUseShortCatalogNames() noexcept { use_short_catalog_names = false; }
+        void UseShortCatalogNames() noexcept { m_useShortCatalogNames = true; }
+        void DontUseShortCatalogNames() noexcept { m_useShortCatalogNames = false; }
 
 		/**
 		 * @brief Resets the locale to the default language.
@@ -251,10 +252,10 @@ namespace bwx_sdk {
         void ResetToDefaultLanguage();
 
     private:
-		bwxLanguage default_lang; ///< Default language
-		LangMap lang_map; ///< Language map
-		wxString lang_folder = bwxDEFAULT_LANG_FOLDER; ///< Language folder name
-		bool use_short_catalog_names = true; ///< Flag for short catalog names
+		bwxLanguage m_defaultLang; ///< Default language
+		LangMap m_langMap; ///< Language map
+		wxString m_langFolder = bwxDEFAULT_LANG_FOLDER; ///< Language folder name
+		bool m_useShortCatalogNames = true; ///< Flag for short catalog names
 
 		/**
 		 * @brief Loads language catalogs based on language information.
@@ -262,10 +263,10 @@ namespace bwx_sdk {
 		 * This method constructs the catalog lookup path and attempts to load a series of catalogs
 		 * (with or without short names) for the specified language.
 		 *
-		 * @param lang_info Pointer to wxLanguageInfo containing language details.
+		 * @param langInfo Pointer to wxLanguageInfo containing language details.
 		 * @return True if all catalogs were loaded successfully; false if any catalog failed to load.
 		 */
-        bool LoadCatalogs(const wxLanguageInfo* lang_info);
+        bool LoadCatalogs(const wxLanguageInfo* langInfo);
     };
 
 }

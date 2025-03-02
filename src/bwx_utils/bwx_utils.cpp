@@ -27,6 +27,60 @@ namespace bwx_sdk {
 	//----------------------------------------------------------------------------------------------
 	// Colour functions
 	//----------------------------------------------------------------------------------------------
+	wxColour bwxGetRandomColour()
+	{
+		//  return wxColour(R, G, B);
+		return wxColour(bwxRand<int>(0, 255), bwxRand<int>(0, 255), bwxRand<int>(0, 255));
+	}
+
+	void bwxGetRandomColours(wxVector<wxColour>* v, int howMany, bool unique, const wxColour& first)
+	{
+		bool exists = false;
+		wxColour tmp = first;
+
+		for (int i = 0; i < howMany; i++)
+		{
+			if (i != 0)
+			{
+				tmp = bwxGetRandomColour();
+			}
+
+			if (!unique)
+			{
+				v->push_back(tmp);
+			}
+			else
+			{
+				if (i == 0)
+				{
+					v->push_back(tmp);
+				}
+				else
+				{
+					exists = false;
+					for (int j = 0; j < (int)v->size(); j++)
+					{
+						if (v->operator[](j) == tmp)
+						{
+							exists = true;
+							break;
+						}
+					}
+
+					if (exists)
+					{
+						i -= 1;
+						continue;
+					}
+					else
+					{
+						v->push_back(tmp);
+					}
+				}
+			}
+		}
+	}
+
 	wxColour bwxMixColours(const wxColour& col1, const wxColour& col2, double factor)
 	{
 		return wxColour(

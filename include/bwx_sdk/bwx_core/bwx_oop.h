@@ -31,9 +31,9 @@
 #include <vector>
 
 // wxWidgets events declaration for value change notifications
-wxDECLARE_EVENT(EVT_PROPERTY_CHANGED, wxCommandEvent);
-wxDECLARE_EVENT(EVT_PROPERTY_VECTOR_CHANGED, wxCommandEvent);
-wxDECLARE_EVENT(EVT_PROPERTY_MAP_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_BWXPROPERTY_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_BWXPROPERTY_VECTOR_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_BWXPROPERTY_MAP_CHANGED, wxCommandEvent);
 
 //-----------------------------------------------------------------------------------
 
@@ -51,15 +51,15 @@ public:
                          RejectCallback onReject = nullptr, size_t historyLimit = 0,
                          std::optional<std::chrono::seconds> undoTimeout = std::nullopt,
                          wxEvtHandler* eventHandler = nullptr)
-        : value_(defaultValue),
-          defaultValue_(defaultValue),
-          validator_(std::move(validator)),
-          onChange_(std::move(onChange)),
-          onReject_(std::move(onReject)),
-          historyLimit_(historyLimit),
-          undoTimeout_(undoTimeout),
-          eventHandler_(eventHandler),
-          lastChangeTime_(std::chrono::system_clock::now()) {}
+        : m_value(defaultValue),
+          m_defaultValue(defaultValue),
+          m_validator(std::move(validator)),
+          m_onChange(std::move(onChange)),
+          m_onReject(std::move(onReject)),
+          m_historyLimit(historyLimit),
+          m_undoTimeout(undoTimeout),
+          m_eventHandler(eventHandler),
+          m_lastChangeTime(std::chrono::system_clock::now()) {}
 
     bwxProperty<T>& operator=(const T& newValue) {
         set(newValue);
@@ -67,21 +67,21 @@ public:
     }
 
     void set(const T& newValue) {
-        wxMutexLocker lock(mutex_);
-        if (readOnly_) return;
+        wxMutexLocker lock(m_mutex);
+        if (m_readOnly) return;
 
-        if (validator_ && !validator_(newValue)) {
-            if (onReject_) onReject_(newValue);
+        if (m_validator && !m_validator(newValue)) {
+            if (m_onReject) m_onReject(newValue);
             return;
         }
 
-        if (newValue != value_) {
-            recordHistory(value_);
+        if (newValue != m_value) {
+            recordHistory(m_value);
             clearRedoHistory();
-            if (onChange_) onChange_(value_, newValue);
+            if (m_onChange) m_onChange(m_value, newValue);
 
-            value_ = newValue;
-            lastChangeTime_ = std::chrono::system_clock::now();
+            m_value = newValue;
+            m_lastChangeTime = std::chrono::system_clock::now();
 
             notifyChange();
             propagateBinding(newValue);
@@ -89,15 +89,15 @@ public:
     }
 
     [[nodiscard]] const T& get() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return value_;
+        wxMutexLocker lock(m_mutex);
+        return m_value;
     }
 
     const char* AsCStr() const {
         if constexpr (std::is_same_v<T, std::string>) {
-            return value_.c_str();
+            return m_value.c_str();
         } else if constexpr (std::is_same_v<T, wxString>) {
-            return value_.mb_str().data();
+            return m_value.mb_str().data();
         } else {
             static_assert(std::is_same_v<T, std::string> || std::is_same_v<T, wxString>,
                           "AsCStr() is only supported for std::string or wxString.");
@@ -105,172 +105,173 @@ public:
         }
     }
 
-    void reset() { set(defaultValue_); }
+    void reset() { set(m_defaultValue); }
 
     void setValidator(Validator validator) {
-        wxMutexLocker lock(mutex_);
-        validator_ = std::move(validator);
+        wxMutexLocker lock(m_mutex);
+        m_validator = std::move(validator);
     }
 
     void setOnChangeCallback(ChangeCallback onChange) {
-        wxMutexLocker lock(mutex_);
-        onChange_ = std::move(onChange);
+        wxMutexLocker lock(m_mutex);
+        m_onChange = std::move(onChange);
     }
 
     void setOnRejectCallback(RejectCallback onReject) {
-        wxMutexLocker lock(mutex_);
-        onReject_ = std::move(onReject);
+        wxMutexLocker lock(m_mutex);
+        m_onReject = std::move(onReject);
     }
 
     void setReadOnly(bool readOnly) {
-        wxMutexLocker lock(mutex_);
-        readOnly_ = readOnly;
+        wxMutexLocker lock(m_mutex);
+        m_readOnly = readOnly;
     }
 
     [[nodiscard]] bool isReadOnly() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return readOnly_;
+        wxMutexLocker lock(m_mutex);
+        return m_readOnly;
     }
 
     bool undo() {
-        wxMutexLocker lock(mutex_);
-        if (undoHistory_.empty()) return false;
+        wxMutexLocker lock(m_mutex);
+        if (m_undoHistory.empty()) return false;
 
         auto now = std::chrono::system_clock::now();
-        if (undoTimeout_ && std::chrono::duration_cast<std::chrono::seconds>(now - lastChangeTime_) > *undoTimeout_) {
+        if (m_undoTimeout &&
+            std::chrono::duration_cast<std::chrono::seconds>(now - m_lastChangeTime) > *m_undoTimeout) {
             return false;
         }
 
-        redoHistory_.push_front(value_);
-        value_ = undoHistory_.front();
-        undoHistory_.pop_front();
-        lastChangeTime_ = now;
+        m_redoHistory.push_front(m_value);
+        m_value = m_undoHistory.front();
+        m_undoHistory.pop_front();
+        m_lastChangeTime = now;
 
         notifyChange();
-        propagateBinding(value_);
+        propagateBinding(m_value);
         return true;
     }
 
     bool redo() {
-        wxMutexLocker lock(mutex_);
-        if (redoHistory_.empty()) return false;
+        wxMutexLocker lock(m_mutex);
+        if (m_redoHistory.empty()) return false;
 
-        undoHistory_.push_front(value_);
-        value_ = redoHistory_.front();
-        redoHistory_.pop_front();
-        lastChangeTime_ = std::chrono::system_clock::now();
+        m_undoHistory.push_front(m_value);
+        m_value = m_redoHistory.front();
+        m_redoHistory.pop_front();
+        m_lastChangeTime = std::chrono::system_clock::now();
 
         notifyChange();
-        propagateBinding(value_);
+        propagateBinding(m_value);
         return true;
     }
 
     void setHistoryLimit(size_t limit) {
-        wxMutexLocker lock(mutex_);
-        historyLimit_ = limit;
-        trimHistory(undoHistory_);
-        trimHistory(redoHistory_);
+        wxMutexLocker lock(m_mutex);
+        m_historyLimit = limit;
+        trimHistory(m_undoHistory);
+        trimHistory(m_redoHistory);
     }
 
     [[nodiscard]] size_t getHistoryLimit() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return historyLimit_;
+        wxMutexLocker lock(m_mutex);
+        return m_historyLimit;
     }
 
     void clearHistory() {
-        wxMutexLocker lock(mutex_);
-        undoHistory_.clear();
-        redoHistory_.clear();
+        wxMutexLocker lock(m_mutex);
+        m_undoHistory.clear();
+        m_redoHistory.clear();
     }
 
     void setUndoTimeout(std::chrono::seconds timeout) {
-        wxMutexLocker lock(mutex_);
-        undoTimeout_ = timeout;
+        wxMutexLocker lock(m_mutex);
+        m_undoTimeout = timeout;
     }
 
     [[nodiscard]] std::optional<std::chrono::seconds> getUndoTimeout() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return undoTimeout_;
+        wxMutexLocker lock(m_mutex);
+        return m_undoTimeout;
     }
 
     Timestamp getLastChangeTime() const {
-        wxMutexLocker lock(mutex_);
-        return lastChangeTime_;
+        wxMutexLocker lock(m_mutex);
+        return m_lastChangeTime;
     }
 
-    void bind(Property<T>& other) {
-        wxMutexLocker lock(mutex_);
-        boundProperties_.push_back(&other);
+    void bind(bwxProperty<T>& other) {
+        wxMutexLocker lock(m_mutex);
+        m_boundProperties.push_back(&other);
     }
 
     // Arithmetic operators
-    Property<T>& operator+=(const T& rhs) {
-        set(value_ + rhs);
+    bwxProperty<T>& operator+=(const T& rhs) {
+        set(m_value + rhs);
         return *this;
     }
-    Property<T>& operator-=(const T& rhs) {
-        set(value_ - rhs);
+    bwxProperty<T>& operator-=(const T& rhs) {
+        set(m_value - rhs);
         return *this;
     }
-    Property<T>& operator*=(const T& rhs) {
-        set(value_ * rhs);
+    bwxProperty<T>& operator*=(const T& rhs) {
+        set(m_value * rhs);
         return *this;
     }
-    Property<T>& operator/=(const T& rhs) {
-        set(value_ / rhs);
+    bwxProperty<T>& operator/=(const T& rhs) {
+        set(m_value / rhs);
         return *this;
     }
 
     // Comparison operators
-    bool operator==(const T& rhs) const { return value_ == rhs; }
-    bool operator!=(const T& rhs) const { return value_ != rhs; }
-    bool operator<(const T& rhs) const { return value_ < rhs; }
-    bool operator<=(const T& rhs) const { return value_ <= rhs; }
-    bool operator>(const T& rhs) const { return value_ > rhs; }
-    bool operator>=(const T& rhs) const { return value_ >= rhs; }
+    bool operator==(const T& rhs) const { return m_value == rhs; }
+    bool operator!=(const T& rhs) const { return m_value != rhs; }
+    bool operator<(const T& rhs) const { return m_value < rhs; }
+    bool operator<=(const T& rhs) const { return m_value <= rhs; }
+    bool operator>(const T& rhs) const { return m_value > rhs; }
+    bool operator>=(const T& rhs) const { return m_value >= rhs; }
 
 private:
     void recordHistory(const T& oldValue) {
-        if (historyLimit_ == 0) return;
-        undoHistory_.push_front(oldValue);
-        trimHistory(undoHistory_);
+        if (m_historyLimit == 0) return;
+        m_undoHistory.push_front(oldValue);
+        trimHistory(m_undoHistory);
     }
 
-    void clearRedoHistory() { redoHistory_.clear(); }
+    void clearRedoHistory() { m_redoHistory.clear(); }
 
     void trimHistory(std::deque<T>& history) {
-        while (history.size() > historyLimit_) {
+        while (history.size() > m_historyLimit) {
             history.pop_back();
         }
     }
 
     void notifyChange() {
-        if (eventHandler_) {
+        if (m_eventHandler) {
             wxCommandEvent evt(EVT_BWXPROPERTY_CHANGED);
-            eventHandler_->AddPendingEvent(evt);
+            m_eventHandler->AddPendingEvent(evt);
         }
     }
 
     void propagateBinding(const T& newValue) {
-        for (auto* boundProp : boundProperties_) {
+        for (auto* boundProp : m_boundProperties) {
             if (boundProp) boundProp->set(newValue);
         }
     }
 
-    T value_{};
-    T defaultValue_{};
-    Validator validator_ = nullptr;
-    ChangeCallback onChange_ = nullptr;
-    RejectCallback onReject_ = nullptr;
-    size_t historyLimit_ = 0;
-    std::optional<std::chrono::seconds> undoTimeout_ = std::nullopt;
-    bool readOnly_ = false;
-    wxEvtHandler* eventHandler_ = nullptr;
-    Timestamp lastChangeTime_;
-    std::deque<T> undoHistory_;
-    std::deque<T> redoHistory_;
-    std::vector<Property<T>*> boundProperties_;
-    mutable wxMutex mutex_;
+    T m_value{};
+    T m_defaultValue{};
+    Validator m_validator = nullptr;
+    ChangeCallback m_onChange = nullptr;
+    RejectCallback m_onReject = nullptr;
+    size_t m_historyLimit = 0;
+    std::optional<std::chrono::seconds> m_undoTimeout = std::nullopt;
+    bool m_readOnly = false;
+    wxEvtHandler* m_eventHandler = nullptr;
+    Timestamp m_lastChangeTime;
+    std::deque<T> m_undoHistory;
+    std::deque<T> m_redoHistory;
+    std::vector<bwxProperty<T>*> m_boundProperties;
+    mutable wxMutex m_mutex;
 };
 
 //-----------------------------------------------------------------------------------
@@ -283,137 +284,137 @@ public:
 
     explicit bwxPropertyVector(wxEvtHandler* handler = nullptr, ChangeCallback callback = nullptr,
                                size_t historyLimit = 0, size_t capacityLimit = 0)
-        : eventHandler_(handler),
-          onChange_(std::move(callback)),
-          historyLimit_(historyLimit),
-          capacityLimit_(capacityLimit),
-          lastChangeTime_(std::chrono::system_clock::now()) {}
+        : m_eventHandler(handler),
+          m_onChange(std::move(callback)),
+          m_historyLimit(historyLimit),
+          m_capacityLimit(capacityLimit),
+          m_lastChangeTime(std::chrono::system_clock::now()) {}
 
     void add(const T& value) {
-        wxMutexLocker lock(mutex_);
-        if (readOnly_) return;
-        if (capacityLimit_ > 0 && data_.size() >= capacityLimit_) {
+        wxMutexLocker lock(m_mutex);
+        if (m_readOnly) return;
+        if (m_capacityLimit > 0 && m_data.size() >= m_capacityLimit) {
             throw std::overflow_error("Capacity limit reached");
         }
 
         recordHistory();
-        data_.push_back(value);
-        lastChangeTime_ = std::chrono::system_clock::now();
+        m_data.push_back(value);
+        m_lastChangeTime = std::chrono::system_clock::now();
         notifyChange();
     }
 
     std::optional<T> get(size_t index) const {
-        wxMutexLocker lock(mutex_);
-        return (index < data_.size()) ? std::optional<T>(data_[index]) : std::nullopt;
+        wxMutexLocker lock(m_mutex);
+        return (index < m_data.size()) ? std::optional<T>(m_data[index]) : std::nullopt;
     }
 
     T& at(size_t index) {
-        wxMutexLocker lock(mutex_);
-        if (index >= data_.size()) throw std::out_of_range("Index out of range");
-        return data_[index];
+        wxMutexLocker lock(m_mutex);
+        if (index >= m_data.size()) throw std::out_of_range("Index out of range");
+        return m_data[index];
     }
 
     void clear() {
-        wxMutexLocker lock(mutex_);
+        wxMutexLocker lock(m_mutex);
         recordHistory();
-        data_.clear();
+        m_data.clear();
         notifyChange();
     }
 
     size_t size() const {
-        wxMutexLocker lock(mutex_);
-        return data_.size();
+        wxMutexLocker lock(m_mutex);
+        return m_data.size();
     }
 
-    typename std::vector<T>::iterator begin() { return data_.begin(); }
-    typename std::vector<T>::iterator end() { return data_.end(); }
-    typename std::vector<T>::const_iterator cbegin() const { return data_.cbegin(); }
-    typename std::vector<T>::const_iterator cend() const { return data_.cend(); }
+    typename std::vector<T>::iterator begin() { return m_data.begin(); }
+    typename std::vector<T>::iterator end() { return m_data.end(); }
+    typename std::vector<T>::const_iterator cbegin() const { return m_data.cbegin(); }
+    typename std::vector<T>::const_iterator cend() const { return m_data.cend(); }
 
     void setReadOnly(bool readOnly) {
-        wxMutexLocker lock(mutex_);
-        readOnly_ = readOnly;
+        wxMutexLocker lock(m_mutex);
+        m_readOnly = readOnly;
     }
 
     bool isReadOnly() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return readOnly_;
+        wxMutexLocker lock(m_mutex);
+        return m_readOnly;
     }
 
     bool undo() {
-        wxMutexLocker lock(mutex_);
-        if (undoHistory_.empty()) return false;
+        wxMutexLocker lock(m_mutex);
+        if (m_undoHistory.empty()) return false;
 
-        redoHistory_.push_front(data_);
-        data_ = undoHistory_.front();
-        undoHistory_.pop_front();
+        m_redoHistory.push_front(m_data);
+        m_data = m_undoHistory.front();
+        m_undoHistory.pop_front();
         notifyChange();
         return true;
     }
 
     bool redo() {
-        wxMutexLocker lock(mutex_);
-        if (redoHistory_.empty()) return false;
+        wxMutexLocker lock(m_mutex);
+        if (m_redoHistory.empty()) return false;
 
-        undoHistory_.push_front(data_);
-        data_ = redoHistory_.front();
-        redoHistory_.pop_front();
+        m_undoHistory.push_front(m_data);
+        m_data = m_redoHistory.front();
+        m_redoHistory.pop_front();
         notifyChange();
         return true;
     }
 
     void setHistoryLimit(size_t limit) {
-        wxMutexLocker lock(mutex_);
-        historyLimit_ = limit;
-        trimHistory(undoHistory_);
-        trimHistory(redoHistory_);
+        wxMutexLocker lock(m_mutex);
+        m_historyLimit = limit;
+        trimHistory(m_undoHistory);
+        trimHistory(m_redoHistory);
     }
 
     size_t getHistoryLimit() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return historyLimit_;
+        wxMutexLocker lock(m_mutex);
+        return m_historyLimit;
     }
 
     void clearHistory() {
-        wxMutexLocker lock(mutex_);
-        undoHistory_.clear();
-        redoHistory_.clear();
+        wxMutexLocker lock(m_mutex);
+        m_undoHistory.clear();
+        m_redoHistory.clear();
     }
 
     void setCapacityLimit(size_t limit) {
-        wxMutexLocker lock(mutex_);
-        capacityLimit_ = limit;
+        wxMutexLocker lock(m_mutex);
+        m_capacityLimit = limit;
         trimToCapacity();
     }
 
     size_t getCapacityLimit() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return capacityLimit_;
+        wxMutexLocker lock(m_mutex);
+        return m_capacityLimit;
     }
 
     Timestamp getLastChangeTime() const {
-        wxMutexLocker lock(mutex_);
-        return lastChangeTime_;
+        wxMutexLocker lock(m_mutex);
+        return m_lastChangeTime;
     }
 
     void setOnChangeCallback(ChangeCallback callback) {
-        wxMutexLocker lock(mutex_);
-        onChange_ = std::move(callback);
+        wxMutexLocker lock(m_mutex);
+        m_onChange = std::move(callback);
     }
 
     void setEventHandler(wxEvtHandler* handler) {
-        wxMutexLocker lock(mutex_);
-        eventHandler_ = handler;
+        wxMutexLocker lock(m_mutex);
+        m_eventHandler = handler;
     }
 
     const char* AsCStr(size_t index = 0) const {
-        wxMutexLocker lock(mutex_);
-        if (index >= data_.size()) return nullptr;
+        wxMutexLocker lock(m_mutex);
+        if (index >= m_data.size()) return nullptr;
 
         if constexpr (std::is_same_v<T, std::string>) {
-            return data_[index].c_str();
+            return m_data[index].c_str();
         } else if constexpr (std::is_same_v<T, wxString>) {
-            return data_[index].mb_str().data();
+            return m_data[index].mb_str().data();
         } else {
             static_assert(std::is_same_v<T, std::string> || std::is_same_v<T, wxString>,
                           "AsCStr() is only supported for std::string or wxString.");
@@ -423,236 +424,42 @@ public:
 
 private:
     void notifyChange() {
-        if (onChange_) onChange_();
-        if (eventHandler_) {
-            wxCommandEvent evt(EVT_PROPERTY_VECTOR_CHANGED);
-            eventHandler_->AddPendingEvent(evt);
+        if (m_onChange) m_onChange();
+        if (m_eventHandler) {
+            wxCommandEvent evt(EVT_BWXPROPERTY_VECTOR_CHANGED);
+            m_eventHandler->AddPendingEvent(evt);
         }
     }
 
     void recordHistory() {
-        if (historyLimit_ == 0) return;
-        undoHistory_.push_front(data_);
-        trimHistory(undoHistory_);
-        redoHistory_.clear();
+        if (m_historyLimit == 0) return;
+        m_undoHistory.push_front(m_data);
+        trimHistory(m_undoHistory);
+        m_redoHistory.clear();
     }
 
     void trimHistory(std::deque<std::vector<T>>& history) {
-        while (history.size() > historyLimit_) {
+        while (history.size() > m_historyLimit) {
             history.pop_back();
         }
     }
 
     void trimToCapacity() {
-        while (capacityLimit_ > 0 && data_.size() > capacityLimit_) {
-            data_.erase(data_.begin());
+        while (m_capacityLimit > 0 && m_data.size() > m_capacityLimit) {
+            m_data.erase(m_data.begin());
         }
     }
 
-    std::vector<T> data_{};
-    size_t historyLimit_ = 0;
-    size_t capacityLimit_ = 0;
-    std::deque<std::vector<T>> undoHistory_;
-    std::deque<std::vector<T>> redoHistory_;
-    wxEvtHandler* eventHandler_ = nullptr;
-    ChangeCallback onChange_ = nullptr;
-    Timestamp lastChangeTime_;
-    bool readOnly_ = false;
-    mutable wxMutex mutex_;
+    std::vector<T> m_data{};
+    size_t m_historyLimit = 0;
+    size_t m_capacityLimit = 0;
+    std::deque<std::vector<T>> m_undoHistory;
+    std::deque<std::vector<T>> m_redoHistory;
+    wxEvtHandler* m_eventHandler = nullptr;
+    ChangeCallback m_onChange = nullptr;
+    Timestamp m_lastChangeTime;
+    bool m_readOnly = false;
+    mutable wxMutex m_mutex;
 };
 
 //-----------------------------------------------------------------------------------
-
-template <typename K, typename V>
-class bwxPropertyMap {
-public:
-    using ChangeCallback = std::function<void()>;
-    using Timestamp = std::chrono::system_clock::time_point;
-
-    explicit bwxPropertyMap(wxEvtHandler* handler = nullptr, ChangeCallback callback = nullptr, size_t historyLimit = 0,
-                            size_t capacityLimit = 0)
-        : eventHandler_(handler),
-          onChange_(std::move(callback)),
-          historyLimit_(historyLimit),
-          capacityLimit_(capacityLimit),
-          lastChangeTime_(std::chrono::system_clock::now()) {}
-
-    void set(const K& key, const V& value) {
-        wxMutexLocker lock(mutex_);
-        if (readOnly_) return;
-
-        if (capacityLimit_ > 0 && data_.size() >= capacityLimit_ && data_.find(key) == data_.end()) {
-            throw std::overflow_error("Capacity limit reached");
-        }
-
-        recordHistory();
-        data_[key] = value;
-        lastChangeTime_ = std::chrono::system_clock::now();
-        notifyChange();
-    }
-
-    std::optional<V> get(const K& key) const {
-        wxMutexLocker lock(mutex_);
-        auto it = data_.find(key);
-        return (it != data_.end()) ? std::optional<V>(it->second) : std::nullopt;
-    }
-
-    const V& getRef(const K& key) const {
-        wxMutexLocker lock(mutex_);
-        auto it = data_.find(key);
-        if (it == data_.end()) throw std::out_of_range("Key not found");
-        return it->second;
-    }
-
-    void clear() {
-        wxMutexLocker lock(mutex_);
-        recordHistory();
-        data_.clear();
-        notifyChange();
-    }
-
-    size_t size() const {
-        wxMutexLocker lock(mutex_);
-        return data_.size();
-    }
-
-    typename std::map<K, V>::iterator begin() { return data_.begin(); }
-    typename std::map<K, V>::iterator end() { return data_.end(); }
-    typename std::map<K, V>::const_iterator cbegin() const { return data_.cbegin(); }
-    typename std::map<K, V>::const_iterator cend() const { return data_.cend(); }
-
-    void setReadOnly(bool readOnly) {
-        wxMutexLocker lock(mutex_);
-        readOnly_ = readOnly;
-    }
-
-    bool isReadOnly() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return readOnly_;
-    }
-
-    bool undo() {
-        wxMutexLocker lock(mutex_);
-        if (undoHistory_.empty()) return false;
-
-        redoHistory_.push_front(data_);
-        data_ = undoHistory_.front();
-        undoHistory_.pop_front();
-        notifyChange();
-        return true;
-    }
-
-    bool redo() {
-        wxMutexLocker lock(mutex_);
-        if (redoHistory_.empty()) return false;
-
-        undoHistory_.push_front(data_);
-        data_ = redoHistory_.front();
-        redoHistory_.pop_front();
-        notifyChange();
-        return true;
-    }
-
-    void setHistoryLimit(size_t limit) {
-        wxMutexLocker lock(mutex_);
-        historyLimit_ = limit;
-        trimHistory(undoHistory_);
-        trimHistory(redoHistory_);
-    }
-
-    size_t getHistoryLimit() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return historyLimit_;
-    }
-
-    void clearHistory() {
-        wxMutexLocker lock(mutex_);
-        undoHistory_.clear();
-        redoHistory_.clear();
-    }
-
-    void setCapacityLimit(size_t limit) {
-        wxMutexLocker lock(mutex_);
-        capacityLimit_ = limit;
-        trimToCapacity();
-    }
-
-    size_t getCapacityLimit() const noexcept {
-        wxMutexLocker lock(mutex_);
-        return capacityLimit_;
-    }
-
-    Timestamp getLastChangeTime() const {
-        wxMutexLocker lock(mutex_);
-        return lastChangeTime_;
-    }
-
-    void setOnChangeCallback(ChangeCallback callback) {
-        wxMutexLocker lock(mutex_);
-        onChange_ = std::move(callback);
-    }
-
-    void setEventHandler(wxEvtHandler* handler) {
-        wxMutexLocker lock(mutex_);
-        eventHandler_ = handler;
-    }
-
-    const char* AsCStr(const K& key) const {
-        wxMutexLocker lock(mutex_);
-        auto it = data_.find(key);
-        if (it == data_.end()) return nullptr;
-
-        if constexpr (std::is_same_v<V, std::string>) {
-            return it->second.c_str();
-        } else if constexpr (std::is_same_v<V, wxString>) {
-            return it->second.mb_str().data();
-        } else {
-            static_assert(std::is_same_v<V, std::string> || std::is_same_v<V, wxString>,
-                          "AsCStr() is only supported for std::string or wxString.");
-            return nullptr;
-        }
-    }
-
-private:
-    void notifyChange() {
-        if (onChange_) onChange_();
-        if (eventHandler_) {
-            wxCommandEvent evt(EVT_PROPERTY_MAP_CHANGED);
-            eventHandler_->AddPendingEvent(evt);
-        }
-    }
-
-    void recordHistory() {
-        if (historyLimit_ == 0) return;
-        undoHistory_.push_front(data_);
-        trimHistory(undoHistory_);
-        redoHistory_.clear();
-    }
-
-    void trimHistory(std::deque<std::map<K, V>>& history) {
-        while (history.size() > historyLimit_) {
-            history.pop_back();
-        }
-    }
-
-    void trimToCapacity() {
-        while (capacityLimit_ > 0 && data_.size() > capacityLimit_) {
-            data_.erase(data_.begin());
-        }
-    }
-
-    std::map<K, V> data_{};
-    size_t historyLimit_ = 0;
-    size_t capacityLimit_ = 0;
-    std::deque<std::map<K, V>> undoHistory_;
-    std::deque<std::map<K, V>> redoHistory_;
-    wxEvtHandler* eventHandler_ = nullptr;
-    ChangeCallback onChange_ = nullptr;
-    Timestamp lastChangeTime_;
-    bool readOnly_ = false;
-    mutable wxMutex mutex_;
-};
-
-}  // namespace bwx_sdk
-
-#endif  // _BWXOOP_H_

@@ -304,7 +304,7 @@ namespace bwx_sdk {
 		 * @brief Retrieves the last error message from the JSON parser.
 		 * @return The error message.
 		 */
-        wxString GetLastError() const { return lastError; }
+        wxString GetLastError() const { return m_lastError; }
 
         //
 
@@ -602,9 +602,9 @@ namespace bwx_sdk {
 
 
     private:
-		std::unordered_map<wxString, bwxJsonValue> data; ///< The JSON data.
+		std::unordered_map<wxString, bwxJsonValue> m_data; ///< The JSON data.
 
-		wxString lastError; ///< The last error message.
+		wxString m_lastError; ///< The last error message.
 
         /**
          * @brief Escapes a string for JSON output.

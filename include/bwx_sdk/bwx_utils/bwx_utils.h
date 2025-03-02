@@ -21,8 +21,13 @@
 
 namespace bwx_sdk {
 
+wxColour bwxGetRandomColour();
+
+void bwxGetRandomColours(wxVector<wxColour>* v, int howMany, bool unique = true,
+                         const wxColour& first = wxColour(255, 0, 255));
+
 wxColour bwxMixColours(const wxColour& col1, const wxColour& col2, double factor);
 
-}
+}  // namespace bwx_sdk
 
 #endif

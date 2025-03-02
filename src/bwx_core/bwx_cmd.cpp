@@ -31,7 +31,7 @@ namespace bwx_sdk {
 
 	bool bwxCmdLineParser::Parse()
 	{
-		if (argc == 1)
+		if (m_argc == 1)
 		{
 			wxPrintf(wxT("\nFor more information, run the application with the parameter -h, /h, or --help.\n"));
 			return false;
@@ -55,76 +55,76 @@ namespace bwx_sdk {
 		this->SetSwitches();
 	}
 
-	void bwxCmdLineParser::SetSwitches(const wxString& switch_chars)
+	void bwxCmdLineParser::SetSwitches(const wxString& switchChars)
 	{
-		this->SetSwitchChars(switch_chars);
+		this->SetSwitchChars(switchChars);
 	}
 
-	void bwxCmdLineParser::AddHelp(const wxString& short_name, const wxString& long_name, const wxString& description)
+	void bwxCmdLineParser::AddHelp(const wxString& shortName, const wxString& longName, const wxString& description)
 	{
-		this->AddSwitch(short_name, long_name, description, static_cast<wxCmdLineEntryFlags>(wxCMD_LINE_VAL_NONE) | wxCMD_LINE_OPTION_HELP);
+		this->AddSwitch(shortName, longName, description, static_cast<wxCmdLineEntryFlags>(wxCMD_LINE_VAL_NONE) | wxCMD_LINE_OPTION_HELP);
 	}
 
-	void bwxCmdLineParser::AddSwitchOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
+	void bwxCmdLineParser::AddSwitchOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
 	{
 		int flags = static_cast<int>(wxCMD_LINE_VAL_NONE) | wxCMD_LINE_PARAM_OPTIONAL;
 		if (!visible) flags |= wxCMD_LINE_HIDDEN;
-		this->AddSwitch(short_name, long_name, description + this->Optional(), flags);
+		this->AddSwitch(shortName, longName, description + this->Optional(), flags);
 	}
 
-	void bwxCmdLineParser::AddSwitchMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
+	void bwxCmdLineParser::AddSwitchMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
 	{
 		int flags = wxCMD_LINE_VAL_NONE;
 		if (!visible) flags |= wxCMD_LINE_HIDDEN;
-		this->AddSwitch(short_name, long_name, description, flags);
+		this->AddSwitch(shortName, longName, description, flags);
 	}
 
-	void bwxCmdLineParser::AddStringOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
+	void bwxCmdLineParser::AddStringOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
 	{
-		this->AddOption(short_name, long_name, description + this->Optional(), wxCMD_LINE_VAL_STRING, (visible) ? 0 : wxCMD_LINE_HIDDEN);
+		this->AddOption(shortName, longName, description + this->Optional(), wxCMD_LINE_VAL_STRING, (visible) ? 0 : wxCMD_LINE_HIDDEN);
 	}
 
-	void bwxCmdLineParser::AddStringMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
-	{
-		int flags = wxCMD_LINE_OPTION_MANDATORY;
-		if (!visible) flags |= wxCMD_LINE_HIDDEN;
-		this->AddOption(short_name, long_name, description, wxCMD_LINE_VAL_STRING, flags);
-	}
-
-	void bwxCmdLineParser::AddNumberOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
-	{
-		this->AddOption(short_name, long_name, description + this->Optional(), wxCMD_LINE_VAL_NUMBER, (visible) ? 0 : wxCMD_LINE_HIDDEN);
-	}
-
-	void bwxCmdLineParser::AddNumberMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
+	void bwxCmdLineParser::AddStringMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
 	{
 		int flags = wxCMD_LINE_OPTION_MANDATORY;
 		if (!visible) flags |= wxCMD_LINE_HIDDEN;
-		this->AddOption(short_name, long_name, description, wxCMD_LINE_VAL_NUMBER, flags);
+		this->AddOption(shortName, longName, description, wxCMD_LINE_VAL_STRING, flags);
 	}
 
-	void bwxCmdLineParser::AddDoubleOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
+	void bwxCmdLineParser::AddNumberOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
 	{
-		this->AddOption(short_name, long_name, description + this->Optional(), wxCMD_LINE_VAL_DOUBLE, (visible) ? 0 : wxCMD_LINE_HIDDEN);
+		this->AddOption(shortName, longName, description + this->Optional(), wxCMD_LINE_VAL_NUMBER, (visible) ? 0 : wxCMD_LINE_HIDDEN);
 	}
 
-	void bwxCmdLineParser::AddDoubleMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
-	{
-		int flags = wxCMD_LINE_OPTION_MANDATORY;
-		if (!visible) flags |= wxCMD_LINE_HIDDEN;
-		this->AddOption(short_name, long_name, description, wxCMD_LINE_VAL_DOUBLE, flags);
-	}
-
-	void bwxCmdLineParser::AddDateOptional(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
-	{
-		this->AddOption(short_name, long_name, description + this->Optional(), wxCMD_LINE_VAL_DATE, (visible) ? 0 : wxCMD_LINE_HIDDEN);
-	}
-
-	void bwxCmdLineParser::AddDateMandatory(const wxString& short_name, const wxString& long_name, const wxString& description, bool visible)
+	void bwxCmdLineParser::AddNumberMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
 	{
 		int flags = wxCMD_LINE_OPTION_MANDATORY;
 		if (!visible) flags |= wxCMD_LINE_HIDDEN;
-		this->AddOption(short_name, long_name, description, wxCMD_LINE_VAL_DATE, flags);
+		this->AddOption(shortName, longName, description, wxCMD_LINE_VAL_NUMBER, flags);
+	}
+
+	void bwxCmdLineParser::AddDoubleOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
+	{
+		this->AddOption(shortName, longName, description + this->Optional(), wxCMD_LINE_VAL_DOUBLE, (visible) ? 0 : wxCMD_LINE_HIDDEN);
+	}
+
+	void bwxCmdLineParser::AddDoubleMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
+	{
+		int flags = wxCMD_LINE_OPTION_MANDATORY;
+		if (!visible) flags |= wxCMD_LINE_HIDDEN;
+		this->AddOption(shortName, longName, description, wxCMD_LINE_VAL_DOUBLE, flags);
+	}
+
+	void bwxCmdLineParser::AddDateOptional(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
+	{
+		this->AddOption(shortName, longName, description + this->Optional(), wxCMD_LINE_VAL_DATE, (visible) ? 0 : wxCMD_LINE_HIDDEN);
+	}
+
+	void bwxCmdLineParser::AddDateMandatory(const wxString& shortName, const wxString& longName, const wxString& description, bool visible)
+	{
+		int flags = wxCMD_LINE_OPTION_MANDATORY;
+		if (!visible) flags |= wxCMD_LINE_HIDDEN;
+		this->AddOption(shortName, longName, description, wxCMD_LINE_VAL_DATE, flags);
 	}
 
 	void bwxCmdLineParser::AddStringParamOptional(const wxString& name, bool visible)
