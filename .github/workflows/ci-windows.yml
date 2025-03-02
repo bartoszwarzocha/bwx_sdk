@@ -105,19 +105,29 @@ jobs:
           $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
           cmake --build "$BUILD_DIR" --config "${{ matrix.build_type }}"
 
+      - name: Determine Compiler Version
+        id: compiler_info
+        run: |
+          $COMPILER_VERSION = cl.exe 2>&1 | Select-String "Version" | ForEach-Object { $_ -match 'Version (\d+\.\d+\.\d+)' ; $matches[1] }
+          Write-Output "compiler_version=$COMPILER_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Package artifacts
         run: |
           $BUILD_DIR = "build/windows-latest-${{ matrix.build_type }}"
-          $PACKAGE_NAME = "bwx_sdk-windows-${{ matrix.build_type }}.zip"
+          $VERSION = "${{ matrix.build_type }}-${{ env.compiler_version }}-x64"
+          $PACKAGE_NAME = "bwx_sdk-$VERSION.zip"
           if (!(Test-Path -Path "packages")) {
             New-Item -ItemType Directory -Force -Path "packages"
           }
-          Compress-Archive -Path "$BUILD_DIR\\*" -DestinationPath "packages\\$PACKAGE_NAME"
+          Compress-Archive -Path `
+            "bin", "lib", "include", `
+            "README.md", "LICENSE.md" `
+            -DestinationPath "packages\\$PACKAGE_NAME"
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4.6.0
         with:
-          name: bwx_sdk-windows-${{ matrix.build_type }}
+          name: bwx_sdk-${{ matrix.build_type }}
           path: packages/*.zip
 
       - name: Run tests (if any)
