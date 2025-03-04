@@ -29,7 +29,7 @@
  * @brief Provides a template class for advanced property management.
  */
 
-// wxWidgets events declaration for value change notifications
+ // wxWidgets events declaration for value change notifications
 wxDECLARE_EVENT(EVT_BWXPROPERTY_CHANGED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_BWXPROPERTY_VECTOR_CHANGED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_BWXPROPERTY_MAP_CHANGED, wxCommandEvent);
@@ -39,341 +39,343 @@ wxDECLARE_EVENT(EVT_BWXPROPERTY_MAP_CHANGED, wxCommandEvent);
 namespace bwx_sdk {
 
 	/**
-     * @brief Template class representing a property with advanced features.
-     *
-     * This class manages a single value with the following capabilities:
-     * - Value validation with customizable validator.
-     * - Change and rejection callbacks.
-     * - Undo/redo functionality with configurable history limit.
-     * - Read-only mode to prevent modifications.
-     * - wxWidgets event notifications and callback handling.
-     * - Timestamp tracking for the last modification.
-     * - Property binding to synchronize values between properties.
-     * - Arithmetic and comparison operators.
-     * - Conversion of the value to C-style strings (for supported types).
-     *
-     * @tparam T Type of the value.
-     */
-    template <typename T>
-    class bwxProperty {
-    public:
-        using Validator = std::function<bool(const T&)>;              ///< Validator function to validate new values.
-        using ChangeCallback = std::function<void(const T&, const T&)>; ///< Callback invoked when the value changes.
-        using RejectCallback = std::function<void(const T&)>;        ///< Callback invoked when a value is rejected.
-        using Timestamp = std::chrono::system_clock::time_point;     ///< Timestamp of the last modification.
+	 * @brief Template class representing a property with advanced features.
+	 *
+	 * This class manages a single value with the following capabilities:
+	 * - Value validation with customizable validator.
+	 * - Change and rejection callbacks.
+	 * - Undo/redo functionality with configurable history limit.
+	 * - Read-only mode to prevent modifications.
+	 * - wxWidgets event notifications and callback handling.
+	 * - Timestamp tracking for the last modification.
+	 * - Property binding to synchronize values between properties.
+	 * - Arithmetic and comparison operators.
+	 * - Conversion of the value to C-style strings (for supported types).
+	 *
+	 * @tparam T Type of the value.
+	 */
+	template <typename T>
+	class bwxProperty {
+	public:
+		using Validator = std::function<bool(const T&)>;              ///< Validator function to validate new values.
+		using ChangeCallback = std::function<void(const T&, const T&)>; ///< Callback invoked when the value changes.
+		using RejectCallback = std::function<void(const T&)>;        ///< Callback invoked when a value is rejected.
+		using Timestamp = std::chrono::system_clock::time_point;     ///< Timestamp of the last modification.
 
-        /**
-         * @brief Constructs a Property with optional parameters.
-         * @param defaultValue Initial value of the property.
-         * @param validator Validator function for new values.
-         * @param onChange Callback invoked on value change.
-         * @param onReject Callback invoked when value is rejected.
-         * @param historyLimit Maximum number of undo/redo states (0 disables history).
-         * @param undoTimeout Optional timeout for undo operations.
-         * @param eventHandler Optional wxWidgets event handler for notifications.
-         */
-        explicit bwxProperty(const T& defaultValue = T(),
-                          Validator validator = nullptr,
-                          ChangeCallback onChange = nullptr,
-                          RejectCallback onReject = nullptr,
-                          size_t historyLimit = 0,
-                          std::optional<std::chrono::seconds> undoTimeout = std::nullopt,
-                          wxEvtHandler* eventHandler = nullptr)
-            : m_value(defaultValue),
-              m_defaultValue(defaultValue),
-              m_validator(std::move(validator)),
-              m_onChange(std::move(onChange)),
-              m_onReject(std::move(onReject)),
-              m_historyLimit(historyLimit),
-              m_undoTimeout(undoTimeout),
-              m_eventHandler(eventHandler),
-              m_lastChangeTime(std::chrono::system_clock::now()) {}
+		/**
+		 * @brief Constructs a Property with optional parameters.
+		 * @param defaultValue Initial value of the property.
+		 * @param validator Validator function for new values.
+		 * @param onChange Callback invoked on value change.
+		 * @param onReject Callback invoked when value is rejected.
+		 * @param historyLimit Maximum number of undo/redo states (0 disables history).
+		 * @param undoTimeout Optional timeout for undo operations.
+		 * @param eventHandler Optional wxWidgets event handler for notifications.
+		 */
+		explicit bwxProperty(const T& defaultValue = T(),
+			Validator validator = nullptr,
+			ChangeCallback onChange = nullptr,
+			RejectCallback onReject = nullptr,
+			size_t historyLimit = 0,
+			std::optional<std::chrono::seconds> undoTimeout = std::nullopt,
+			wxEvtHandler* eventHandler = nullptr)
+				: m_value(defaultValue),
+				m_defaultValue(defaultValue),
+				m_validator(std::move(validator)),
+				m_onChange(std::move(onChange)),
+				m_onReject(std::move(onReject)),
+				m_historyLimit(historyLimit),
+				m_undoTimeout(undoTimeout),
+				m_lastChangeTime(std::chrono::system_clock::now()),
+				m_eventHandler(eventHandler) {} 
 
-        /**
-         * @brief Assigns a new value to the property.
-         * @param newValue Value to assign.
-         * @return Reference to the updated property.
-         */
-        bwxProperty<T>& operator=(const T& newValue) {
-            set(newValue);
-            return *this;
-        }
+		/**
+		 * @brief Assigns a new value to the property.
+		 * @param newValue Value to assign.
+		 * @return Reference to the updated property.
+		 */
+		bwxProperty<T>& operator=(const T& newValue) {
+			set(newValue);
+			return *this;
+		}
 
-        /**
-         * @brief Sets a new value for the property.
-         * @param newValue Value to set.
-         */
-        void set(const T& newValue) {
-            wxMutexLocker lock(m_mutex);
-            if (m_readOnly) return;
+		/**
+		 * @brief Sets a new value for the property.
+		 * @param newValue Value to set.
+		 */
+		void set(const T& newValue) {
+			wxMutexLocker lock(m_mutex);
+			if (m_readOnly) return;
 
-            if (m_validator && !m_validator(newValue)) {
-                if (m_onReject) m_onReject(newValue);
-                return;
-            }
+			if (m_validator && !m_validator(newValue)) {
+				if (m_onReject) m_onReject(newValue);
+				return;
+			}
 
-            if (newValue != m_value) {
-                recordHistory(m_value);
-                clearRedoHistory();
-                if (m_onChange) m_onChange(m_value, newValue);
+			if (newValue != m_value) {
+				recordHistory(m_value);
+				clearRedoHistory();
+				if (m_onChange) m_onChange(m_value, newValue);
 
-                m_value = newValue;
-                m_lastChangeTime = std::chrono::system_clock::now();
+				m_value = newValue;
+				m_lastChangeTime = std::chrono::system_clock::now();
 
-                notifyChange();
-                propagateBinding(newValue);
-            }
-        }
+				notifyChange();
+				propagateBinding(newValue);
+			}
+		}
 
-        /**
-         * @brief Retrieves the current value.
-         * @return Constant reference to the value.
-         */
-        [[nodiscard]] const T& get() const noexcept {
-            wxMutexLocker lock(m_mutex);
-            return m_value;
-        }
+		/**
+		 * @brief Retrieves the current value.
+		 * @return Constant reference to the value.
+		 */
+		[[nodiscard]] const T& get() const noexcept {
+			wxMutexLocker lock(m_mutex);
+			return m_value;
+		}
 
-        /**
-         * @brief Converts the value to a C-style string.
-         * @return Pointer to the C-string or nullptr if unsupported.
-         */
-        const char* AsCStr() const {
-            if constexpr (std::is_same_v<T, std::string>) {
-                return m_value.c_str();
-            } else if constexpr (std::is_same_v<T, wxString>) {
-                return m_value.mb_str().data();
-            } else {
-                static_assert(std::is_same_v<T, std::string> || std::is_same_v<T, wxString>,
-                              "AsCStr() is only supported for std::string or wxString.");
-                return nullptr;
-            }
-        }
+		/**
+		 * @brief Converts the value to a C-style string.
+		 * @return Pointer to the C-string or nullptr if unsupported.
+		 */
+		const char* AsCStr() const {
+			if constexpr (std::is_same_v<T, std::string>) {
+				return m_value.c_str();
+			}
+			else if constexpr (std::is_same_v<T, wxString>) {
+				return m_value.mb_str().data();
+			}
+			else {
+				static_assert(std::is_same_v<T, std::string> || std::is_same_v<T, wxString>,
+					"AsCStr() is only supported for std::string or wxString.");
+				return nullptr;
+			}
+		}
 
-        /**
-         * @brief Resets the value to its default.
-         */
-        void reset() {
-            set(m_defaultValue);
-        }
+		/**
+		 * @brief Resets the value to its default.
+		 */
+		void reset() {
+			set(m_defaultValue);
+		}
 
-        /**
-         * @brief Sets a new validator function.
-         * @param validator Validator function to set.
-         */
-        void setValidator(Validator validator) {
-            wxMutexLocker lock(m_mutex);
-            m_validator = std::move(validator);
-        }
+		/**
+		 * @brief Sets a new validator function.
+		 * @param validator Validator function to set.
+		 */
+		void setValidator(Validator validator) {
+			wxMutexLocker lock(m_mutex);
+			m_validator = std::move(validator);
+		}
 
-        /**
-         * @brief Assigns a callback for value changes.
-         * @param onChange Callback to set.
-         */
-        void setOnChangeCallback(ChangeCallback onChange) {
-            wxMutexLocker lock(m_mutex);
-            m_onChange = std::move(onChange);
-        }
+		/**
+		 * @brief Assigns a callback for value changes.
+		 * @param onChange Callback to set.
+		 */
+		void setOnChangeCallback(ChangeCallback onChange) {
+			wxMutexLocker lock(m_mutex);
+			m_onChange = std::move(onChange);
+		}
 
-        /**
-         * @brief Assigns a callback for value rejections.
-         * @param onReject Callback to set.
-         */
-        void setOnRejectCallback(RejectCallback onReject) {
-            wxMutexLocker lock(m_mutex);
-            m_onReject = std::move(onReject);
-        }
+		/**
+		 * @brief Assigns a callback for value rejections.
+		 * @param onReject Callback to set.
+		 */
+		void setOnRejectCallback(RejectCallback onReject) {
+			wxMutexLocker lock(m_mutex);
+			m_onReject = std::move(onReject);
+		}
 
-        /**
-         * @brief Enables or disables read-only mode.
-         * @param readOnly True to enable, false to disable.
-         */
-        void setReadOnly(bool readOnly) {
-            wxMutexLocker lock(m_mutex);
-            m_readOnly = readOnly;
-        }
+		/**
+		 * @brief Enables or disables read-only mode.
+		 * @param readOnly True to enable, false to disable.
+		 */
+		void setReadOnly(bool readOnly) {
+			wxMutexLocker lock(m_mutex);
+			m_readOnly = readOnly;
+		}
 
-        /**
-         * @brief Checks if the property is read-only.
-         * @return True if read-only, false otherwise.
-         */
-        [[nodiscard]] bool isReadOnly() const noexcept {
-            wxMutexLocker lock(m_mutex);
-            return m_readOnly;
-        }
+		/**
+		 * @brief Checks if the property is read-only.
+		 * @return True if read-only, false otherwise.
+		 */
+		[[nodiscard]] bool isReadOnly() const noexcept {
+			wxMutexLocker lock(m_mutex);
+			return m_readOnly;
+		}
 
-        /**
-         * @brief Undoes the last value change.
-         * @return True if successful, false otherwise.
-         */
-        bool undo() {
-            wxMutexLocker lock(m_mutex);
-            if (m_undoHistory.empty()) return false;
+		/**
+		 * @brief Undoes the last value change.
+		 * @return True if successful, false otherwise.
+		 */
+		bool undo() {
+			wxMutexLocker lock(m_mutex);
+			if (m_undoHistory.empty()) return false;
 
-            auto now = std::chrono::system_clock::now();
-            if (m_undoTimeout && std::chrono::duration_cast<std::chrono::seconds>(now - m_lastChangeTime) > *m_undoTimeout) {
-                return false;
-            }
+			auto now = std::chrono::system_clock::now();
+			if (m_undoTimeout && std::chrono::duration_cast<std::chrono::seconds>(now - m_lastChangeTime) > *m_undoTimeout) {
+				return false;
+			}
 
-            m_redoHistory.push_front(m_value);
-            m_value = m_undoHistory.front();
-            m_undoHistory.pop_front();
-            m_lastChangeTime = now;
+			m_redoHistory.push_front(m_value);
+			m_value = m_undoHistory.front();
+			m_undoHistory.pop_front();
+			m_lastChangeTime = now;
 
-            notifyChange();
-            propagateBinding(m_value);
-            return true;
-        }
+			notifyChange();
+			propagateBinding(m_value);
+			return true;
+		}
 
-        /**
-         * @brief Redoes the previously undone value change.
-         * @return True if successful, false otherwise.
-         */
-        bool redo() {
-            wxMutexLocker lock(m_mutex);
-            if (m_redoHistory.empty()) return false;
+		/**
+		 * @brief Redoes the previously undone value change.
+		 * @return True if successful, false otherwise.
+		 */
+		bool redo() {
+			wxMutexLocker lock(m_mutex);
+			if (m_redoHistory.empty()) return false;
 
-            m_undoHistory.push_front(m_value);
-            m_value = m_redoHistory.front();
-            m_redoHistory.pop_front();
-            m_lastChangeTime = std::chrono::system_clock::now();
+			m_undoHistory.push_front(m_value);
+			m_value = m_redoHistory.front();
+			m_redoHistory.pop_front();
+			m_lastChangeTime = std::chrono::system_clock::now();
 
-            notifyChange();
-            propagateBinding(m_value);
-            return true;
-        }
+			notifyChange();
+			propagateBinding(m_value);
+			return true;
+		}
 
-        /**
-         * @brief Sets the history limit for undo/redo operations.
-         * @param limit Number of history entries to retain.
-         */
-        void setHistoryLimit(size_t limit) {
-            wxMutexLocker lock(m_mutex);
-            m_historyLimit = limit;
-            trimHistory(m_undoHistory);
-            trimHistory(m_redoHistory);
-        }
+		/**
+		 * @brief Sets the history limit for undo/redo operations.
+		 * @param limit Number of history entries to retain.
+		 */
+		void setHistoryLimit(size_t limit) {
+			wxMutexLocker lock(m_mutex);
+			m_historyLimit = limit;
+			trimHistory(m_undoHistory);
+			trimHistory(m_redoHistory);
+		}
 
-        /**
-         * @brief Retrieves the configured history limit.
-         * @return History limit.
-         */
-        [[nodiscard]] size_t getHistoryLimit() const noexcept {
-            wxMutexLocker lock(m_mutex);
-            return m_historyLimit;
-        }
+		/**
+		 * @brief Retrieves the configured history limit.
+		 * @return History limit.
+		 */
+		[[nodiscard]] size_t getHistoryLimit() const noexcept {
+			wxMutexLocker lock(m_mutex);
+			return m_historyLimit;
+		}
 
-        /**
-         * @brief Clears the undo and redo histories.
-         */
-        void clearHistory() {
-            wxMutexLocker lock(m_mutex);
-            m_undoHistory.clear();
-            m_redoHistory.clear();
-        }
+		/**
+		 * @brief Clears the undo and redo histories.
+		 */
+		void clearHistory() {
+			wxMutexLocker lock(m_mutex);
+			m_undoHistory.clear();
+			m_redoHistory.clear();
+		}
 
-        /**
-         * @brief Sets the timeout for undo operations.
-         * @param timeout Timeout duration.
-         */
-        void setUndoTimeout(std::chrono::seconds timeout) {
-            wxMutexLocker lock(m_mutex);
-            m_undoTimeout = timeout;
-        }
+		/**
+		 * @brief Sets the timeout for undo operations.
+		 * @param timeout Timeout duration.
+		 */
+		void setUndoTimeout(std::chrono::seconds timeout) {
+			wxMutexLocker lock(m_mutex);
+			m_undoTimeout = timeout;
+		}
 
-        /**
-         * @brief Retrieves the undo timeout duration.
-         * @return Optional undo timeout.
-         */
-        [[nodiscard]] std::optional<std::chrono::seconds> getUndoTimeout() const noexcept {
-            wxMutexLocker lock(m_mutex);
-            return m_undoTimeout;
-        }
+		/**
+		 * @brief Retrieves the undo timeout duration.
+		 * @return Optional undo timeout.
+		 */
+		[[nodiscard]] std::optional<std::chrono::seconds> getUndoTimeout() const noexcept {
+			wxMutexLocker lock(m_mutex);
+			return m_undoTimeout;
+		}
 
-        /**
-         * @brief Retrieves the timestamp of the last change.
-         * @return Last change timestamp.
-         */
-        Timestamp getLastChangeTime() const {
-            wxMutexLocker lock(m_mutex);
-            return m_lastChangeTime;
-        }
+		/**
+		 * @brief Retrieves the timestamp of the last change.
+		 * @return Last change timestamp.
+		 */
+		Timestamp getLastChangeTime() const {
+			wxMutexLocker lock(m_mutex);
+			return m_lastChangeTime;
+		}
 
-        /**
-         * @brief Binds another property to synchronize value changes.
-         * @param other Property to bind to.
-         */
-        void bind(bwxProperty<T>& other) {
-            wxMutexLocker lock(m_mutex);
-            m_boundProperties.push_back(&other);
-        }
+		/**
+		 * @brief Binds another property to synchronize value changes.
+		 * @param other Property to bind to.
+		 */
+		void bind(bwxProperty<T>& other) {
+			wxMutexLocker lock(m_mutex);
+			m_boundProperties.push_back(&other);
+		}
 
-        // Arithmetic operators
-        bwxProperty<T>& operator+=(const T& rhs) { set(m_value + rhs); return *this; }
-        bwxProperty<T>& operator-=(const T& rhs) { set(m_value - rhs); return *this; }
-        bwxProperty<T>& operator*=(const T& rhs) { set(m_value * rhs); return *this; }
-        bwxProperty<T>& operator/=(const T& rhs) { set(m_value / rhs); return *this; }
+		// Arithmetic operators
+		bwxProperty<T>& operator+=(const T& rhs) { set(m_value + rhs); return *this; }
+		bwxProperty<T>& operator-=(const T& rhs) { set(m_value - rhs); return *this; }
+		bwxProperty<T>& operator*=(const T& rhs) { set(m_value * rhs); return *this; }
+		bwxProperty<T>& operator/=(const T& rhs) { set(m_value / rhs); return *this; }
 
-        // Comparison operators
-        bool operator==(const T& rhs) const { return m_value == rhs; }
-        bool operator!=(const T& rhs) const { return m_value != rhs; }
-        bool operator<(const T& rhs) const { return m_value < rhs; }
-        bool operator<=(const T& rhs) const { return m_value <= rhs; }
-        bool operator>(const T& rhs) const { return m_value > rhs; }
-        bool operator>=(const T& rhs) const { return m_value >= rhs; }
+		// Comparison operators
+		bool operator==(const T& rhs) const { return m_value == rhs; }
+		bool operator!=(const T& rhs) const { return m_value != rhs; }
+		bool operator<(const T& rhs) const { return m_value < rhs; }
+		bool operator<=(const T& rhs) const { return m_value <= rhs; }
+		bool operator>(const T& rhs) const { return m_value > rhs; }
+		bool operator>=(const T& rhs) const { return m_value >= rhs; }
 
-    private:
-        /** @brief Records the current value into the undo history. */
-        void recordHistory(const T& oldValue) {
-            if (m_historyLimit == 0) return;
-            m_undoHistory.push_front(oldValue);
-            trimHistory(m_undoHistory);
-        }
+	private:
+		/** @brief Records the current value into the undo history. */
+		void recordHistory(const T& oldValue) {
+			if (m_historyLimit == 0) return;
+			m_undoHistory.push_front(oldValue);
+			trimHistory(m_undoHistory);
+		}
 
-        /** @brief Clears the redo history. */
-        void clearRedoHistory() {
-            m_redoHistory.clear();
-        }
+		/** @brief Clears the redo history. */
+		void clearRedoHistory() {
+			m_redoHistory.clear();
+		}
 
-        /** @brief Trims the history to respect the configured limit. */
-        void trimHistory(std::deque<T>& history) {
-            while (history.size() > m_historyLimit) {
-                history.pop_back();
-            }
-        }
+		/** @brief Trims the history to respect the configured limit. */
+		void trimHistory(std::deque<T>& history) {
+			while (history.size() > m_historyLimit) {
+				history.pop_back();
+			}
+		}
 
-        /** @brief Notifies listeners through callbacks and wxWidgets events. */
-        void notifyChange() {
-            if (m_eventHandler) {
-                wxCommandEvent evt(EVT_BWXPROPERTY_CHANGED);
-                m_eventHandler->AddPendingEvent(evt);
-            }
-        }
+		/** @brief Notifies listeners through callbacks and wxWidgets events. */
+		void notifyChange() {
+			if (m_eventHandler) {
+				wxCommandEvent evt(EVT_BWXPROPERTY_CHANGED);
+				m_eventHandler->AddPendingEvent(evt);
+			}
+		}
 
-        /** @brief Propagates value changes to bound properties. */
-        void propagateBinding(const T& newValue) {
-            for (auto* boundProp : m_boundProperties) {
-                if (boundProp) boundProp->set(newValue);
-            }
-        }
+		/** @brief Propagates value changes to bound properties. */
+		void propagateBinding(const T& newValue) {
+			for (auto* boundProp : m_boundProperties) {
+				if (boundProp) boundProp->set(newValue);
+			}
+		}
 
-        T m_value{};                                    ///< Current value of the property.
-        T m_defaultValue{};                              ///< Default value used for resets.
-        Validator m_validator = nullptr;                 ///< Validator function for new values.
-        ChangeCallback m_onChange = nullptr;             ///< Callback for value changes.
-        RejectCallback m_onReject = nullptr;             ///< Callback for rejected values.
-        size_t m_historyLimit = 0;                       ///< Undo/redo history limit.
-        std::optional<std::chrono::seconds> m_undoTimeout = std::nullopt; ///< Undo operation timeout.
-        bool m_readOnly = false;                         ///< Read-only mode flag.
-        wxEvtHandler* m_eventHandler = nullptr;          ///< wxWidgets event handler.
-        Timestamp m_lastChangeTime;                      ///< Timestamp of the last modification.
-        std::deque<T> m_undoHistory;                     ///< Undo history.
-        std::deque<T> m_redoHistory;                     ///< Redo history.
-        std::vector<bwxProperty<T>*> m_boundProperties;     ///< Bound properties for synchronization.
-        mutable wxMutex m_mutex;                         ///< Mutex for thread safety.
-    };
-    
-    //-----------------------------------------------------------------------------------
+		T m_value{};                                    ///< Current value of the property.
+		T m_defaultValue{};                              ///< Default value used for resets.
+		Validator m_validator = nullptr;                 ///< Validator function for new values.
+		ChangeCallback m_onChange = nullptr;             ///< Callback for value changes.
+		RejectCallback m_onReject = nullptr;             ///< Callback for rejected values.
+		size_t m_historyLimit = 0;                       ///< Undo/redo history limit.
+		std::optional<std::chrono::seconds> m_undoTimeout = std::nullopt; ///< Undo operation timeout.
+		bool m_readOnly = false;                         ///< Read-only mode flag.
+		wxEvtHandler* m_eventHandler = nullptr;          ///< wxWidgets event handler.
+		Timestamp m_lastChangeTime;                      ///< Timestamp of the last modification.
+		std::deque<T> m_undoHistory;                     ///< Undo history.
+		std::deque<T> m_redoHistory;                     ///< Redo history.
+		std::vector<bwxProperty<T>*> m_boundProperties;     ///< Bound properties for synchronization.
+		mutable wxMutex m_mutex;                         ///< Mutex for thread safety.
+	};
+
+	//-----------------------------------------------------------------------------------
 
 	/**
 	 * @brief Template class representing a vector-based property with advanced features.
@@ -409,11 +411,12 @@ namespace bwx_sdk {
 			ChangeCallback callback = nullptr,
 			size_t historyLimit = 0,
 			size_t capacityLimit = 0)
-			: m_eventHandler(handler),
-			m_onChange(std::move(callback)),
-			m_historyLimit(historyLimit),
-			m_capacityLimit(capacityLimit),
-			m_lastChangeTime(std::chrono::system_clock::now()) {}
+				: m_eventHandler(handler),
+				m_onChange(std::move(callback)),
+				m_historyLimit(historyLimit),
+				m_capacityLimit(capacityLimit),
+				m_lastChangeTime(std::chrono::system_clock::now()) {
+		}
 
 		/**
 		 * @brief Adds a value to the vector.
@@ -705,11 +708,12 @@ namespace bwx_sdk {
 			ChangeCallback callback = nullptr,
 			size_t historyLimit = 0,
 			size_t capacityLimit = 0)
-			: m_eventHandler(handler),
-			m_onChange(std::move(callback)),
-			m_historyLimit(historyLimit),
-			m_capacityLimit(capacityLimit),
-			m_lastChangeTime(std::chrono::system_clock::now()) {}
+				: m_eventHandler(handler),
+				m_onChange(std::move(callback)),
+				m_historyLimit(historyLimit),
+				m_capacityLimit(capacityLimit),
+				m_lastChangeTime(std::chrono::system_clock::now()) {
+		}
 
 		/**
 		 * @brief Inserts or updates a value associated with a key.

@@ -20,6 +20,7 @@
 #include "bwx_sdk/bwx_globals.h"
 
 namespace bwx_sdk {
+namespace utils {
 
 wxColour bwxGetRandomColour();
 
@@ -28,6 +29,7 @@ void bwxGetRandomColours(wxVector<wxColour>* v, int howMany, bool unique = true,
 
 wxColour bwxMixColours(const wxColour& col1, const wxColour& col2, double factor);
 
+}  // namespace utils
 }  // namespace bwx_sdk
 
 #endif

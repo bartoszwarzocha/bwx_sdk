@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        bwx_datetime.h
-// Purpose:     My wxWidgets app
+// Purpose:     BWX_SDK Library; Daye & Time operations
 // Author:      Name Surname <name.surname@email.org>
 // Created:     2025-03-04
 // Copyright:   (c) 2025 by Name Surname
@@ -19,6 +19,7 @@
 #include "bwx_sdk/bwx_globals.h"
 
 namespace bwx_sdk {
+namespace dt {
 
 int bwxGetWeekDay(int d, int m, int y, int s = 1);
 
@@ -88,6 +89,7 @@ time_t bwxToTimeT(wxDateTime date);
 
 wxDateTime bwxFromTimeT(time_t timestamp);
 
+}  // namespace dt
 }  // namespace bwx_sdk
 
 #endif

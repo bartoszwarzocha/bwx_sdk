@@ -58,8 +58,8 @@ public:
           m_onReject(std::move(onReject)),
           m_historyLimit(historyLimit),
           m_undoTimeout(undoTimeout),
-          m_eventHandler(eventHandler),
-          m_lastChangeTime(std::chrono::system_clock::now()) {}
+          m_lastChangeTime(std::chrono::system_clock::now()),
+          m_eventHandler(eventHandler) {}
 
     bwxProperty<T>& operator=(const T& newValue) {
         set(newValue);
@@ -463,3 +463,31 @@ private:
 };
 
 //-----------------------------------------------------------------------------------
+
+template <typename K, typename V>
+class bwxPropertyMap {
+public:
+    using ChangeCallback = std::function<void()>;
+    using Timestamp = std::chrono::system_clock::time_point;
+
+    explicit bwxPropertyMap(wxEvtHandler* handler = nullptr, ChangeCallback callback = nullptr, size_t historyLimit = 0,
+                            size_t capacityLimit = 0)
+        : m_eventHandler(handler),
+          m_onChange(std::move(callback)),
+          m_historyLimit(historyLimit),
+          m_capacityLimit(capacityLimit),
+          m_lastChangeTime(std::chrono::system_clock::now()) {}
+
+    void set(const K& key, const V& value) {
+        wxMutexLocker lock(m_mutex);
+        if (m_readOnly) return;
+
+        if (m_capacityLimit > 0 && m_data.size() >= m_capacityLimit && m_data.find(key) == m_data.end()) {
+            throw std::overflow_error("Capacity limit reached");
+        }
+
+        recordHistory();
+        m_data[key] = value;
+        m_lastChangeTime = std::chrono::system_clock::now();
+        notifyChange();
+    }

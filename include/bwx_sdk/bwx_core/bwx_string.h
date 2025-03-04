@@ -20,6 +20,7 @@
 #include "bwx_sdk/bwx_globals.h"
 
 namespace bwx_sdk {
+namespace str {
 
 wxArrayString bwxSimpleExplode(const wxString& s, const wxString& separator);
 
@@ -75,6 +76,8 @@ T bwxFromString(const wxString& str) {
 
     return static_cast<T>(0);  // 0 if error
 }
+
+}  // namespace str
 }  // namespace bwx_sdk
 
 #endif

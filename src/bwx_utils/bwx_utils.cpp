@@ -31,7 +31,7 @@ namespace bwx_sdk {
 		wxColour bwxGetRandomColour()
 		{
 			//  return wxColour(R, G, B);
-			return wxColour(bwxRand<int>(0, 255), bwxRand<int>(0, 255), bwxRand<int>(0, 255));
+			return wxColour(math::bwxRand<int>(0, 255), math::bwxRand<int>(0, 255), math::bwxRand<int>(0, 255));
 		}
 
 		void bwxGetRandomColours(wxVector<wxColour>* v, int howMany, bool unique, const wxColour& first)

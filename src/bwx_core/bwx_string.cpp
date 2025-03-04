@@ -24,7 +24,7 @@ namespace bwx_sdk {
 			if (separator.IsEmpty() || str.IsEmpty()) return result;
 
 			size_t start = 0;
-			size_t end = str.Find(separator);
+			int end = str.Find(separator);
 
 			while (end != wxNOT_FOUND)
 			{
@@ -44,7 +44,7 @@ namespace bwx_sdk {
 
 			result->Clear();
 			size_t start = 0;
-			size_t end = str.Find(separator);
+			int end = str.Find(separator);
 
 			while (end != wxNOT_FOUND)
 			{

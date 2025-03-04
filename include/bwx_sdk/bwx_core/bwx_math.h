@@ -26,6 +26,7 @@
 #include "bwx_sdk/bwx_globals.h"
 
 namespace bwx_sdk {
+namespace math {
 
 #define bwxPI M_PI
 #define bwxHPI bwxPI / 2.0f
@@ -119,6 +120,8 @@ constexpr T bwxNormalize(T x, T minVal, T maxVal) {
     if (minVal == maxVal) return static_cast<T>(0);  // Avoid division by 0
     return (x - minVal) / (maxVal - minVal);
 }
+
+}  // namespace math
 }  // namespace bwx_sdk
 
 #endif

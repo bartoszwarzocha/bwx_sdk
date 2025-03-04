@@ -87,11 +87,11 @@ namespace bwx_sdk {
 		float bwxFastSqrt(float number)
 		{
 			long i;
-			float x, y;
+			float x = number * 0.5F;
+			float y = number;
+
 			const float threehalfs = 1.5F;
 
-			x = number * 0.5F;
-			y = number;
 			i = *(long*)&y;
 			i = 0x5f3759df - (i >> 1);
 			y = *(float*)&i;

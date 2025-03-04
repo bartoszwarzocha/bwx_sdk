@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        bwx_datetime.h
-// Purpose:     My wxWidgets app
+// Purpose:     BWX_SDK Library; Daye & Time operations
 // Author:      Name Surname <name.surname@email.org>
 // Created:     2025-03-04
 // Copyright:   (c) 2025 by Name Surname

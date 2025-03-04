@@ -73,6 +73,7 @@ endfunction()
 
 # Add subdirectories for additional libraries and example applications
 add_subdirectory(src/bwx_core)
+add_subdirectory(src/bwx_gui)
 add_subdirectory(src/bwx_utils)
 add_subdirectory(examples/example_app)
 
