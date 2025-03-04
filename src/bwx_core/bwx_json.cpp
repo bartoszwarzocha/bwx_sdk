@@ -299,8 +299,8 @@ namespace bwx_sdk {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, std::nullptr_t>) return wxString("null");
             else if constexpr (std::is_same_v<T, int>) return wxString::Format("%d", arg);
-            else if constexpr (std::is_same_v<T, int64_t>) return wxString::Format("%lld", arg);   // NOWE
-            else if constexpr (std::is_same_v<T, uint64_t>) return wxString::Format("%llu", arg); // NOWE
+            else if constexpr (std::is_same_v<T, int64_t>) return wxString::Format("%lld", arg);
+            else if constexpr (std::is_same_v<T, uint64_t>) return wxString::Format("%llu", arg);
             else if constexpr (std::is_same_v<T, double>) return wxString::Format("%g", arg);
             else if constexpr (std::is_same_v<T, bool>) return wxString(arg ? "true" : "false");
             else if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, wxString>) return "\"" + wxString(arg) + "\"";
@@ -333,7 +333,7 @@ namespace bwx_sdk {
             if (text[start] == '/' && start + 1 < text.Length() && text[start + 1] == '/')
             {
                 while (start < text.Length() && text[start] != '\n')
-                    start++;  // Przeskakujemy do koñca linii
+                    start++;
                 continue;
             }
 

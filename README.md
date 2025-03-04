@@ -4,6 +4,7 @@
 
 - [Overview](#overview)
 - [Features](#features)
+  - [List of component libraries](#list-of-component-libraries)
 - [Requirements](#requirements)
   - [Supported Compilers](#supported-compilers)
 - [CI/CD – GitHub Actions](#cicd--github-actions)
@@ -51,6 +52,17 @@ The current GitHub version is still under construction (it's a long way to first
 - Cross-platform compatibility (Windows, Linux, macOS).
 - Support for both static and shared (Windows) library builds.
 - Examples demonstrating library usage.
+
+### List of component libraries
+Library|Description|Comments|Status
+-|-|-|-
+_bwx_adv_|Advanced stuff like **Python** plugins system, etc.||In preparation
+_bwx_core_|Basic classes and functions for general functions (application configuration, cmd command parser, etc.), operations (such as data conversion or mathematical operations) and types (string, datetime, json, etc.)||**Moving in progress**
+_bwx_gl_|A collection of classes and functions to facilitate working with **OpenGL** in wxWidgets applications||In preparation
+_bwx_gui_|A collection of various custom GUI parts (sizer wrappers, dialog windows, custom GUI controls, etc.)||In preparation
+_bwx_utils_|A collection of different classes and functions that provide ‘non-primary’ solutions, such as operations on colours|Requires _bwx_core_|**Moving in progress**
+
+
 
 ---
 

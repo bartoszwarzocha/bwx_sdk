@@ -89,7 +89,7 @@ namespace bwx_sdk {
 
 			if (processLog)
 			{
-				//wxLogSdkCoreError(msg);
+				wxLogError(msg);
 			}
 		}
 
@@ -117,7 +117,7 @@ namespace bwx_sdk {
 
 			if (processLog)
 			{
-				//wxLogSdkCoreError(msg);
+				wxLogError(msg);
 			}
 		}
 
@@ -146,7 +146,7 @@ namespace bwx_sdk {
 
 			if (processLog)
 			{
-				//wxLogSdkCoreError(msg);
+				wxLogError(msg);
 			}
 		}
 

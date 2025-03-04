@@ -14,7 +14,7 @@
 #include "bwx_sdk/bwx_globals.h"
 
 /**
- * @file bwx_core.cpp
+ * @file bwx_core.h
  * @brief Implements core functions for the BWXSDK.
  *
  * This file provides basic functions such as displaying standard system paths,

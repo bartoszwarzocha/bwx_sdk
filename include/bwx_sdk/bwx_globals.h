@@ -142,7 +142,7 @@ public:                                                      \
     inline T* Get##f##Ptr() { return &(this->m_##x); }       \
                                                              \
 private:                                                     \
-    T m_##x;
+    T m_##x
 
 #define _static(Class, T, x, f)                               \
 public:                                                       \

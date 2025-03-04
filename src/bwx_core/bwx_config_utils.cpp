@@ -80,27 +80,27 @@ namespace bwx_sdk {
 			switch (it->second.GetType())
 			{
 			case CONFIG_ENTRY_TYPE_STRING:
-				//wxLogDebug("Save config entry (string): %s: %s", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<wxString>().c_str());
+				wxLogDebug("Save config entry (string): %s: %s", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<wxString>().c_str());
 				config.Write(*(it->second.GetPathPtr()), it->second.GetValuePtr()->As<wxString>());
 				break;
 
 			case CONFIG_ENTRY_TYPE_INT:
-				//wxLogDebug("Save config entry (int): %s: %d", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<int>());
+				wxLogDebug("Save config entry (int): %s: %d", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<int>());
 				config.Write(*(it->second.GetPathPtr()), it->second.GetValuePtr()->As<int>());
 				break;
 
 			case CONFIG_ENTRY_TYPE_FLOAT:
-				//wxLogDebug("Save config entry (float): %s: %f", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<float>());
+				wxLogDebug("Save config entry (float): %s: %f", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<float>());
 				config.Write(*(it->second.GetPathPtr()), it->second.GetValuePtr()->As<float>());
 				break;
 
 			case CONFIG_ENTRY_TYPE_DOUBLE:
-				//wxLogDebug("Save config entry (double): %s: %lf", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<double>());
+				wxLogDebug("Save config entry (double): %s: %lf", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<double>());
 				config.Write(*(it->second.GetPathPtr()), it->second.GetValuePtr()->As<double>());
 				break;
 
 			case CONFIG_ENTRY_TYPE_BOOLEAN:
-				//wxLogDebug("Save config entry (bool): %s: %s", it->second.GetPathPtr()->c_str(), (it->second.GetValuePtr()->As<bool>()) ? "true" : "false");
+				wxLogDebug("Save config entry (bool): %s: %s", it->second.GetPathPtr()->c_str(), (it->second.GetValuePtr()->As<bool>()) ? "true" : "false");
 				config.Write(*(it->second.GetPathPtr()), it->second.GetValuePtr()->As<bool>());
 				break;
 			}
@@ -109,39 +109,39 @@ namespace bwx_sdk {
 
 	void bwxConfigUtils::Set(const wxString& key, wxAny val)
 	{
-		//wxLogInfo("Value: %s", val.As<wxString>().c_str());
+		wxLogInfo("Value: %s", val.As<wxString>().c_str());
 		bwxConfigUtils::m_configEntries[key].SetValue(val);
-		//wxLogDebug("Saved value: %s", ConfigUtils::m_config_entries[key].GetValue().As<wxString>());
+		wxLogDebug("Saved value: %s", bwxConfigUtils::m_configEntries[key].GetValue().As<wxString>());
 	}
 
 	void bwxConfigUtils::Get(const wxString& key, wxString* val)
 	{
-		//wxLogDebug("Get config entry: %s", key.c_str());
+		wxLogDebug("Get config entry: %s", key.c_str());
 		*val = bwxConfigUtils::m_configEntries[key].GetValue().As<wxString>();
 	}
 
 	void bwxConfigUtils::Get(const wxString& key, int* val)
 	{
-		//wxLogDebug("Get config entry: %s", key.c_str());
+		wxLogDebug("Get config entry: %s", key.c_str());
 		*val = bwxConfigUtils::m_configEntries[key].GetValue().As<int>();
 	}
 
 	void bwxConfigUtils::Get(const wxString& key, float* val)
 	{
-		//wxLogDebug("Get config entry: %s", key.c_str());
+		wxLogDebug("Get config entry: %s", key.c_str());
 		*val = bwxConfigUtils::m_configEntries[key].GetValue().As<float>();
 	}
 
 	void bwxConfigUtils::Get(const wxString& key, bool* val)
 	{
-		//wxLogDebug("Get config entry: %s", key.c_str());
+		wxLogDebug("Get config entry: %s", key.c_str());
 		*val = bwxConfigUtils::m_configEntries[key].GetValue().As<bool>();
 	}
 
 	bool bwxConfigUtils::Get(const wxString& key, wxColour* val)
 	{
 		bool ret = false;
-		//wxLogDebug("Get config entry: %s", key.c_str());
+		wxLogDebug("Get config entry: %s", key.c_str());
 		ret = wxFromString(bwxConfigUtils::m_configEntries[key].GetValue().As<wxString>(), val);
 		if (!ret) *val = wxColour(128, 128, 128);
 		return ret;
@@ -149,30 +149,30 @@ namespace bwx_sdk {
 
 	void bwxConfigUtils::ShowInLog()
 	{
-		//wxLogMessage("Current config entries:");
+		wxLogMessage("Current config entries:");
 
 		for (auto it = bwxConfigUtils::m_configEntries.begin(); it != bwxConfigUtils::m_configEntries.end(); it++)
 		{
 			switch (it->second.GetType())
 			{
 			case CONFIG_ENTRY_TYPE_STRING:
-				//wxLogDebug("Config entry (string): %s: %s", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<wxString>().c_str());
+				wxLogDebug("Config entry (string): %s: %s", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<wxString>().c_str());
 				break;
 
 			case CONFIG_ENTRY_TYPE_INT:
-				//wxLogDebug("Config entry (int): %s: %d", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<int>());
+				wxLogDebug("Config entry (int): %s: %d", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<int>());
 				break;
 
 			case CONFIG_ENTRY_TYPE_FLOAT:
-				//wxLogDebug("Config entry (float): %s: %f", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<float>());
+				wxLogDebug("Config entry (float): %s: %f", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<float>());
 				break;
 
 			case CONFIG_ENTRY_TYPE_DOUBLE:
-				//wxLogDebug("Config entry (double): %s: %lf", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<double>());
+				wxLogDebug("Config entry (double): %s: %lf", it->second.GetPathPtr()->c_str(), it->second.GetValuePtr()->As<double>());
 				break;
 
 			case CONFIG_ENTRY_TYPE_BOOLEAN:
-				//wxLogDebug("Config entry (bool): %s: %s", it->second.GetPathPtr()->c_str(), (it->second.GetValuePtr()->As<bool>()) ? "true" : "false");
+				wxLogDebug("Config entry (bool): %s: %s", it->second.GetPathPtr()->c_str(), (it->second.GetValuePtr()->As<bool>()) ? "true" : "false");
 				break;
 			}
 		}
