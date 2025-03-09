@@ -6,6 +6,18 @@
     {
       "name": "wxwidgets",
       "version>=": "3.2.6"
+    },
+    {
+      "name": "opengl",
+      "platform": "windows | linux"
+    },
+    {
+      "name": "glew",
+      "platform": "windows | linux"
+    },
+    {
+      "name": "glm",
+      "platform": "windows | linux"
     }
   ]
 }

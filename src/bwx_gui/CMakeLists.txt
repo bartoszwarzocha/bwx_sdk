@@ -34,6 +34,7 @@ target_include_directories(bwx_gui
 
 target_link_libraries(bwx_gui 
     PUBLIC ${wxWidgets_LIBRARIES}
+    PUBLIC bwx_core
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${BWX_GUI_SOURCES})
