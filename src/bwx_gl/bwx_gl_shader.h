@@ -10,18 +10,16 @@
 #ifndef _BWX_GL_SHADER_H_
 #define _BWX_GL_SHADER_H_
 
+#if defined(__APPLE__)
+#error OpenGL functionality is not available for macOS.
+#endif
+
 #include <string>
 #include <unordered_map>
-#include <iostream>
-#include <vector>
 
-#if defined(__APPLE__)
-	#error OpenGL functionality is not available for macOS.
-#else
-	#include <GL/glew.h>
-    #include <glm/glm.hpp>
-    #include <glm/gtc/type_ptr.hpp>
-#endif
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace bwx_sdk {
 

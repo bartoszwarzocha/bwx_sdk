@@ -15,7 +15,6 @@
 
 namespace bwx_sdk {
 
-    // bwxGLBuffer (Base)
     bwxGLBuffer::bwxGLBuffer(GLenum target) : m_target(target) {
         glGenBuffers(1, &m_bufferID);
     }
@@ -39,36 +38,14 @@ namespace bwx_sdk {
         }
     }
 
-    // bwxGLVertexBuffer
-    bwxGLVertexBuffer::bwxGLVertexBuffer() : bwxGLBuffer(GL_ARRAY_BUFFER) {}
-
-    void bwxGLVertexBuffer::UploadData(const void* data, GLsizeiptr size, GLenum usage) {
+    void bwxGLBuffer::SetData(const void* data, GLsizeiptr size, GLenum usage) {
         Bind();
-        glBufferData(GL_ARRAY_BUFFER, size, data, usage);
+        glBufferData(m_target, size, data, usage);
         Unbind();
     }
 
-    // bwxGLIndexBuffer
-    bwxGLIndexBuffer::bwxGLIndexBuffer() : bwxGLBuffer(GL_ELEMENT_ARRAY_BUFFER), m_count(0) {}
-
-    void bwxGLIndexBuffer::UploadData(const std::vector<GLuint>& indices, GLenum usage) {
-        Bind();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), usage);
-        m_count = static_cast<GLsizei>(indices.size());
-        Unbind();
-    }
-
-    // bwxGLUniformBuffer
-    bwxGLUniformBuffer::bwxGLUniformBuffer() : bwxGLBuffer(GL_UNIFORM_BUFFER) {}
-
-    void bwxGLUniformBuffer::UploadData(const void* data, GLsizeiptr size, GLenum usage) {
-        Bind();
-        glBufferData(GL_UNIFORM_BUFFER, size, data, usage);
-        Unbind();
-    }
-
-    void bwxGLUniformBuffer::BindToPoint(GLuint bindingPoint) {
-        glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, m_bufferID);
+    void bwxGLBuffer::SetData(const std::vector<GLuint>& indices, GLenum usage) {
+        SetData(indices.data(), indices.size() * sizeof(GLuint), usage);
     }
 
 } // namespace bwx_sdk

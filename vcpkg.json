@@ -4,10 +4,6 @@
   "builtin-baseline": "9df46ca3f4ec3bd05984e5668218630c52ea302a",
   "dependencies": [
     {
-      "name": "wxwidgets",
-      "version>=": "3.2.6"
-    },
-    {
       "name": "opengl",
       "platform": "windows | linux"
     },
@@ -18,6 +14,10 @@
     {
       "name": "glm",
       "platform": "windows | linux"
+    },
+    {
+      "name": "wxwidgets",
+      "version>=": "3.2.6"
     }
   ]
 }

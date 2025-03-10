@@ -11,10 +11,11 @@
 #error OpenGL functionality is not available for macOS.
 #endif
 
-#include "bwx_gl_shader.h"
-
+#include <iostream>
 #include <fstream>
 #include <vector>
+
+#include "bwx_gl_shader.h"
 
 namespace bwx_sdk {
 

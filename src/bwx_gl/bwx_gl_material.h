@@ -10,88 +10,84 @@
 #ifndef _BWX_GL_MATERIAL_H_
 #define _BWX_GL_MATERIAL_H_
 
-#include <wx/string.h>
-#include <vector>
-#include <unordered_map>
-
-#include "bwx_gl_texture.h"
-#include "bwx_gl_shader.h"
-
 #if defined(__APPLE__)
-    #error OpenGL functionality is not available for macOS.
-#else
-    #include <GL/glew.h>
-    #include <glm/glm.hpp>
+#error OpenGL functionality is not available for macOS.
 #endif
 
-namespace bwx_sdk {
+#define bwxGL_MATERIAL_IOR_AIR          1.000
+#define bwxGL_MATERIAL_IOR_WATER        1.333
+#define bwxGL_MATERIAL_IOR_DIAMOND      2.417
+#define bwxGL_MATERIAL_IOR_ETHYL_ALC    1.360
+#define bwxGL_MATERIAL_IOR_WHISKY       1.356
+#define bwxGL_MATERIAL_IOR_VODKA        1.363
+#define bwxGL_MATERIAL_IOR_AMBER        1.539
+#define bwxGL_MATERIAL_IOR_AMETHYST     1.532
+#define bwxGL_MATERIAL_IOR_GOLD         0.470
 
-    enum bwxGL_TEXTURE_TYPE {
-        TEXTURE_DIFFUSE,
-        TEXTURE_SPECULAR,
-        TEXTURE_NORMAL,
-        TEXTURE_HEIGHT,
-        TEXTURE_EMISSIVE,
-        TEXTURE_OPACITY,
-        TEXTURE_UNKNOWN
-    };
+#include "bwx_gl_shader.h"
+#include "bwx_gl_texture.h"
+
+#include <unordered_map>
+#include <string>
+
+namespace bwx_sdk {
 
     class bwxGLMaterial {
     public:
         bwxGLMaterial();
+        bwxGLMaterial(const std::string& name);
         ~bwxGLMaterial();
 
-        void Clean();
+		void Clean();
+
         void ApplyToShader(bwxGLShaderProgram& shader) const;
+        void Bind() const;
 
-        // Ustawianie w³aœciwoœci materia³u
-        inline void SetAmbient(glm::vec4 a) { m_ambient = a; }
-        inline void SetDiffuse(glm::vec4 d) { m_diffuse = d; }
-        inline void SetSpecular(glm::vec4 s) { m_specular = s; }
-        inline void SetEmissive(glm::vec4 e) { m_emissive = e; }
-        inline void SetTransparent(glm::vec4 t) { m_transparent = t; }
-        inline void SetReflectivity(glm::vec4 r) { m_reflectivity = r; }
-        inline void SetShininess(GLfloat s) { m_shininess = s; }
-        inline void SetReflection(GLfloat r) { m_reflection = r; }
-        inline void SetRefraction(GLfloat r) { m_refraction = r; }
-        inline void SetOpacity(GLfloat o) { m_opacity = o; }
+		void AddTexture(bwxGL_TEXTURE_TYPE type, const std::string& path);
+        std::unordered_map<bwxGL_TEXTURE_TYPE, std::string>& GetTextures();
+        bool HasTexture(bwxGL_TEXTURE_TYPE type) const;
+        std::string GetTexturePath(bwxGL_TEXTURE_TYPE type) const;
 
-        inline glm::vec4 GetAmbient() const { return m_ambient; }
-        inline glm::vec4 GetDiffuse() const { return m_diffuse; }
-        inline glm::vec4 GetSpecular() const { return m_specular; }
-        inline glm::vec4 GetEmissive() const { return m_emissive; }
-        inline glm::vec4 GetTransparent() const { return m_transparent; }
-        inline glm::vec4 GetReflectivity() const { return m_reflectivity; }
-        inline GLfloat GetShininess() const { return m_shininess; }
-        inline GLfloat GetReflection() const { return m_reflection; }
-        inline GLfloat GetRefraction() const { return m_refraction; }
-        inline GLfloat GetOpacity() const { return m_opacity; }
+		void SetAmbient(const glm::vec4& ambient);
+		void SetDiffuse(const glm::vec4& diffuse);
+		void SetSpecular(const glm::vec4& specular);
+		void SetEmissive(const glm::vec4& emissive);
+		void SetTransparent(const glm::vec4& transparent);
+		void SetReflectivity(const glm::vec4& reflectivity);
 
-        // Tekstury
-        void AddTexture(bwxGL_TEXTURE_TYPE type, const std::string& texturePath);
-        inline std::unordered_map<bwxGL_TEXTURE_TYPE, std::string>& GetTextures() { return m_textures; }
-        inline bool HasTexture(bwxGL_TEXTURE_TYPE type) const { return m_textures.find(type) != m_textures.end(); }
-        inline std::string GetTexturePath(bwxGL_TEXTURE_TYPE type) const { return HasTexture(type) ? m_textures.at(type) : ""; }
+		void SetShininess(GLfloat shininess);
+		void SetReflection(GLfloat reflection);
+		void SetRefraction(GLfloat refraction);
+		void SetOpacity(GLfloat opacity);
 
-        // Identyfikacja materia³u
-        inline void SetName(const std::string& n) { m_name = n; }
-        inline std::string GetName() const { return m_name; }
+		const glm::vec4& GetAmbient() const;
+		const glm::vec4& GetDiffuse() const;
+		const glm::vec4& GetSpecular() const;
+		const glm::vec4& GetEmissive() const;
+		const glm::vec4& GetTransparent() const;
+		const glm::vec4& GetReflectivity() const;
 
-        inline void SetId(unsigned int d) { m_id = d; }
-        inline unsigned int GetId() const { return m_id; }
+		GLfloat GetShininess() const;
+		GLfloat GetReflection() const;
+		GLfloat GetRefraction() const;
+		GLfloat GetOpacity() const;
 
-        // Flagowanie materia³u
-        inline void SetEmissive(bool e = true) { m_isEmissive = e; }
-        inline void SetTransparent(bool o = true) { m_isTransparent = o; }
-        inline void SetReflection(bool r = true) { m_isReflection = r; }
-        inline void SetRefraction(bool r = true) { m_isRefraction = r; }
-        inline void SetTwoSided(bool ts = true) { m_isTwoSided = ts; }
+		void SetName(const std::string& name) { m_name = name; }
+		const std::string& GetName() const { return m_name; }
 
-        inline bool IsEmissive() const { return m_isEmissive; }
-        inline bool IsTransparent() const { return m_isTransparent; }
-        inline bool IsReflection() const { return m_isReflection; }
-        inline bool IsRefraction() const { return m_isRefraction; }
-        inline bool IsTwoSided() const { return m_isTwoSided; }
+		void SetID(unsigned int id) { m_id = id; }
+		unsigned int GetID() const { return m_id; }
+
+		void SetTransparent(bool transparent) { m_isTransparent = transparent; }
+		bool IsTransparent() const { return m_isTransparent; }
+		void SetEmissive(bool emissive) { m_isEmissive = emissive; }
+		bool IsEmissive() const { return m_isEmissive; }
+		void SetReflection(bool reflection) { m_isReflection = reflection; }
+		bool IsReflection() const { return m_isReflection; }
+		void SetRefraction(bool refraction) { m_isRefraction = refraction; }
+		bool IsRefraction() const { return m_isRefraction; }
+		void SetTwoSided(bool twoSided) { m_isTwoSided = twoSided; }
+		bool IsTwoSided() const { return m_isTwoSided; }
 
     private:
         glm::vec4 m_ambient;
@@ -106,9 +102,8 @@ namespace bwx_sdk {
         GLfloat m_refraction;
         GLfloat m_opacity;
 
-        std::unordered_map<bwxGL_TEXTURE_TYPE, std::string> m_textures; // Mapowanie tekstur
+		std::string m_name;
 
-        std::string m_name;
         unsigned int m_id;
 
         bool m_isTransparent;
@@ -116,6 +111,8 @@ namespace bwx_sdk {
         bool m_isReflection;
         bool m_isRefraction;
         bool m_isTwoSided;
+
+        std::unordered_map<bwxGL_TEXTURE_TYPE, std::string> m_textures;
     };
 
 } // namespace bwx_sdk

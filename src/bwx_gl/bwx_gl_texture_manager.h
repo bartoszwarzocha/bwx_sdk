@@ -28,7 +28,15 @@ namespace bwx_sdk {
         static bwxGLTextureManager& GetInstance();
 
         GLuint LoadTexture(const std::string& filePath, bool generateMipmaps = true);
+
+        void BindTexture(const std::string& filePath, int textureUnit = 0);
+		void BindTexture(GLuint textureId, int textureUnit = 0);
+        void UnbindTexture(const std::string& filePath);
+        void UnbindTexture(int textureUnit = 0);
+        
+        bwxGLTexture2DData GetTexture(const std::string& filePath) const;
         GLuint GetTextureID(const std::string& filePath) const;
+        
         void ReleaseTexture(const std::string& filePath);
 
         void Clear();

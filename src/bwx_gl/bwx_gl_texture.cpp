@@ -43,7 +43,7 @@ namespace bwx_sdk {
     {
         Release();  // Release old texture (if exists)
 
-        data.path = file;
+        m_data.path = file;
 
         // Load image
         bwxGLImgLoader img;
@@ -52,8 +52,8 @@ namespace bwx_sdk {
             return;
         }
 
-        glGenTextures(1, &data.texture_id);
-        glBindTexture(GL_TEXTURE_2D, data.texture_id);
+        glGenTextures(1, &m_data.textureId);
+        glBindTexture(GL_TEXTURE_2D, m_data.textureId);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
@@ -80,7 +80,7 @@ namespace bwx_sdk {
     void bwxGLTexture2D::Bind(int index)
     {
         glActiveTexture(GL_TEXTURE0 + index);
-        glBindTexture(GL_TEXTURE_2D, data.texture_id);
+        glBindTexture(GL_TEXTURE_2D, m_data.textureId);
     }
 
     void bwxGLTexture2D::Unbind()
@@ -90,10 +90,10 @@ namespace bwx_sdk {
 
     void bwxGLTexture2D::Release()
     {
-        if (data.texture_id)
+        if (m_data.textureId)
         {
-            glDeleteTextures(1, &data.texture_id);
-            data.texture_id = 0;
+            glDeleteTextures(1, &m_data.textureId);
+            m_data.textureId = 0;
         }
     }
 

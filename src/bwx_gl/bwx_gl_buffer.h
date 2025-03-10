@@ -10,13 +10,14 @@
 #ifndef _BWX_GL_BUFFER_H_
 #define _BWX_GL_BUFFER_H_
 
+#if defined(__APPLE__)
+#error OpenGL functionality is not available for macOS.
+#endif
+
 #include <vector>
 
-#if defined(__APPLE__)
-    #error OpenGL functionality is not available for macOS.
-#else
-    #include <GL/glew.h>
-#endif
+#include <GL/glew.h>
+#include <glm/glm.hpp>
 
 namespace bwx_sdk {
 
@@ -28,6 +29,7 @@ namespace bwx_sdk {
 
     class bwxGLBuffer {
     public:
+        bwxGLBuffer() : m_bufferID(0), m_target(GL_ARRAY_BUFFER) {}
         bwxGLBuffer(GLenum target);
         virtual ~bwxGLBuffer();
 
@@ -36,32 +38,12 @@ namespace bwx_sdk {
         void Release();
         GLuint GetID() const { return m_bufferID; }
 
+        void SetData(const void* data, GLsizeiptr size, GLenum usage = GL_STATIC_DRAW);
+        void SetData(const std::vector<GLuint>& indices, GLenum usage = GL_STATIC_DRAW);
+
     protected:
         GLuint m_bufferID;
         GLenum m_target;
-    };
-
-    class bwxGLVertexBuffer : public bwxGLBuffer {
-    public:
-        bwxGLVertexBuffer();
-        void UploadData(const void* data, GLsizeiptr size, GLenum usage = GL_STATIC_DRAW);
-    };
-
-    class bwxGLIndexBuffer : public bwxGLBuffer {
-    public:
-        bwxGLIndexBuffer();
-        void UploadData(const std::vector<GLuint>& indices, GLenum usage = GL_STATIC_DRAW);
-        GLsizei GetCount() const { return m_count; }
-
-    private:
-        GLsizei m_count;
-    };
-
-    class bwxGLUniformBuffer : public bwxGLBuffer {
-    public:
-        bwxGLUniformBuffer();
-        void UploadData(const void* data, GLsizeiptr size, GLenum usage = GL_DYNAMIC_DRAW);
-        void BindToPoint(GLuint bindingPoint);
     };
 
 } // namespace bwx_sdk

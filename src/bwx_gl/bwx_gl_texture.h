@@ -20,8 +20,18 @@
 
 namespace bwx_sdk {
 
+    enum bwxGL_TEXTURE_TYPE {
+        TEXTURE_DIFFUSE,
+        TEXTURE_SPECULAR,
+        TEXTURE_NORMAL,
+        TEXTURE_HEIGHT,
+        TEXTURE_EMISSIVE,
+        TEXTURE_OPACITY,
+        TEXTURE_UNKNOWN
+    };
+
     struct bwxGLTexture2DData {
-        GLuint texture_id = 0;
+        GLuint textureId = 0;
         wxString path;
     };
 
@@ -37,11 +47,11 @@ namespace bwx_sdk {
         void Unbind();
         void Release();
 
-        inline GLuint GetID() const { return data.texture_id; }
-        inline const wxString& GetPath() const { return data.path; }
+        inline GLuint GetID() const { return m_data.textureId; }
+        inline const wxString& GetPath() const { return m_data.path; }
 
     private:
-        bwxGLTexture2DData data;
+        bwxGLTexture2DData m_data;
     };
 
 } // namespace bwx_sdk

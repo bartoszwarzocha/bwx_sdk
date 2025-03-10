@@ -17,12 +17,14 @@
 #include <wx/splitter.h>
 #include <wx/stopwatch.h>
 
-#include <bwx_sdk/bwx_gl/bwx_gl_shader.h>
-#include <bwx_sdk/bwx_gl/bwx_gl_texture.h>
-#include <bwx_sdk/bwx_gl/bwx_gl_texture_manager.h>
-#include <bwx_sdk/bwx_gl/bwx_gl_material.h>
-#include <bwx_sdk/bwx_gl/bwx_gl_mesh.h>
-#include <bwx_sdk/bwx_gl/bwx_gl_buffer.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <memory>
+
+#include <bwx_sdk/bwx_gl/bwx_gl.h>
 
 // Wspó³rzêdne wierzcho³ków i tekstur
 float verts[] = {
@@ -175,15 +177,13 @@ private:
 	wxString GLvendor;
 	wxString GLrenderer;
 
-	bwx_sdk::bwxGLVertexBuffer* vbo;
-	bwx_sdk::bwxGLIndexBuffer* ibo;
-
 	unsigned int VBO, VAO;
-	bwx_sdk::bwxGLShaderProgram* solid_shader_program;
-	bwx_sdk::bwxGLShaderProgram* mesh_shader_program;
+
+	std::shared_ptr<bwx_sdk::bwxGLShaderProgram> solid_shader_program;
+	std::shared_ptr<bwx_sdk::bwxGLShaderProgram> mesh_shader_program;
 	bwx_sdk::bwxGLShaderProgram* active_shader_program;
 
-	bwx_sdk::bwxGLTexture2D* texture;
+	std::shared_ptr<bwx_sdk::bwxGLTexture2D> texture;
 
 	DECLARE_EVENT_TABLE()
 };
@@ -227,7 +227,7 @@ bool MyApp::OnInit()
 {
 	wxInitAllImageHandlers();
 
-	MyFrame* frame = new MyFrame(NULL, wxID_ANY, "TEST", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE);
+	MyFrame* frame = new MyFrame(NULL, wxID_ANY, "BWX_SDK & OpenGL", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE);
 	frame->Show(true);
 	return true;
 }
@@ -342,26 +342,26 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 
 	// Tworzymy shadery
 	bwx_sdk::bwxGLShader mvs, mfs, svs, sfs;
+
 	mvs.LoadShader(bwx_sdk::SHADER_VERTEX, mesh_vertex_src);
 	mfs.LoadShader(bwx_sdk::SHADER_FRAGMENT, mesh_fragment_src);
-	svs.LoadShader(bwx_sdk::SHADER_VERTEX, solid_vertex_src);
-	sfs.LoadShader(bwx_sdk::SHADER_FRAGMENT, solid_fragment_src);
-
-	mesh_shader_program = new bwx_sdk::bwxGLShaderProgram();
-	solid_shader_program = new bwx_sdk::bwxGLShaderProgram();
-
+	mesh_shader_program = std::make_shared<bwx_sdk::bwxGLShaderProgram>();
 	mesh_shader_program->AttachShader(mvs);
 	mesh_shader_program->AttachShader(mfs);
 	mesh_shader_program->Link();
 
+	svs.LoadShader(bwx_sdk::SHADER_VERTEX, solid_vertex_src);
+	sfs.LoadShader(bwx_sdk::SHADER_FRAGMENT, solid_fragment_src);
+	solid_shader_program = std::make_shared<bwx_sdk::bwxGLShaderProgram>();
 	solid_shader_program->AttachShader(svs);
 	solid_shader_program->AttachShader(sfs);
 	solid_shader_program->Link();
 
-	active_shader_program = solid_shader_program;
+	active_shader_program = solid_shader_program.get();
 
 	// Wczytujemy teksturê
-	texture = new bwx_sdk::bwxGLTexture2D("texture.png", GL_REPEAT, GL_LINEAR, true, false);
+	//bwx_sdk::bwxGLTextureManager::GetInstance().LoadTexture("texture.png");
+	texture = std::make_shared<bwx_sdk::bwxGLTexture2D>("texture.png");
 
 	//
 	Fit();
@@ -375,10 +375,6 @@ MyFrame::~MyFrame()
 {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-
-	wxDELETE(solid_shader_program);
-	wxDELETE(mesh_shader_program);
-	wxDELETE(texture);
 
 	wxDELETE(ctx);
 	wxDELETE(canvas);
@@ -408,12 +404,12 @@ void MyFrame::OnMesh(wxCommandEvent& event)
 	if (event.IsChecked())
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		active_shader_program = mesh_shader_program;
+		active_shader_program = mesh_shader_program.get();
 	}
 	else
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		active_shader_program = solid_shader_program;
+		active_shader_program = solid_shader_program.get();
 	}
 }
 
@@ -459,13 +455,20 @@ void MyFrame::Render()
 	active_shader_program->SetUniform("view", view);
 	active_shader_program->SetUniform("projection", projection);
 
-	// Aktywacja tekstury (zak³adaj¹c, ¿e `texture` to wskaŸnik do `bwxGLTexture`)
-	texture->Bind(0);
+	// Aktywacja tekstury
+	//texture->Bind();
+	//glActiveTexture(bwx_sdk::bwxGLTextureManager::GetInstance().GetTextureID("texture.png"));
+	//glBindTexture(GL_TEXTURE_2D, bwx_sdk::bwxGLTextureManager::GetInstance().GetTextureID("texture.png"));
+	//bwx_sdk::bwxGLTextureManager::GetInstance().BindTexture("texture.png");
+	texture->Bind();
 
 	// Renderowanie obiektu
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
+
+	//glActiveTexture(0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	canvas->SwapBuffers();
 }

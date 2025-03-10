@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        bwx_gl_mesh.h
-// Purpose:     BWX_SDK Libarary; OpenGL Mesh
+// Purpose:     BWX_SDK Library; OpenGL Mesh
 // Author:      Bartosz Warzocha <bartosz.warzocha@gmail.com>
 // Created:     2025-03-09
 // Copyright:   (c) 2025 by Bartosz Warzocha
@@ -10,30 +10,30 @@
 #ifndef _BWX_GL_MESH_H_
 #define _BWX_GL_MESH_H_
 
+#if defined(__APPLE__)
+#error OpenGL functionality is not available for macOS.
+#endif
+
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <vector>
 
-#include "bwx_gl_buffer.h"
-#include "bwx_gl_material.h"
-#include "bwx_gl_shader.h"
+#include <GL/glew.h>
+#include <glm/glm.hpp>
 
-#if defined(__APPLE__)
-    #error OpenGL functionality is not available for macOS.
-#else
-    #include <GL/glew.h>
-    #include <glm/glm.hpp>
-#endif
+#include "bwx_gl_renderable.h"
 
 namespace bwx_sdk {
 
-    #define bwxGLMESH_NORMAL       0x00000001
-    #define bwxGLMESH_TEX_COORD    0x00000002
-    #define bwxGLMESH_TANGENT      0x00000004
-    #define bwxGLMESH_BITANGENT    0x00000008
-    #define bwxGLMESH_COLOR        0x00000010
-    #define bwxGLMESH_UV           0x00000020
+#define bwxGLMESH_NORMAL       0x00000001
+#define bwxGLMESH_TEX_COORD    0x00000002
+#define bwxGLMESH_TANGENT      0x00000004
+#define bwxGLMESH_BITANGENT    0x00000008
+#define bwxGLMESH_COLOR        0x00000010
+#define bwxGLMESH_UV           0x00000020
 
-    #define bwxGLMESH_INDICES      0x00001000
-    #define bwxGLMESH_DEFAULT      bwxGLMESH_NORMAL | bwxGLMESH_TEX_COORD
+#define bwxGLMESH_INDICES      0x00001000
+#define bwxGLMESH_DEFAULT      bwxGLMESH_NORMAL | bwxGLMESH_TEX_COORD
 
     struct bwxGLVertex {
         glm::vec3 position;
@@ -42,14 +42,15 @@ namespace bwx_sdk {
         glm::vec3 tangent;
         glm::vec3 bitangent;
         glm::vec3 color;
+        glm::vec3 uv;
     };
 
-    class bwxGLMesh {
+    class bwxGLMesh : public bwxGLRenderable {
     public:
         bwxGLMesh(int style);
-        virtual ~bwxGLMesh() { Delete(); }
+        virtual ~bwxGLMesh();
 
-        void Render(bwxGLShaderProgram& shader, glm::mat4* model, bool transparent);
+        void Render() override;
         void Delete();
 
         inline void AddVertex(const bwxGLVertex& v) { m_vertices.push_back(v); }
@@ -61,24 +62,20 @@ namespace bwx_sdk {
         void ConvertVerticesTableToVector(GLfloat v[], GLuint size);
         void ConvertIndicesTableToVector(GLfloat i[], GLuint size);
 
-        inline void SetMaterial(const bwxGLMaterial& m) { m_material = m; }
-        inline bwxGLMaterial& GetMaterial() { return m_material; }
-
-        inline void SetStyle(int style) { m_inputDataFormat = style; }
-        inline int& GetStyle() { return m_inputDataFormat; }
-
         void SetupMesh();
 
-    private:
-        GLuint m_VAO;
-        bwxGLVertexBuffer m_VBO;
-        bwxGLIndexBuffer m_EBO;
+        inline bwxGLBuffer* GetVBO() { return m_vbo; }
+        inline bwxGLBuffer* GetEBO() { return m_ebo; }
+        inline GLuint GetVAO() const { return m_vao; }
 
+    private:
         std::vector<bwxGLVertex> m_vertices;
         std::vector<GLuint> m_indices;
-
         int m_inputDataFormat;
-        bwxGLMaterial m_material;
+
+        bwxGLBuffer* m_vbo = nullptr;
+        bwxGLBuffer* m_ebo = nullptr;
+        GLuint m_vao = 0;
     };
 
 } // namespace bwx_sdk

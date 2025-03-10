@@ -16,6 +16,7 @@
 #include <wx/wx.h>
 #endif
 
+#include "bwx_gl_texture.h"
 #include "bwx_gl_texture_manager.h"
 #include <iostream>
 
@@ -34,40 +35,54 @@ namespace bwx_sdk {
             return it->second;
         }
 
-        // If not then load texture with bwxGLImgLoader...
-        bwxGLImgLoader image;
-        if (!image.Load(filePath)) {
-            std::cerr << "Error: Failed to load texture: " << filePath << std::endl;
-            return 0;
-        }
+        // If not then load texture...
+		bwxGLTexture2D texture(filePath);
+		if (!texture.GetID()) {
+			wxLogError("Failed to load texture: %s", filePath);
+			std::cerr << "Failed to load texture: " << filePath << std::endl;
+			return 0;
+		}
 
-        GLuint textureID;
-        glGenTextures(1, &textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-
-        GLenum format = image.GetBytesPerPixel() == 4 ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, image.Width(), image.Height(), 0, format, GL_UNSIGNED_BYTE, image.Data().data());
-
-        if (generateMipmaps) {
-            glGenerateMipmap(GL_TEXTURE_2D);
-        }
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        // Add texture to map
-        m_textureMap[filePath] = textureID;
-        return textureID;
+		// ...and store it
+		m_textureMap[filePath] = texture.GetID();
+        return texture.GetID();
     }
+
+	void bwxGLTextureManager::BindTexture(const std::string& filePath, int textureUnit) {
+		auto it = m_textureMap.find(filePath);
+		if (it != m_textureMap.end()) {
+			glActiveTexture(GL_TEXTURE0 + textureUnit);
+			glBindTexture(GL_TEXTURE_2D, it->second);
+		}
+	}
+
+	void bwxGLTextureManager::BindTexture(GLuint textureId, int textureUnit) {
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
+		glBindTexture(GL_TEXTURE_2D, textureId);
+	}
+
+	void bwxGLTextureManager::UnbindTexture(const std::string& filePath) {
+		auto it = m_textureMap.find(filePath);
+		if (it != m_textureMap.end()) {
+			glDeleteTextures(1, &it->second);
+			m_textureMap.erase(it);
+		}
+	}
+
+	void bwxGLTextureManager::UnbindTexture(int textureUnit) {
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
     GLuint bwxGLTextureManager::GetTextureID(const std::string& filePath) const {
         auto it = m_textureMap.find(filePath);
         return (it != m_textureMap.end()) ? it->second : 0;
     }
+
+    bwxGLTexture2DData bwxGLTextureManager::GetTexture(const std::string& filePath) const {
+		auto it = m_textureMap.find(filePath);
+		return bwxGLTexture2DData{ it->second, filePath };
+	}
 
     void bwxGLTextureManager::ReleaseTexture(const std::string& filePath) {
         auto it = m_textureMap.find(filePath);
