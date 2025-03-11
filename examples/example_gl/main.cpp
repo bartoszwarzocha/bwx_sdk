@@ -7,6 +7,9 @@
 // Licence:		wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
+#define USE_SHADER_PROGRAM_MANAGER 1
+#define USE_TEXTURE_MANAGER 1
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -24,6 +27,8 @@
 #include <unordered_map>
 #include <memory>
 
+#include <bwx_sdk/bwx_globals.h>
+#include <bwx_sdk/bwx_core/bwx_string.h>
 #include <bwx_sdk/bwx_gl/bwx_gl.h>
 
 // Wspó³rzêdne wierzcho³ków i tekstur
@@ -179,45 +184,53 @@ private:
 
 	unsigned int VBO, VAO;
 
+#if not USE_SHADER_PROGRAM_MANAGER
 	std::shared_ptr<bwx_sdk::bwxGLShaderProgram> solid_shader_program;
 	std::shared_ptr<bwx_sdk::bwxGLShaderProgram> mesh_shader_program;
+#endif
 	bwx_sdk::bwxGLShaderProgram* active_shader_program;
 
+#if not USE_TEXTURE_MANAGER
 	std::shared_ptr<bwx_sdk::bwxGLTexture2D> texture;
+#endif
 
 	DECLARE_EVENT_TABLE()
 };
 
 //---------------------------------------------------------------------------
-// Implementacja aplikacji
+// App implementation
 //---------------------------------------------------------------------------
 IMPLEMENT_APP(MyApp)
 
 //---------------------------------------------------------------------------
-// Identyfikatory
+// Event ids
 //---------------------------------------------------------------------------
 enum
 {
 	ID_CLOSE = wxID_HIGHEST + 1,
 	ID_ABOUT_PROGRAM,
-	ID_MESH,
+	ID_POINT,
+	ID_LINE,
+	ID_FILL,
 };
 
 //---------------------------------------------------------------------------
-// Tablica zdarzeñ
+// Event table
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-EVT_MENU(ID_CLOSE, MyFrame::OnClose)
-EVT_MENU(ID_ABOUT_PROGRAM, MyFrame::OnAboutProgram)
-//
-EVT_PAINT(MyFrame::OnPaint)
-EVT_IDLE(MyFrame::OnIdle)
-//
-EVT_MENU(ID_MESH, MyFrame::OnMesh)
+	EVT_MENU(ID_CLOSE, MyFrame::OnClose)
+	EVT_MENU(ID_ABOUT_PROGRAM, MyFrame::OnAboutProgram)
+	//
+	EVT_PAINT(MyFrame::OnPaint)
+	EVT_IDLE(MyFrame::OnIdle)
+	//
+	EVT_MENU(ID_POINT, MyFrame::OnMesh)
+	EVT_MENU(ID_LINE, MyFrame::OnMesh)
+	EVT_MENU(ID_FILL, MyFrame::OnMesh)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(MyCanvas, wxGLCanvas)
-EVT_SIZE(MyCanvas::OnSize)
+	EVT_SIZE(MyCanvas::OnSize)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------------
@@ -233,7 +246,7 @@ bool MyApp::OnInit()
 }
 
 //---------------------------------------------------------------------------
-// Konstruktor MyFrame
+// MyFrame constructor
 //---------------------------------------------------------------------------
 MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
 	: wxFrame(parent, id, title, pos, size, style)
@@ -245,15 +258,18 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 	mHelp = new wxMenu();
 
 	mFile->AppendSeparator();
-	mFile->Append(ID_CLOSE, wxT("&Zamknij program\tCtrl-X"), wxT("Zamyka program"));
+	mFile->Append(ID_CLOSE, wxT("&Close program\tCtrl-X"), wxT("Closes the program"));
 
-	mView->AppendCheckItem(ID_MESH, wxT("Widok siatki\tF5"));
+	mView->AppendRadioItem(ID_POINT, wxT("Point rendering\tF5"));
+	mView->AppendRadioItem(ID_LINE, wxT("Line rendering\tF6"));
+	mView->AppendRadioItem(ID_FILL, wxT("Triangle rendering\tF7"));
+	mView->FindItem(ID_FILL)->Check();
 
-	mHelp->Append(ID_ABOUT_PROGRAM, wxT("&O programie\tF1"), wxT("O programie"));
+	mHelp->Append(ID_ABOUT_PROGRAM, wxT("&About program\tF1"), wxT("About the program"));
 
-	mb->Append(mFile, wxT("&Plik"));
-	mb->Append(mView, wxT("&Widok"));
-	mb->Append(mHelp, wxT("P&omoc"));
+	mb->Append(mFile, wxT("&File"));
+	mb->Append(mView, wxT("&View"));
+	mb->Append(mHelp, wxT("&Help"));
 
 	this->SetMenuBar(mb);
 
@@ -271,36 +287,35 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 
 	timer.Start();
 
-	///////////////////////////////////////
-
-	// Atrybuty p³ótna
+	//-------------------------------------------
+	// Canvas attributes
 	wxGLAttributes vAttrs;
 	vAttrs.PlatformDefaults().RGBA().DoubleBuffer().Depth(16).EndList();
 
 	if (!wxGLCanvas::IsDisplaySupported(vAttrs))
 	{
-		wxLogError(wxT("Nieobs³ugiwana konfiguracja OpenGL!"));
+		wxLogError(wxT("Unsupported OpenGL configuration!"));
 		return;
 	}
 
-	// Tworzymy p³ótno
+	// Create canvas
 	canvas = new MyCanvas(panel, vAttrs, wxID_ANY);
 	canvas->SetMinSize(wxSize(500, 500));
 
-	// Atrybuty kontekstu
+	// Context attributes
 	wxGLContextAttrs cAttrs;
 	cAttrs.PlatformDefaults().CoreProfile().OGLVersion(4, 5).EndList();
 
-	// Tworzymy  kontekst
+	// Create context
 	ctx = new wxGLContext(canvas, (wxGLContext*)NULL, &cAttrs);
 
 	if (!(*ctx).IsOK())
 	{
-		wxLogError(wxT("Kontekst OpenGL jest nieprawid³owy."));
+		wxLogError(wxT("OpenGL context is invalid."));
 		return;
 	}
 
-	// Ustawiamy kontekst
+	// Set context
 	canvas->SetCurrent(*ctx);
 
 	ps->Add(canvas, 1, wxEXPAND | wxALL, 0);
@@ -309,7 +324,8 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 	//*******************************************
 	// OpenGL
 	//*******************************************
-	// Inicjujemy GLEW
+	// 
+	// Initialize GLEW
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 	if (err != GL_NO_ERROR)
@@ -317,15 +333,35 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 		wxLogError(wxString(glewGetErrorString(err)));
 	}
 
-	// Wczytujemy informacje o wersji OpenGL oraz karcie graficznej
+	// Load OpenGL version and graphics card information
 	this->GLversion = wxString(glGetString(GL_VERSION));
 	this->GLvendor = wxString(glGetString(GL_VENDOR));
 	this->GLrenderer = wxString(glGetString(GL_RENDERER));
 
-	// W³¹czamy obs³ugê 3D
+	// Renderowanie 3D
 	glEnable(GL_DEPTH_TEST);
 
-	// Inicjujemy bufory wspó³rzêdnych
+	// Atialiasing
+	glEnable(GL_MULTISAMPLE);
+
+	// Ukrywanie niewidocznych œcian
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+
+	// Obs³uga przezroczystoœci
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//glEnable(GL_LINE_SMOOTH);
+	//glEnable(GL_POLYGON_SMOOTH);
+
+	// VSync
+#ifdef __WXMSW__
+	((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(0);
+#endif
+
+	//-------------------------------------------
+	// BUFFERS
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
@@ -340,7 +376,13 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	// Tworzymy shadery
+	//-------------------------------------------
+	// SHADERS
+#if USE_SHADER_PROGRAM_MANAGER
+	bwx_sdk::bwxGLShaderProgramManager::GetInstance().CreateShaderProgramFromStrings("solid", solid_vertex_src, solid_fragment_src, true);
+	bwx_sdk::bwxGLShaderProgramManager::GetInstance().CreateShaderProgramFromStrings("mesh", mesh_vertex_src, mesh_fragment_src, true);
+	active_shader_program = bwx_sdk::bwxGLShaderProgramManager::GetInstance().GetShaderProgramPtr("solid").get();
+#else
 	bwx_sdk::bwxGLShader mvs, mfs, svs, sfs;
 
 	mvs.LoadShader(bwx_sdk::SHADER_VERTEX, mesh_vertex_src);
@@ -358,18 +400,23 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 	solid_shader_program->Link();
 
 	active_shader_program = solid_shader_program.get();
+#endif
 
-	// Wczytujemy teksturê
-	//bwx_sdk::bwxGLTextureManager::GetInstance().LoadTexture("texture.png");
+	//-------------------------------------------
+	// TEXTURES
+#if USE_TEXTURE_MANAGER
+	bwx_sdk::bwxGLTextureManager::GetInstance().LoadTexture("texture.png");
+#else
 	texture = std::make_shared<bwx_sdk::bwxGLTexture2D>("texture.png");
+#endif
 
-	//
+	//-------------------------------------------
 	Fit();
 	CenterOnScreen();
 }
 
 //---------------------------------------------------------------------------
-// Destruktor MyFrame
+// MyFrame destructor
 //-------------------------------------------------------------------------
 MyFrame::~MyFrame()
 {
@@ -381,7 +428,7 @@ MyFrame::~MyFrame()
 }
 
 //---------------------------------------------------------------------------
-// Funkcja inicjuje zamkniêcie programu
+// Function initiates program closure
 //---------------------------------------------------------------------------
 void MyFrame::OnClose(wxCommandEvent& WXUNUSED(event))
 {
@@ -389,19 +436,28 @@ void MyFrame::OnClose(wxCommandEvent& WXUNUSED(event))
 }
 
 //---------------------------------------------------------------------------
-// Funkcja wyœwietla okno "O programie..."
+// Function displays "About program..." window
 //---------------------------------------------------------------------------
 void MyFrame::OnAboutProgram(wxCommandEvent& WXUNUSED(event))
 {
-	wxMessageBox("TEST", wxT("O programie..."), wxOK | wxICON_INFORMATION);
+	wxMessageBox("TEST", wxT("About program..."), wxOK | wxICON_INFORMATION);
 }
 
 //---------------------------------------------------------------------------
-// Funkcja prze³¹cza widok pomiêdzy zwyk³ym i widokiem siatki
+// Function toggles view between normal and mesh view
 //---------------------------------------------------------------------------
 void MyFrame::OnMesh(wxCommandEvent& event)
 {
-	if (event.IsChecked())
+	active_shader_program->Release();
+
+#if not USE_SHADER_PROGRAM_MANAGER
+	if (event.GetId() == ID_POINT)
+	{
+		glPointSize(5);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+		active_shader_program = mesh_shader_program.get();
+	}
+	else if (event.GetId() == ID_LINE)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		active_shader_program = mesh_shader_program.get();
@@ -411,10 +467,28 @@ void MyFrame::OnMesh(wxCommandEvent& event)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		active_shader_program = solid_shader_program.get();
 	}
+#else
+	if (event.GetId() == ID_POINT)
+	{
+		glPointSize(5);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+		active_shader_program = bwx_sdk::bwxGLShaderProgramManager::GetInstance().GetShaderProgramPtr("mesh").get();
+	}
+	else if (event.GetId() == ID_LINE)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		active_shader_program = bwx_sdk::bwxGLShaderProgramManager::GetInstance().GetShaderProgramPtr("mesh").get();
+	}
+	else
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		active_shader_program = bwx_sdk::bwxGLShaderProgramManager::GetInstance().GetShaderProgramPtr("solid").get();
+	}
+#endif
 }
 
 //---------------------------------------------------------------------------
-// Funkcja obs³uguje zdarzenie przerysowania okna
+// Function handles window repaint event
 //---------------------------------------------------------------------------
 void MyFrame::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
@@ -422,18 +496,18 @@ void MyFrame::OnPaint(wxPaintEvent& WXUNUSED(event))
 }
 
 //---------------------------------------------------------------------------
-// Funkcja wykonuje rysowanie podczas bezczynnoœci okna
+// Function performs drawing during window idle time
 //---------------------------------------------------------------------------
 void MyFrame::OnIdle(wxIdleEvent& event)
 {
 	Render();
 
-	// Zapewniamy ci¹g³oœæ...
+	// Ensure continuity...
 	event.RequestMore();
 }
 
 //---------------------------------------------------------------------------
-// Funkcja rysuj¹ca
+// Drawing function
 //---------------------------------------------------------------------------
 void MyFrame::Render()
 {
@@ -442,33 +516,34 @@ void MyFrame::Render()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Aktywacja programu shaderowego
+	// Activate shader program
 	active_shader_program->Use();
 
-	// Ustawienie macierzy transformacji
+	// Set transformation matrices
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f), (GLfloat)timer.TimeInMicro().ToDouble() / 1000000, glm::vec3(0.5f, 1.0f, 0.0f));
 	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)canvas->x / (float)canvas->y, 0.1f, 100.0f);
 
-	// Przekazanie macierzy do shadera
+	// Pass matrices to shader
 	active_shader_program->SetUniform("model", model);
 	active_shader_program->SetUniform("view", view);
 	active_shader_program->SetUniform("projection", projection);
 
-	// Aktywacja tekstury
-	//texture->Bind();
-	//glActiveTexture(bwx_sdk::bwxGLTextureManager::GetInstance().GetTextureID("texture.png"));
-	//glBindTexture(GL_TEXTURE_2D, bwx_sdk::bwxGLTextureManager::GetInstance().GetTextureID("texture.png"));
-	//bwx_sdk::bwxGLTextureManager::GetInstance().BindTexture("texture.png");
+	// Activate texture
+#if USE_TEXTURE_MANAGER
+	bwx_sdk::bwxGLTextureManager::GetInstance().BindTexture("texture.png");
+#else
 	texture->Bind();
+#endif
 
-	// Renderowanie obiektu
+	// Render object
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 
-	//glActiveTexture(0);
-	//glBindTexture(GL_TEXTURE_2D, 0);
+#if USE_TEXTURE_MANAGER
+	//bwx_sdk::bwxGLTextureManager::GetInstance().UnbindTexture(0);
+#endif
 
 	canvas->SwapBuffers();
 }

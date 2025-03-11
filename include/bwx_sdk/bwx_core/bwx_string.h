@@ -26,7 +26,9 @@ wxArrayString bwxSimpleExplode(const wxString& s, const wxString& separator);
 
 void bwxSimpleExplode(wxArrayString* a, const wxString& str, const wxString& separator);
 
-wxString bwxSimpleJoin(const wxArrayString& array, const wxString& separator);
+wxString bwxSimpleJoin(const wxArrayString& array, const wxString& separator = "\n");
+
+wxString bwxSimpleJoin(const std::vector<std::string>& array, const wxString& separator = "\n");
 
 wxString bwxTrim(const wxString& str, bool fromRight = true, bool fromLeft = true);
 

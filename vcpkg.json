@@ -4,6 +4,10 @@
   "builtin-baseline": "9df46ca3f4ec3bd05984e5668218630c52ea302a",
   "dependencies": [
     {
+      "name": "freetype",
+      "platform": "windows | linux"
+    },
+    {
       "name": "opengl",
       "platform": "windows | linux"
     },

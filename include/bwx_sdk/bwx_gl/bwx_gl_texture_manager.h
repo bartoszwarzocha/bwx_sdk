@@ -26,6 +26,7 @@
 #endif
 
 #include "bwx_gl_image_loader.h"
+#include "bwx_gl_texture.h"
 
 namespace bwx_sdk {
 
@@ -36,14 +37,12 @@ public:
     GLuint LoadTexture(const std::string& filePath, bool generateMipmaps = true);
 
     void BindTexture(const std::string& filePath, int textureUnit = 0);
-    void BindTexture(GLuint textureId, int textureUnit = 0);
-    void UnbindTexture(const std::string& filePath);
     void UnbindTexture(int textureUnit = 0);
 
-    bwxGLTexture2DData GetTexture(const std::string& filePath) const;
-    GLuint GetTextureID(const std::string& filePath) const;
+    void DeleteTexture(const std::string& filePath);
 
-    void ReleaseTexture(const std::string& filePath);
+    std::shared_ptr<bwxGLTexture2D> GetTexturePtr(const std::string& filePath);
+    GLuint GetTextureID(const std::string& filePath);
 
     void Clear();
 
@@ -51,7 +50,7 @@ private:
     bwxGLTextureManager() = default;
     ~bwxGLTextureManager();
 
-    std::unordered_map<std::string, GLuint> m_textureMap;
+    std::unordered_map<std::string, std::shared_ptr<bwxGLTexture2D>> m_textureMap;
 };
 
 }  // namespace bwx_sdk

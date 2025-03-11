@@ -60,6 +60,7 @@
 #include "bwx_gl_renderer.h"
 #include "bwx_gl_scene.h"
 #include "bwx_gl_shader.h"
+#include "bwx_gl_shader_manager.h"
 #include "bwx_gl_skybox.h"
 #include "bwx_gl_texture.h"
 #include "bwx_gl_texture_manager.h"

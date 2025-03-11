@@ -69,7 +69,16 @@ namespace bwx_sdk {
 		* @param separator The separator that will be inserted between the strings.
 		* @return The resulting string.
 		*/
-		wxString bwxSimpleJoin(const wxArrayString& array, const wxString& separator);
+		wxString bwxSimpleJoin(const wxArrayString& array, const wxString& separator = "\n");
+
+		/**
+		 * @brief Joins an array of strings into a single string using a specified separator.
+		 *
+		 * @param array The array of strings to be joined.
+		 * @param separator The separator that will be inserted between the strings.
+		 * @return The resulting string.
+		 */
+		wxString bwxSimpleJoin(const std::vector<std::string>& array, const wxString& separator = "\n");
 
 		/**
 		 * @brief Trims the whitespace from the beginning and/or end of a string.

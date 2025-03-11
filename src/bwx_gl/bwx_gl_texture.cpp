@@ -36,12 +36,12 @@ namespace bwx_sdk {
 
     bwxGLTexture2D::~bwxGLTexture2D()
     {
-        Release();
+        Delete();
     }
 
     void bwxGLTexture2D::Create(const wxString& file, GLint wrapS, GLint wrapT, GLint filterMin, GLint filterMag, bool mipmaps, bool srgb)
     {
-        Release();  // Release old texture (if exists)
+        Delete();  // Delete old texture (if exists)
 
         m_data.path = file;
 
@@ -52,8 +52,8 @@ namespace bwx_sdk {
             return;
         }
 
-        glGenTextures(1, &m_data.textureId);
-        glBindTexture(GL_TEXTURE_2D, m_data.textureId);
+        glGenTextures(1, &m_data.textureID);
+        glBindTexture(GL_TEXTURE_2D, m_data.textureID);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
@@ -80,7 +80,7 @@ namespace bwx_sdk {
     void bwxGLTexture2D::Bind(int index)
     {
         glActiveTexture(GL_TEXTURE0 + index);
-        glBindTexture(GL_TEXTURE_2D, m_data.textureId);
+        glBindTexture(GL_TEXTURE_2D, m_data.textureID);
     }
 
     void bwxGLTexture2D::Unbind()
@@ -88,12 +88,12 @@ namespace bwx_sdk {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void bwxGLTexture2D::Release()
+    void bwxGLTexture2D::Delete()
     {
-        if (m_data.textureId)
+        if (m_data.textureID)
         {
-            glDeleteTextures(1, &m_data.textureId);
-            m_data.textureId = 0;
+            glDeleteTextures(1, &m_data.textureID);
+            m_data.textureID = 0;
         }
     }
 

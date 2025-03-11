@@ -32,72 +32,66 @@ namespace bwx_sdk {
         // Return ID if texture exists
         auto it = m_textureMap.find(filePath);
         if (it != m_textureMap.end()) {
-            return it->second;
+            return it->second->GetID();
         }
 
         // If not then load texture...
-		bwxGLTexture2D texture(filePath);
-		if (!texture.GetID()) {
+		std::shared_ptr<bwxGLTexture2D> texture = std::make_shared<bwxGLTexture2D>(filePath);
+		if (!texture->GetID()) {
 			wxLogError("Failed to load texture: %s", filePath);
 			std::cerr << "Failed to load texture: " << filePath << std::endl;
 			return 0;
 		}
 
 		// ...and store it
-		m_textureMap[filePath] = texture.GetID();
-        return texture.GetID();
+		m_textureMap[filePath] = texture;
+        return texture->GetID();
     }
 
 	void bwxGLTextureManager::BindTexture(const std::string& filePath, int textureUnit) {
 		auto it = m_textureMap.find(filePath);
 		if (it != m_textureMap.end()) {
 			glActiveTexture(GL_TEXTURE0 + textureUnit);
-			glBindTexture(GL_TEXTURE_2D, it->second);
-		}
-	}
-
-	void bwxGLTextureManager::BindTexture(GLuint textureId, int textureUnit) {
-		glActiveTexture(GL_TEXTURE0 + textureUnit);
-		glBindTexture(GL_TEXTURE_2D, textureId);
-	}
-
-	void bwxGLTextureManager::UnbindTexture(const std::string& filePath) {
-		auto it = m_textureMap.find(filePath);
-		if (it != m_textureMap.end()) {
-			glDeleteTextures(1, &it->second);
-			m_textureMap.erase(it);
+			glBindTexture(GL_TEXTURE_2D, it->second->GetID());
 		}
 	}
 
 	void bwxGLTextureManager::UnbindTexture(int textureUnit) {
-		glActiveTexture(GL_TEXTURE0 + textureUnit);
-		glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-    GLuint bwxGLTextureManager::GetTextureID(const std::string& filePath) const {
-        auto it = m_textureMap.find(filePath);
-        return (it != m_textureMap.end()) ? it->second : 0;
-    }
-
-    bwxGLTexture2DData bwxGLTextureManager::GetTexture(const std::string& filePath) const {
+	void bwxGLTextureManager::DeleteTexture(const std::string& filePath) {
 		auto it = m_textureMap.find(filePath);
-		return bwxGLTexture2DData{ it->second, filePath };
+		if (it != m_textureMap.end()) {
+			it->second->Delete();
+			m_textureMap.erase(it);
+		}
 	}
 
-    void bwxGLTextureManager::ReleaseTexture(const std::string& filePath) {
-        auto it = m_textureMap.find(filePath);
-        if (it != m_textureMap.end()) {
-            glDeleteTextures(1, &it->second);
-            m_textureMap.erase(it);
-        }
-    }
+	std::shared_ptr<bwxGLTexture2D> bwxGLTextureManager::GetTexturePtr(const std::string& filePath) {
+		auto it = m_textureMap.find(filePath);
+		if (it != m_textureMap.end()) {
+			return it->second;
+		}
+		return nullptr;
+	}
 
-    void bwxGLTextureManager::Clear() {
-        for (auto& pair : m_textureMap) {
-            glDeleteTextures(1, &pair.second);
-        }
-        m_textureMap.clear();
-    }
+	GLuint bwxGLTextureManager::GetTextureID(const std::string& filePath) {
+		auto it = m_textureMap.find(filePath);
+		if (it != m_textureMap.end()) {
+			return it->second->GetID();
+		}
+		return 0;
+	}
+
+	void bwxGLTextureManager::Clear() {
+		for (auto& texture : m_textureMap) {
+			texture.second->Delete();
+		}
+
+		m_textureMap.clear();
+	}
 
     bwxGLTextureManager::~bwxGLTextureManager() {
         Clear();

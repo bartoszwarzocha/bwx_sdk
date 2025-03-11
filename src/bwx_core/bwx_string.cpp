@@ -68,6 +68,18 @@ namespace bwx_sdk {
 			return result;
 		}
 
+		wxString bwxSimpleJoin(const std::vector<std::string>& array, const wxString& separator)
+		{
+			wxString result;
+			for (size_t i = 0; i < array.size(); ++i)
+			{
+				if (i > 0)
+					result += separator;
+				result += wxString::FromUTF8(array[i]);
+			}
+			return result;
+		}
+
 		wxString bwxTrim(const wxString& str, bool fromRight, bool fromLeft)
 		{
 			wxString result = str;

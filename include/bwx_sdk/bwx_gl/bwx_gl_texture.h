@@ -37,7 +37,8 @@ enum bwxGL_TEXTURE_TYPE {
 };
 
 struct bwxGLTexture2DData {
-    GLuint textureId = 0;
+    GLuint textureID = 0;
+    wxString name = wxEmptyString;
     wxString path;
 };
 
@@ -52,12 +53,17 @@ public:
 
     void Create(const wxString& file, GLint wrapS, GLint wrapT, GLint filterMin, GLint filterMag, bool mipmaps = true,
                 bool srgb = false);
+
     void Bind(int index = 0);
     void Unbind();
-    void Release();
+    void Delete();
 
-    inline GLuint GetID() const { return m_data.textureId; }
+    inline void SetName(const wxString& name) { m_data.name = name; }
+
+    inline GLuint GetID() const { return m_data.textureID; }
     inline const wxString& GetPath() const { return m_data.path; }
+    inline const wxString& GetName() const { return m_data.name; }
+    inline bwxGLTexture2DData GetData() const { return m_data; }
 
 private:
     bwxGLTexture2DData m_data;
