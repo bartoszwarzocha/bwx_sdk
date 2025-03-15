@@ -58,7 +58,7 @@ Library|Description|Comments|Status
 -|-|-|-
 _bwx_adv_|Advanced stuff like **Python** plugins system, etc.||In preparation
 _bwx_core_|Basic classes and functions for general functions (application configuration, cmd command parser, etc.), operations (such as data conversion or mathematical operations) and types (string, datetime, json, etc.)||**Moving in progress**
-_bwx_gl_|A collection of classes and functions to facilitate working with **OpenGL** in wxWidgets applications||In preparation
+_bwx_gl_|A collection of classes and functions to facilitate working with **OpenGL** in wxWidgets applications; macOS version is not available due to lack of OpenGL support - please use Metal |Requires _bwx_core_|**Moving in progress**
 _bwx_gui_|A collection of various custom GUI parts (sizer wrappers, dialog windows, custom GUI controls, etc.)|Requires _bwx_core_|**Moving in progress**
 _bwx_utils_|A collection of different classes and functions that provide ‘non-primary’ solutions, such as operations on colours|Requires _bwx_core_|**Moving in progress**
 
