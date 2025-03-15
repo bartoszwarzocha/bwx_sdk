@@ -26,7 +26,9 @@ wxArrayString bwxSimpleExplode(const wxString& s, const wxString& separator);
 
 void bwxSimpleExplode(wxArrayString* a, const wxString& str, const wxString& separator);
 
-wxString bwxSimpleJoin(const wxArrayString& array, const wxString& separator);
+wxString bwxSimpleJoin(const wxArrayString& array, const wxString& separator = "\n");
+
+wxString bwxSimpleJoin(const std::vector<std::string>& array, const wxString& separator = "\n");
 
 wxString bwxTrim(const wxString& str, bool fromRight = true, bool fromLeft = true);
 
@@ -76,6 +78,8 @@ T bwxFromString(const wxString& str) {
 
     return static_cast<T>(0);  // 0 if error
 }
+
+std::wstring bwxStringToWstring(const std::string& str);
 
 }  // namespace str
 }  // namespace bwx_sdk

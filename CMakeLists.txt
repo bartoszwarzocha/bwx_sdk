@@ -20,8 +20,12 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 set(VCPKG_KEEP_BUILT_PACKAGES ON CACHE BOOL "Keep vcpkg built packages" FORCE)
 
 # Compiler flags for MSVC
-if(MSVC AND NOT BUILD_SHARED_LIBS)
-    add_compile_options(/MT)
+if(MSVC)
+    if(NOT BUILD_SHARED_LIBS)
+        add_compile_options(/MD) # MD instead MT (please change if necessary depends on wxWidgets build mode)
+    else()
+        add_compile_options(/MD)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
@@ -38,11 +42,28 @@ if(NOT DEFINED VCPKG_TARGET_TRIPLET)
 endif()
 
 # Find and include wxWidgets
-find_package(wxWidgets REQUIRED COMPONENTS core base)
+if(NOT BUILD_SHARED_LIBS)
+    set(wxWidgets_USE_STATIC 1)
+endif()
+
+if(NOT APPLE)
+    find_package(wxWidgets REQUIRED COMPONENTS core base gl)
+else()
+    find_package(wxWidgets REQUIRED COMPONENTS core base)
+endif()
+
 if(wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
 else()
     message(FATAL_ERROR "wxWidgets not found. Install it via vcpkg or your system package manager.")
+endif()
+
+# Find and include OpenGL + FreeType (not available for macOS)
+if(NOT APPLE)
+    find_package(OpenGL REQUIRED)
+    find_package(GLEW REQUIRED)
+    
+    find_package(Freetype REQUIRED)
 endif()
 
 # Directory paths
@@ -76,6 +97,11 @@ add_subdirectory(src/bwx_core)
 add_subdirectory(src/bwx_gui)
 add_subdirectory(src/bwx_utils)
 add_subdirectory(examples/example_app)
+
+if(NOT APPLE)
+    add_subdirectory(src/bwx_gl)
+    add_subdirectory(examples/example_gl)
+endif()
 
 # Display configuration information
 message(STATUS "Project configured successfully. BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}")

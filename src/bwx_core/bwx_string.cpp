@@ -15,6 +15,10 @@
 
 #include "bwx_string.h"
 
+#include <string>
+#include <locale>
+#include <codecvt>
+
 namespace bwx_sdk {
 	namespace str {
 
@@ -64,6 +68,18 @@ namespace bwx_sdk {
 				if (i > 0)
 					result += separator;
 				result += array[i];
+			}
+			return result;
+		}
+
+		wxString bwxSimpleJoin(const std::vector<std::string>& array, const wxString& separator)
+		{
+			wxString result;
+			for (size_t i = 0; i < array.size(); ++i)
+			{
+				if (i > 0)
+					result += separator;
+				result += wxString::FromUTF8(array[i]);
 			}
 			return result;
 		}
@@ -171,6 +187,12 @@ namespace bwx_sdk {
 		wxString bwxFormat(const wxString& format, ...)
 		{
 			return bwxFormat(format.mb_str().data());
+		}
+
+		std::wstring bwxStringToWstring(const std::string& str)
+		{
+			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+			return converter.from_bytes(str);
 		}
 
 	} // namespace str
