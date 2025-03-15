@@ -30,35 +30,73 @@
 
 namespace bwx_sdk {
 
-struct bwxGLTTFCharacter {
-    GLuint textureID;
-    glm::vec2 size;
-    glm::vec2 bearing;
-    GLuint advance;
-};
-
 class bwxGLTTF {
 public:
-    bwxGLTTF();
-    bwxGLTTF(const int& first, const int& last);
-    bwxGLTTF(const glm::vec2& char_range);
-    ~bwxGLTTF();
+    struct bwxGLTTFGlyph {
+        glm::ivec2 size;
+        glm::ivec2 bearing;
+        GLuint advance;
+        glm::vec2 uvTopLeft;
+        glm::vec2 uvBottomRight;
+    };
 
-    void Init();
+    bool LoadFromFile(const std::string& filepath, int pixelHeight = 48);
 
-    void Render(const std::string& text, const glm::mat4& ortho, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+    GLuint GetTextureAtlas() const;
 
-    static const char* DefaultTTFVertexShader();
-    static const char* DefaultTTFFragmentShader();
+    const bwxGLTTFGlyph& GetGlyph(wchar_t c) const;
 
-    void UseDefaultTTFShader();
+    const std::map<GLchar, bwxGLTTF::bwxGLTTFGlyph>& GetGlyphs() const;
+
+    const int GetGlyphHeight(wchar_t c) const;
+
+    const int GetGlyphWidth(wchar_t c) const;
+
+    void SetCharset(const std::wstring& charset);
+
+    void SetCharsetPL();
+
+    void SetCharsetEN();
+
+    void SetCharsetRU();
+
+    void SetCharsetDE();
+
+    void SetCharsetFR();
+
+    void SetCharsetES();
+
+    void SetCharsetIT();
 
 private:
-    int m_firstChar;
-    int m_lastChar;
-    GLuint m_VAO, m_VBO;
-    std::map<GLchar, bwxGLTTFCharacter> chars;
-    bwxGLShader* shader;
+    std::wstring m_charset =
+        L" !\"#$%&'()*+,-./0123456789:;<=>?@"
+        L"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
+    GLuint m_textureAtlas;
+    std::map<GLchar, bwxGLTTFGlyph> m_glyphs;
+};
+
+class bwxGLText {
+public:
+    bwxGLText(bwxGLTTF& font);
+
+    void SetFont(bwxGLTTF& font);
+
+    const int GetFontHeight();
+
+    void Render(const std::wstring& text, const glm::mat4& orth, const glm::vec2& pos, GLfloat scale,
+                const glm::vec4& color);
+
+    // void SetEffectParams(const EffectParams& params);
+
+    void SetShaderProgram(std::shared_ptr<bwxGLShaderProgram> shader);
+
+    void SetDefaultShaderProgram();
+
+private:
+    bwxGLTTF& m_font;
+    std::shared_ptr<bwxGLShaderProgram> m_shaderProgram;
 };
 
 }  // namespace bwx_sdk

@@ -17,13 +17,13 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <GL/glew.h>
+#include <wx/wxprec.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include <wx/wxprec.h>
+#include <glm/gtx/euler_angles.hpp>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
@@ -32,11 +32,11 @@
 #include <wx/image.h>
 #include <wx/mstream.h>
 
+#include <fstream>
 #include <iostream>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
-#include <fstream>
 
 #include "bwx_gl_armature.h"
 #include "bwx_gl_buffer.h"
@@ -58,5 +58,7 @@
 #include "bwx_gl_skybox.h"
 #include "bwx_gl_texture.h"
 #include "bwx_gl_texture_manager.h"
+#include "bwx_gl_ttf.h"
+#include "bwx_gl_utils.h"
 
-#endif // _BWX_GL_H_
+#endif  // _BWX_GL_H_

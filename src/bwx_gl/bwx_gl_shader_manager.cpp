@@ -608,7 +608,7 @@ namespace bwx_sdk {
 		auto it = m_shaderProgramMap.find(programName);
 		if (it != m_shaderProgramMap.end())
 		{
-			it->second->Use();
+			it->second->Bind();
 		}
 	}
 

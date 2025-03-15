@@ -79,6 +79,8 @@ T bwxFromString(const wxString& str) {
     return static_cast<T>(0);  // 0 if error
 }
 
+std::wstring bwxStringToWstring(const std::string& str);
+
 }  // namespace str
 }  // namespace bwx_sdk
 

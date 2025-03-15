@@ -31,7 +31,7 @@
 #include <bwx_sdk/bwx_core/bwx_string.h>
 #include <bwx_sdk/bwx_gl/bwx_gl.h>
 
-// Wspó³rzêdne wierzcho³ków i tekstur
+// Vertices & texture coordinates
 float verts[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 	0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -76,7 +76,7 @@ float verts[] = {
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
-// Shadery
+// Shaders
 const char* solid_vertex_src = "#version 330 core\n"
 "layout(location = 0) in vec3 pos;\n"
 "layout(location = 1) in vec2 texCoord;\n"
@@ -116,7 +116,9 @@ const char* mesh_fragment_src = "#version 330 core\n"
 "   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
 "}\n\0";
 
-
+//---------------------------------------------------------------------------
+// MyCanvas class
+//---------------------------------------------------------------------------
 class MyCanvas : public wxGLCanvas
 {
 public:
@@ -139,12 +141,18 @@ private:
 	DECLARE_EVENT_TABLE();
 };
 
+//---------------------------------------------------------------------------
+// MyApp class
+//---------------------------------------------------------------------------
 class MyApp : public wxApp
 {
 public:
 	virtual bool OnInit();
 };
 
+//---------------------------------------------------------------------------
+// MyFrame class
+//---------------------------------------------------------------------------
 class MyFrame : public wxFrame
 {
 public:
@@ -193,6 +201,14 @@ private:
 #if not USE_TEXTURE_MANAGER
 	std::shared_ptr<bwx_sdk::bwxGLTexture2D> texture;
 #endif
+
+	bwx_sdk::bwxGLTTF fontSmall;
+	bwx_sdk::bwxGLTTF fontLarge;
+
+	std::shared_ptr<bwx_sdk::bwxGLText> textSmall;
+	std::shared_ptr<bwx_sdk::bwxGLText> textLarge;
+
+	bwx_sdk::bwxGLFPSMonitor fps;
 
 	DECLARE_EVENT_TABLE()
 };
@@ -411,6 +427,17 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 #endif
 
 	//-------------------------------------------
+	// TEXT
+	//font.SetCharsetPL();
+	fontSmall.LoadFromFile("fonts/Ubuntu-R.ttf", 12);
+	textSmall = std::make_shared<bwx_sdk::bwxGLText>(fontSmall);
+	textSmall->SetDefaultShaderProgram();
+
+	fontLarge.LoadFromFile("fonts/BW Typeface.ttf", 36);
+	textLarge = std::make_shared<bwx_sdk::bwxGLText>(fontLarge);
+	textLarge->SetDefaultShaderProgram();
+
+	//-------------------------------------------
 	Fit();
 	CenterOnScreen();
 }
@@ -448,7 +475,7 @@ void MyFrame::OnAboutProgram(wxCommandEvent& WXUNUSED(event))
 //---------------------------------------------------------------------------
 void MyFrame::OnMesh(wxCommandEvent& event)
 {
-	active_shader_program->Release();
+	active_shader_program->Unbind();
 
 #if not USE_SHADER_PROGRAM_MANAGER
 	if (event.GetId() == ID_POINT)
@@ -513,11 +540,14 @@ void MyFrame::Render()
 {
 	if (!this->IsShown()) return;
 
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Default background color
+	bwx_sdk::bwxGLUtils::SetDefaultClearColor();
+
+	// Delta time saved to variable for different operations (for example movement)
+	GLfloat delta = fps.GetDelta();
 
 	// Activate shader program
-	active_shader_program->Use();
+	active_shader_program->Bind();
 
 	// Set transformation matrices
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f), (GLfloat)timer.TimeInMicro().ToDouble() / 1000000, glm::vec3(0.5f, 1.0f, 0.0f));
@@ -545,5 +575,24 @@ void MyFrame::Render()
 	//bwx_sdk::bwxGLTextureManager::GetInstance().UnbindTexture(0);
 #endif
 
+	//-------------------------------------------
+	// RENDER TEXT
+	glm::mat4 ortho = glm::ortho(0.0f, (float)canvas->x, 0.0f, (float)canvas->y);
+
+	// Text with OpenGL coordinates... (from bottom-left corner)
+	textSmall->Render(bwx_sdk::str::bwxStringToWstring(fps.GetFPSStr()), ortho, glm::vec2(10, 26), 1.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	textSmall->Render(L"(c) 2025 by Bartosz Warzocha", ortho, glm::vec2(10, 10), 0.9f, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)); // Smaller scale looks better
+	
+	// Text with window coordinates... (from top-left corner)
+	textLarge->Render(
+		L"BWX_SDK OpenGL Example", 
+		ortho, 
+		bwx_sdk::bwxGLUtils::GetWindowCoordinates(canvas, glm::vec2(20, 20 + textLarge->GetFontHeight())), // Client window coordinates
+		1.0f, // If scale is larger than 1.0f, text will be blurry
+		glm::vec4(0.75f, 1.0f, 1.0f, 1.0f)
+	); 
+
+	//-------------------------------------------
+	// Swap buffers
 	canvas->SwapBuffers();
 }

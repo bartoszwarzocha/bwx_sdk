@@ -250,6 +250,16 @@ namespace bwx_sdk {
 			return static_cast<T>(0); // 0 if error
 		}
 
+		/**
+		 * @brief Converts a string to a numeric value.
+		 *
+		 * This function converts a string to a numeric value using wxString::ToLongLong or wxString::ToDouble.
+		 *
+		 * @param str The string to be converted.
+		 * @return The resulting numeric value.
+		 */
+		std::wstring bwxStringToWstring(const std::string& str);
+
 	}
 }
 

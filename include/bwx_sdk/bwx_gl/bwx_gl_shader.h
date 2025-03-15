@@ -45,6 +45,7 @@ enum bwxGL_SHADER_TYPE : GLenum {
 class bwxGLShader {
 public:
     bwxGLShader();
+    bwxGLShader(bwxGL_SHADER_TYPE type, const std::string& source, bool fromFile = false);
     ~bwxGLShader();
 
     bool LoadShader(bwxGL_SHADER_TYPE type, const std::string& source, bool fromFile = false);
@@ -84,6 +85,25 @@ inline void glUniformHelper(GLint location, const glm::mat4& mat) {
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
+// Helper functions for attribute handling
+inline void glVertexAttribHelper(GLint location, GLfloat v0) { glVertexAttrib1f(location, v0); }
+inline void glVertexAttribHelper(GLint location, GLfloat v0, GLfloat v1) { glVertexAttrib2f(location, v0, v1); }
+inline void glVertexAttribHelper(GLint location, GLfloat v0, GLfloat v1, GLfloat v2) {
+    glVertexAttrib3f(location, v0, v1, v2);
+}
+inline void glVertexAttribHelper(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) {
+    glVertexAttrib4f(location, v0, v1, v2, v3);
+}
+
+inline void glVertexAttribHelper(GLint location, GLint v0) { glVertexAttribI1i(location, v0); }
+inline void glVertexAttribHelper(GLint location, GLint v0, GLint v1) { glVertexAttribI2i(location, v0, v1); }
+inline void glVertexAttribHelper(GLint location, GLint v0, GLint v1, GLint v2) {
+    glVertexAttribI3i(location, v0, v1, v2);
+}
+inline void glVertexAttribHelper(GLint location, GLint v0, GLint v1, GLint v2, GLint v3) {
+    glVertexAttribI4i(location, v0, v1, v2, v3);
+}
+
 class bwxGLShaderProgram {
 public:
     bwxGLShaderProgram();
@@ -92,11 +112,22 @@ public:
     void AttachShader(const bwxGLShader& shader);
     void AttachShader(const GLuint& shaderId);
     bool Link();
-    void Use();
-    void Release();
+    void Bind();
+    void Unbind();
     void Delete();
 
     GLuint GetProgram() const { return m_program; }
+
+    void AddUniform(const std::string& name);
+    void AddUniforms(const std::vector<std::string>& names);
+    void AddAttribute(const std::string& name);
+    void AddAttributes(const std::vector<std::string>& names);
+
+    std::unordered_map<std::string, GLint> GetUniformCache() const { return m_uniformCache; }
+    std::unordered_map<std::string, GLint> GetAttributeCache() const { return m_attributeCache; }
+
+    std::unordered_map<std::string, GLint> GetProgramUniforms();
+    std::unordered_map<std::string, GLint> GetProgramAttributes();
 
     template <typename... Args>
     void SetUniform(const std::string& name, Args... args) {
@@ -111,18 +142,30 @@ public:
         }
     }
 
-    /*
-            shaderProgram.SetUniforms({
-                    {"lightPosition", glm::vec3(1.0f, 1.5f, 2.0f)},
-                    {"ambientColor", glm::vec3(0.1f, 0.1f, 0.1f)},
-                    {"diffuseIntensity", 1.0f},
-                    {"shadowMapIndex", 2}
-            });
-    */
-    template <typename T>
-    void SetUniforms(const std::unordered_map<std::string, T>& uniforms) {
+    template <typename... Args>
+    void SetUniforms(const std::unordered_map<std::string, Args...>& uniforms) {
         for (const auto& [name, value] : uniforms) {
             SetUniform(name, value);
+        }
+    }
+
+    template <typename... Args>
+    void SetAttribute(const std::string& name, Args... args) {
+        GLint location = GetAttributeLocation(name);
+        if (location != -1) {
+            if (m_program != 0) {
+                glVertexAttribHelper(location, args...);
+            } else {
+                std::cerr << "Error: Cannot set attribute '" << name << "' because no shader program is in use."
+                          << std::endl;
+            }
+        }
+    }
+
+    template <typename... Args>
+    void SetAttributes(const std::unordered_map<std::string, Args...>& attributes) {
+        for (const auto& [name, value] : attributes) {
+            SetAttribute(name, value);
         }
     }
 
@@ -130,7 +173,9 @@ public:
 
 private:
     GLint GetUniformLocation(const std::string& name);
+    GLint GetAttributeLocation(const std::string& name);
     std::unordered_map<std::string, GLint> m_uniformCache;
+    std::unordered_map<std::string, GLint> m_attributeCache;
 
     GLuint m_program;
 };

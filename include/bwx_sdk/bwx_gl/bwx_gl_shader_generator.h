@@ -29,10 +29,12 @@ namespace bwx_sdk {
 
 class bwxGLShaderGenerator {
 public:
-    static std::string GenerateVertexShader(bool useNormals = true, bool useTexCoords = true, bool useLighting = true);
-    static std::string GenerateFragmentShader(bool useTextures = true, bool useLighting = true);
-    static std::string GenerateSkyboxVertexShader();
-    static std::string GenerateSkyboxFragmentShader();
+    static std::string GetVertexShader(bool useNormals = true, bool useTexCoords = true, bool useLighting = true);
+    static std::string GetFragmentShader(bool useTextures = true, bool useLighting = true);
+    static std::string GetDefaultSkyboxVertexShader();
+    static std::string GetDefaultSkyboxFragmentShader();
+    static std::string GetDefaultTTFVertexShader();
+    static std::string GetDefaultTTFFragmentShader();
 };
 
 }  // namespace bwx_sdk

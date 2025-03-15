@@ -30,6 +30,11 @@ namespace bwx_sdk {
 
 	bwxGLShader::bwxGLShader() : m_id(bwxGL_SHADER_EMPTY) {}
 
+	bwxGLShader::bwxGLShader(bwxGL_SHADER_TYPE type, const std::string& source, bool fromFile)
+	{
+		LoadShader(type, source, fromFile);
+	}
+
 	bwxGLShader::~bwxGLShader() {
 		DeleteShader();
 	}
@@ -122,7 +127,7 @@ namespace bwx_sdk {
 		return true;
 	}
 
-	void bwxGLShaderProgram::Use()
+	void bwxGLShaderProgram::Bind()
 	{
 		if (m_program)
 		{
@@ -130,7 +135,7 @@ namespace bwx_sdk {
 		}
 	}
 
-	void bwxGLShaderProgram::Release()
+	void bwxGLShaderProgram::Unbind()
 	{
 		glUseProgram(0);
 	}
@@ -142,6 +147,66 @@ namespace bwx_sdk {
 			glDeleteProgram(m_program);
 			m_program = bwxGL_SHADER_PROGRAM_EMPTY;
 		}
+	}
+
+	void bwxGLShaderProgram::AddUniform(const std::string& name)
+	{
+		GetUniformLocation(name);
+	}
+
+	void bwxGLShaderProgram::AddUniforms(const std::vector<std::string>& names)
+	{
+		for (const auto& name : names)
+		{
+			AddUniform(name);
+		}
+	}
+
+	void bwxGLShaderProgram::AddAttribute(const std::string& name)
+	{
+		GetAttributeLocation(name);
+	}
+
+	void bwxGLShaderProgram::AddAttributes(const std::vector<std::string>& names)
+	{
+		for (const auto& name : names)
+		{
+			AddAttribute(name);
+		}
+	}
+
+	std::unordered_map<std::string, GLint> bwxGLShaderProgram::GetProgramUniforms()
+	{
+		std::unordered_map<std::string, GLint> uniforms;
+		GLint numUniforms;
+		glGetProgramiv(m_program, GL_ACTIVE_UNIFORMS, &numUniforms);
+		for (int i = 0; i < numUniforms; i++)
+		{
+			GLchar name[256];
+			GLsizei length;
+			GLint size;
+			GLenum type;
+			glGetActiveUniform(m_program, i, 256, &length, &size, &type, name);
+			uniforms[name] = glGetUniformLocation(m_program, name);
+		}
+		return uniforms;
+	}
+
+	std::unordered_map<std::string, GLint> bwxGLShaderProgram::GetProgramAttributes()
+	{
+		std::unordered_map<std::string, GLint> attributes;
+		GLint numAttributes;
+		glGetProgramiv(m_program, GL_ACTIVE_ATTRIBUTES, &numAttributes);
+		for (int i = 0; i < numAttributes; i++)
+		{
+			GLchar name[256];
+			GLsizei length;
+			GLint size;
+			GLenum type;
+			glGetActiveAttrib(m_program, i, 256, &length, &size, &type, name);
+			attributes[name] = glGetAttribLocation(m_program, name);
+		}
+		return attributes;
 	}
 
 	GLint bwxGLShaderProgram::GetUniformLocation(const std::string& name)
@@ -157,6 +222,20 @@ namespace bwx_sdk {
 		}
 
 		m_uniformCache[name] = location;
+		return location;
+	}
+
+	GLint bwxGLShaderProgram::GetAttributeLocation(const std::string& name)
+	{
+		auto it = m_attributeCache.find(name);
+		if (it != m_attributeCache.end()) {
+			return it->second;
+		}
+		GLint location = glGetAttribLocation(m_program, name.c_str());
+		if (location == -1) {
+			std::cerr << "Warning: Attribute '" << name << "' not found in shader program " << m_program << std::endl;
+		}
+		m_attributeCache[name] = location;
 		return location;
 	}
 

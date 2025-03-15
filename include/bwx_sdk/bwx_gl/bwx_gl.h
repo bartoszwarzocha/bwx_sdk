@@ -64,5 +64,7 @@
 #include "bwx_gl_skybox.h"
 #include "bwx_gl_texture.h"
 #include "bwx_gl_texture_manager.h"
+#include "bwx_gl_ttf.h"
+#include "bwx_gl_utils.h"
 
 #endif  // _BWX_GL_H_

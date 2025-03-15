@@ -32,18 +32,13 @@ target_include_directories(bwx_gl
     PUBLIC ${wxWidgets_INCLUDE_DIRS}
 )
 
-# wxWidgets + core
+# Libraries
 target_link_libraries(bwx_gl 
+    PUBLIC Freetype::Freetype
+    PUBLIC OpenGL::GL GLEW::GLEW
     PUBLIC ${wxWidgets_LIBRARIES}
     PUBLIC bwx_core
 )
-
-# OpenGL
-if(NOT APPLE)
-    target_link_libraries(bwx_gl 
-        PUBLIC OpenGL::GL GLEW::GLEW
-    )
-endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${BWX_GL_SOURCES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Internal Header Files" FILES ${BWX_GL_INTERNAL_HEADERS})

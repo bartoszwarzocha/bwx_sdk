@@ -58,10 +58,12 @@ else()
     message(FATAL_ERROR "wxWidgets not found. Install it via vcpkg or your system package manager.")
 endif()
 
-# Find and include OpenGL (not available for macOS)
+# Find and include OpenGL + FreeType (not available for macOS)
 if(NOT APPLE)
     find_package(OpenGL REQUIRED)
     find_package(GLEW REQUIRED)
+    
+    find_package(Freetype REQUIRED)
 endif()
 
 # Directory paths
