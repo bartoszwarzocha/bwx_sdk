@@ -18,17 +18,17 @@ def generate_cmake(lib_name: str):
     lib_variable = f"BWX_{lib_upper}"
     lib_target = f"bwx_{lib_lower}"
 
-    cmake_content = f"""file(GLOB_RECURSE {lib_variable}_SOURCES CONFIGURE_DEPENDS
+    cmake_content = f"""file(GLOB_RECURSE {lib_variable}_SOURCES
     "${{CMAKE_CURRENT_SOURCE_DIR}}/*.cpp"
     "${{CMAKE_CURRENT_SOURCE_DIR}}/*.c"
 )
 
-file(GLOB_RECURSE {lib_variable}_INTERNAL_HEADERS CONFIGURE_DEPENDS
+file(GLOB_RECURSE {lib_variable}_INTERNAL_HEADERS
     "${{CMAKE_CURRENT_SOURCE_DIR}}/*.h"
     "${{CMAKE_CURRENT_SOURCE_DIR}}/*.hpp"
 )
 
-file(GLOB_RECURSE {lib_variable}_HEADERS CONFIGURE_DEPENDS
+file(GLOB_RECURSE {lib_variable}_HEADERS
     "${{CMAKE_SOURCE_DIR}}/include/*.h"
     "${{CMAKE_SOURCE_DIR}}/include/*.hpp"
 )
