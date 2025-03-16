@@ -24,7 +24,9 @@
 
 #include <glm/glm.hpp>
 #include <map>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "bwx_gl_shader.h"
 
@@ -44,13 +46,13 @@ public:
 
     GLuint GetTextureAtlas() const;
 
-    const bwxGLTTFGlyph& GetGlyph(wchar_t c) const;
+    bwxGLTTFGlyph& GetGlyph(wchar_t c);
 
-    const std::map<GLchar, bwxGLTTF::bwxGLTTFGlyph>& GetGlyphs() const;
+    std::map<GLchar, bwxGLTTF::bwxGLTTFGlyph>& GetGlyphs();
 
-    const int GetGlyphHeight(wchar_t c) const;
+    int GetGlyphHeight(wchar_t c) const;
 
-    const int GetGlyphWidth(wchar_t c) const;
+    int GetGlyphWidth(wchar_t c) const;
 
     void SetCharset(const std::wstring& charset);
 
@@ -83,7 +85,7 @@ public:
 
     void SetFont(bwxGLTTF& font);
 
-    const int GetFontHeight();
+    int GetFontHeight();
 
     void Render(const std::wstring& text, const glm::mat4& orth, const glm::vec2& pos, GLfloat scale,
                 const glm::vec4& color);

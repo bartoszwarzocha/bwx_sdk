@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <memory>
+#include <iostream>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>

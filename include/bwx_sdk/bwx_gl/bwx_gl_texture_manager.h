@@ -16,6 +16,8 @@
 #ifndef _BWX_GL_TEXTURE_MANAGER_H_
 #define _BWX_GL_TEXTURE_MANAGER_H_
 
+#include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 

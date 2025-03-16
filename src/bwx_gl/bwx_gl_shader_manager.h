@@ -16,6 +16,9 @@
 
 #include <unordered_map>
 #include <string>
+#include <memory>
+#include <iostream>
+#include <initializer_list>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>

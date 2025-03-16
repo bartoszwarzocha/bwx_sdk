@@ -25,6 +25,7 @@
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
+#include <iostream>
 #include <vector>
 
 #include "bwx_gl_renderable.h"

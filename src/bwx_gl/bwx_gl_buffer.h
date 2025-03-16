@@ -15,6 +15,7 @@
 #endif
 
 #include <vector>
+#include <iostream>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>

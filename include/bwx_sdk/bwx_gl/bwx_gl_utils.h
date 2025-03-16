@@ -25,6 +25,7 @@
 
 #include <chrono>
 #include <glm/glm.hpp>
+#include <string>
 
 namespace bwx_sdk {
 

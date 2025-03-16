@@ -27,6 +27,7 @@
 #include <fstream>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>

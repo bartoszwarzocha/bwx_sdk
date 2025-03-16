@@ -20,6 +20,7 @@
 #error OpenGL functionality is not available for macOS.
 #endif
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -32,7 +33,7 @@ class bwxGLMaterialLibrary {
 public:
     static bwxGLMaterialLibrary& GetInstance();
     std::shared_ptr<bwxGLMaterial> GetMaterial(const std::string& name) const;
-    std::shared_ptr<bwxGLMaterial> GetMaterial(const int& id) const;
+    std::shared_ptr<bwxGLMaterial> GetMaterial(const unsigned int& id) const;
     std::shared_ptr<bwxGLMaterial> CreateMaterial(const std::string& name);
     void ReleaseMaterial(const std::string& name);
     void ReleaseMaterial(const int& id);

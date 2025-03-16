@@ -23,6 +23,7 @@
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
+#include <iostream>
 #include <vector>
 
 namespace bwx_sdk {

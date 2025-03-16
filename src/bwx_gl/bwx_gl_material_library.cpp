@@ -29,7 +29,7 @@ namespace bwx_sdk {
         return nullptr;
     }
 
-	std::shared_ptr<bwxGLMaterial> bwxGLMaterialLibrary::GetMaterial(const int& id) const {
+	std::shared_ptr<bwxGLMaterial> bwxGLMaterialLibrary::GetMaterial(const unsigned int& id) const {
 		for (auto it = m_materials.begin(); it != m_materials.end(); ++it) {
 			if (it->second.lock()->GetID() == id) {
 				return it->second.lock();

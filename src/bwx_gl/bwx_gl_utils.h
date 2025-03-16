@@ -20,6 +20,7 @@
 #include <wx/glcanvas.h>
 
 #include <chrono>
+#include <string>
 
 namespace bwx_sdk {
 	

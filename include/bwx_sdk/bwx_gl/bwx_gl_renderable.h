@@ -23,6 +23,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <glm/glm.hpp>
+#include <iostream>
 #include <memory>
 
 #include "bwx_gl_buffer.h"

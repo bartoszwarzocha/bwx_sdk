@@ -30,8 +30,12 @@
 #define bwxGL_MATERIAL_IOR_AMETHYST 1.532
 #define bwxGL_MATERIAL_IOR_GOLD 0.470
 
+#include <fstream>
+#include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "bwx_gl_shader.h"
 #include "bwx_gl_texture.h"

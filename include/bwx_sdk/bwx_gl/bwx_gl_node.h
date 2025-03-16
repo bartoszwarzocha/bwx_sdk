@@ -22,6 +22,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>

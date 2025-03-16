@@ -17,11 +17,16 @@ namespace bwx_sdk {
 
 	void bwxGLModel::Render(glm::mat4* model)
 	{
+		(void)model; // Temporary solution to avoid warning
+
 		for (auto m : this->m_meshes) { /*m->Render(NULL, model, false);*/ }
 	}
 
 	void bwxGLModel::Render(bwxGLShader* sh, glm::mat4* model)
 	{
+		(void)sh; // Temporary solution to avoid warning
+		(void)model; // Temporary solution to avoid warning
+
 		for (auto m : this->m_meshes) { /*m->Render(sh, model, false);*/ }
 	}
 

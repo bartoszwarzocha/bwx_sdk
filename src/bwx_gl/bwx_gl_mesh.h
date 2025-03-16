@@ -17,6 +17,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <vector>
+#include <iostream>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>

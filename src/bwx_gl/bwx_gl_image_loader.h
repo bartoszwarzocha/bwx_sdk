@@ -11,6 +11,7 @@
 #define _BWX_GL_IMAGE_LOADER_H_
 
 #include <wx/image.h>
+
 #include <vector>
 
 #if defined(__APPLE__)

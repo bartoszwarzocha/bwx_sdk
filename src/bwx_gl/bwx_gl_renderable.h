@@ -17,6 +17,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <memory>
+#include <iostream>
 
 #include <glm/glm.hpp>
 

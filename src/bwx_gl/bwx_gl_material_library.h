@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include <iostream>
 
 #include "bwx_gl_material.h"
 
@@ -26,7 +27,7 @@ namespace bwx_sdk {
     public:
         static bwxGLMaterialLibrary& GetInstance();
         std::shared_ptr<bwxGLMaterial> GetMaterial(const std::string& name) const;
-		std::shared_ptr<bwxGLMaterial> GetMaterial(const int& id) const;
+		std::shared_ptr<bwxGLMaterial> GetMaterial(const unsigned int& id) const;
         std::shared_ptr<bwxGLMaterial> CreateMaterial(const std::string& name);
         void ReleaseMaterial(const std::string& name);
 		void ReleaseMaterial(const int& id);

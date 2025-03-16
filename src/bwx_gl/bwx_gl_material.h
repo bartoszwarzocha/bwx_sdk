@@ -29,6 +29,10 @@
 
 #include <unordered_map>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <memory>
 
 namespace bwx_sdk {
 

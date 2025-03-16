@@ -22,11 +22,13 @@
 
 #include <GL/glew.h>
 
+#include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #define bwxGL_SHADER_EMPTY 0
 #define bwxGL_SHADER_PROGRAM_EMPTY 0

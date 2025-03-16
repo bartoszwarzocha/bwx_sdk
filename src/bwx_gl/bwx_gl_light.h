@@ -26,6 +26,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <memory>
 
 namespace bwx_sdk
 {

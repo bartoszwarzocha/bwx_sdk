@@ -21,6 +21,8 @@
 
 #include <string>
 #include <map>
+#include <vector>
+#include <memory>
 
 namespace bwx_sdk {
 
@@ -81,7 +83,7 @@ namespace bwx_sdk {
 		 * @param c Character for which to get the glyph.
 		 * @return Glyph for the given character.
 		 */
-		const bwxGLTTFGlyph& GetGlyph(wchar_t c) const;
+		bwxGLTTFGlyph& GetGlyph(wchar_t c);
 
 		/**
 		 * @brief Returns the map of glyphs for the font.
@@ -91,7 +93,7 @@ namespace bwx_sdk {
 		 *
 		 * @return Map of glyphs for the font.
 		 */
-		const std::map<GLchar, bwxGLTTF::bwxGLTTFGlyph>& GetGlyphs() const;
+		std::map<GLchar, bwxGLTTF::bwxGLTTFGlyph>& GetGlyphs();
 
 		/**
 		 * @brief Returns the width of a glyph.
@@ -101,7 +103,7 @@ namespace bwx_sdk {
 		 * @param c Character for which to get the glyph width.
 		 * @return Width of the glyph.
 		 */
-		const int GetGlyphHeight(wchar_t c) const;
+		int GetGlyphHeight(wchar_t c) const;
 		
 		/**
 		 * @brief Returns the height of a glyph.
@@ -111,7 +113,7 @@ namespace bwx_sdk {
 		 * @param c Character for which to get the glyph height.
 		 * @return Height of the glyph.
 		 */
-		const int GetGlyphWidth(wchar_t c) const;
+		int GetGlyphWidth(wchar_t c) const;
 
 		/**
 		 * @brief Sets the charset for the font.
@@ -245,7 +247,7 @@ namespace bwx_sdk {
 		 *
 		 * @return Height of the font.
 		 */
-		const int GetFontHeight();
+		int GetFontHeight();
 
 		/**
 		 * @brief Renders text at a specified position.

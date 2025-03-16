@@ -12,6 +12,8 @@
 
 #include <unordered_map>
 #include <string>
+#include <memory>
+#include <iostream>
 
 #if defined(__APPLE__)
     #error OpenGL functionality is not available for macOS.

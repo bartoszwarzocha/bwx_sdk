@@ -421,19 +421,19 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 	//-------------------------------------------
 	// TEXTURES
 #if USE_TEXTURE_MANAGER
-	bwx_sdk::bwxGLTextureManager::GetInstance().LoadTexture("texture.png");
+	bwx_sdk::bwxGLTextureManager::GetInstance().LoadTexture("./assets/images/texture.png");
 #else
-	texture = std::make_shared<bwx_sdk::bwxGLTexture2D>("texture.png");
+	texture = std::make_shared<bwx_sdk::bwxGLTexture2D>("./assets/images/texture.png");
 #endif
 
 	//-------------------------------------------
 	// TEXT
 	//font.SetCharsetPL();
-	fontSmall.LoadFromFile("fonts/Ubuntu-R.ttf", 12);
+	fontSmall.LoadFromFile("./assets/fonts/Ubuntu-R.ttf", 12);
 	textSmall = std::make_shared<bwx_sdk::bwxGLText>(fontSmall);
 	textSmall->SetDefaultShaderProgram();
 
-	fontLarge.LoadFromFile("fonts/BW Typeface.ttf", 36);
+	fontLarge.LoadFromFile("./assets/fonts/BW Typeface.ttf", 36);
 	textLarge = std::make_shared<bwx_sdk::bwxGLText>(fontLarge);
 	textLarge->SetDefaultShaderProgram();
 
@@ -561,7 +561,7 @@ void MyFrame::Render()
 
 	// Activate texture
 #if USE_TEXTURE_MANAGER
-	bwx_sdk::bwxGLTextureManager::GetInstance().BindTexture("texture.png");
+	bwx_sdk::bwxGLTextureManager::GetInstance().BindTexture("./assets/images/texture.png");
 #else
 	texture->Bind();
 #endif
