@@ -5,7 +5,8 @@
   "dependencies": [
     {
       "name": "freetype",
-      "platform": "windows | linux"
+      "platform": "windows | linux",
+      "version>=": "2.11.0"
     },
     {
       "name": "opengl",
