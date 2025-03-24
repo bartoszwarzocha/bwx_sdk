@@ -30,8 +30,8 @@ namespace bwx_sdk {
     GLuint bwxGLTextureManager::LoadTexture(const std::string& filePath, bool generateMipmaps) {
         
         // Return ID if texture exists
-        auto it = m_textureMap.find(filePath);
-        if (it != m_textureMap.end()) {
+        auto it = m_resources.find(filePath);
+        if (it != m_resources.end()) {
             return it->second->GetID();
         }
 
@@ -44,13 +44,13 @@ namespace bwx_sdk {
 		}
 
 		// ...and store it
-		m_textureMap[filePath] = texture;
+		m_resources[filePath] = texture;
         return texture->GetID();
     }
 
 	void bwxGLTextureManager::BindTexture(const std::string& filePath, int textureUnit) {
-		auto it = m_textureMap.find(filePath);
-		if (it != m_textureMap.end()) {
+		auto it = m_resources.find(filePath);
+		if (it != m_resources.end()) {
 			glActiveTexture(GL_TEXTURE0 + textureUnit);
 			glBindTexture(GL_TEXTURE_2D, it->second->GetID());
 		}
@@ -62,35 +62,35 @@ namespace bwx_sdk {
 	}
 
 	void bwxGLTextureManager::DeleteTexture(const std::string& filePath) {
-		auto it = m_textureMap.find(filePath);
-		if (it != m_textureMap.end()) {
+		auto it = m_resources.find(filePath);
+		if (it != m_resources.end()) {
 			it->second->Delete();
-			m_textureMap.erase(it);
+			m_resources.erase(it);
 		}
 	}
 
 	std::shared_ptr<bwxGLTexture2D> bwxGLTextureManager::GetTexturePtr(const std::string& filePath) {
-		auto it = m_textureMap.find(filePath);
-		if (it != m_textureMap.end()) {
+		auto it = m_resources.find(filePath);
+		if (it != m_resources.end()) {
 			return it->second;
 		}
 		return nullptr;
 	}
 
 	GLuint bwxGLTextureManager::GetTextureID(const std::string& filePath) {
-		auto it = m_textureMap.find(filePath);
-		if (it != m_textureMap.end()) {
+		auto it = m_resources.find(filePath);
+		if (it != m_resources.end()) {
 			return it->second->GetID();
 		}
 		return 0;
 	}
 
 	void bwxGLTextureManager::Clear() {
-		for (auto& texture : m_textureMap) {
+		for (auto& texture : m_resources) {
 			texture.second->Delete();
 		}
 
-		m_textureMap.clear();
+		m_resources.clear();
 	}
 
     bwxGLTextureManager::~bwxGLTextureManager() {

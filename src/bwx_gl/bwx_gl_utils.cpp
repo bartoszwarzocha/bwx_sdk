@@ -11,6 +11,11 @@
 #error OpenGL functionality is not available for macOS.
 #endif
 
+#include <thread>
+#include <sstream>
+#include <iomanip>
+#include <iostream>
+
 #include "bwx_gl_utils.h"
 
 namespace bwx_sdk {
@@ -69,29 +74,125 @@ namespace bwx_sdk {
 		//glClearBufferfv(GL_COLOR, 0, color);
 	}
 
+	std::vector<float> bwxGLUtils::GenerateSimpleCubeVertices(bool textured)
+	{
+		std::vector<float> vertices;
+
+		float baseVerts[] = {
+			// positions         // texCoords
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		};
+
+		for (size_t i = 0; i < sizeof(baseVerts) / sizeof(float); i += 5) {
+			// Always include position
+			vertices.push_back(baseVerts[i]);
+			vertices.push_back(baseVerts[i + 1]);
+			vertices.push_back(baseVerts[i + 2]);
+
+			// Optionally include texCoords
+			if (textured) {
+				vertices.push_back(baseVerts[i + 3]);
+				vertices.push_back(baseVerts[i + 4]);
+			}
+		}
+
+		return vertices;
+	}
+
 	//-----------------------------------------------------------------
 	// bwxGLFPSMonitor
 	//-----------------------------------------------------------------
 	bwxGLFPSMonitor::bwxGLFPSMonitor()
 		: m_lastUpdate(std::chrono::steady_clock::now()),
-		m_lastFrame(std::chrono::steady_clock::now()),
+		m_startTime(m_lastUpdate),
+		m_frameStart(m_lastUpdate),
+		m_lastDelta(0.0f),
 		m_frames(0),
 		m_fps(0.0f)
-	{}
+	{
+	}
 
-	GLfloat bwxGLFPSMonitor::GetDelta()
+	void bwxGLFPSMonitor::StartFrame()
 	{
 		using namespace std::chrono;
 		auto now = steady_clock::now();
-		duration<GLfloat> delta = now - m_lastFrame;
-		m_lastFrame = now;
-		return delta.count();
+		std::chrono::duration<GLfloat> delta = now - m_frameStart;
+		m_lastDelta = delta.count();
+		m_frameStart = now;
 	}
 
-	GLfloat bwxGLFPSMonitor::GetElapsedTime()
+	void bwxGLFPSMonitor::LimitFPS(int targetFPS)
+	{
+		if (targetFPS <= 0)
+			return;
+
+		using namespace std::chrono;
+
+		const GLfloat targetFrameTime = 1.0f / static_cast<GLfloat>(targetFPS);
+		auto now = steady_clock::now();
+		std::chrono::duration<GLfloat> frameTime = now - m_frameStart;
+
+		GLfloat sleepTime = targetFrameTime - frameTime.count();
+
+		if (sleepTime > 0.0005f)
+		{
+			auto sleepMs = static_cast<unsigned long>(sleepTime * 1000.0f);
+			if (sleepMs > 0)
+				wxMilliSleep(sleepMs);
+
+			while (std::chrono::steady_clock::now() - m_frameStart <= duration<GLfloat>(targetFrameTime)) {}
+		}
+	}
+
+	GLfloat bwxGLFPSMonitor::GetDelta() const
+	{
+		return m_lastDelta;
+	}
+
+	GLfloat bwxGLFPSMonitor::GetElapsedTime() const
 	{
 		using namespace std::chrono;
-		duration<GLfloat> elapsed = steady_clock::now() - m_lastUpdate;
+		std::chrono::duration<GLfloat> elapsed = steady_clock::now() - m_startTime;
 		return elapsed.count();
 	}
 

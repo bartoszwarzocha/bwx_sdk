@@ -52,7 +52,9 @@ bool bwxEndsWith(const wxString& str, const wxString& suffix);
 
 wxString bwxFormat(const char* format, ...);
 
-wxString bwxFormat(const wxString& format, ...);
+std::string bwxFormatStd(const char* format, ...);
+
+std::string bwxFormatStd(const wxString& format, ...);
 
 template <typename T>
 wxString bwxToString(T number) {

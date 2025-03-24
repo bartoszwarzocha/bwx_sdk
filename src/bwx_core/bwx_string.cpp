@@ -174,19 +174,30 @@ namespace bwx_sdk {
 			return str.EndsWith(suffix);
 		}
 
+		wxString bwxFormatV(const char* format, va_list args)
+		{
+			wxString result;
+			result.PrintfV(format, args);
+			return result;
+		}
+
 		wxString bwxFormat(const char* format, ...)
 		{
 			va_list args;
 			va_start(args, format);
-			wxString result;
-			result.PrintfV(wxString::FromUTF8(format), args);
+			wxString result = bwxFormatV(format, args);
 			va_end(args);
 			return result;
 		}
 
-		wxString bwxFormat(const wxString& format, ...)
+		std::string bwxFormatStd(const char* format, ...)
 		{
-			return bwxFormat(format.mb_str().data());
+			va_list args;
+			va_start(args, format);
+			std::string result;
+			result = bwxFormat(format).ToStdString();
+			va_end(args);
+			return result;
 		}
 
 		std::wstring bwxStringToWstring(const std::string& str)

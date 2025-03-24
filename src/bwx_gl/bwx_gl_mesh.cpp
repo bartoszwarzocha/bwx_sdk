@@ -19,9 +19,9 @@ namespace bwx_sdk {
     bwxGLMesh::bwxGLMesh(int style) : m_inputDataFormat(style) {}
 
     void bwxGLMesh::SetupMesh() {
-        if (!m_buffer) {
-            m_buffer = std::make_shared<bwxGLBuffer>();
-        }
+        //if (!m_buffer) {
+        //    m_buffer = std::make_shared<bwxGLBuffer>();
+        //}
 
         std::vector<float> vertexData;
         for (const auto& v : m_vertices) {
@@ -29,26 +29,26 @@ namespace bwx_sdk {
             vertexData.push_back(v.position.y);
             vertexData.push_back(v.position.z);
 
-            if (m_inputDataFormat & bwxGLMESH_NORMAL) {
+            if (m_inputDataFormat & bwxGL_MESH_NORMAL) {
                 vertexData.push_back(v.normal.x);
                 vertexData.push_back(v.normal.y);
                 vertexData.push_back(v.normal.z);
             }
-            if (m_inputDataFormat & bwxGLMESH_TEX_COORD) {
-                vertexData.push_back(v.tex_coord.x);
-                vertexData.push_back(v.tex_coord.y);
+            if (m_inputDataFormat & bwxGL_MESH_TEX_COORD) {
+                vertexData.push_back(v.texCoord.x);
+                vertexData.push_back(v.texCoord.y);
             }
-            if (m_inputDataFormat & bwxGLMESH_TANGENT) {
+            if (m_inputDataFormat & bwxGL_MESH_TANGENT) {
                 vertexData.push_back(v.tangent.x);
                 vertexData.push_back(v.tangent.y);
                 vertexData.push_back(v.tangent.z);
             }
-            if (m_inputDataFormat & bwxGLMESH_BITANGENT) {
+            if (m_inputDataFormat & bwxGL_MESH_BITANGENT) {
                 vertexData.push_back(v.bitangent.x);
                 vertexData.push_back(v.bitangent.y);
                 vertexData.push_back(v.bitangent.z);
             }
-            if (m_inputDataFormat & bwxGLMESH_COLOR) {
+            if (m_inputDataFormat & bwxGL_MESH_COLOR) {
                 vertexData.push_back(v.color.r);
                 vertexData.push_back(v.color.g);
                 vertexData.push_back(v.color.b);
@@ -64,11 +64,11 @@ namespace bwx_sdk {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo->GetID());
 
         int stride = 3;
-        if (m_inputDataFormat & bwxGLMESH_NORMAL) stride += 3;
-        if (m_inputDataFormat & bwxGLMESH_TEX_COORD) stride += 2;
-        if (m_inputDataFormat & bwxGLMESH_TANGENT) stride += 3;
-        if (m_inputDataFormat & bwxGLMESH_BITANGENT) stride += 3;
-        if (m_inputDataFormat & bwxGLMESH_COLOR) stride += 3;
+        if (m_inputDataFormat & bwxGL_MESH_NORMAL) stride += 3;
+        if (m_inputDataFormat & bwxGL_MESH_TEX_COORD) stride += 2;
+        if (m_inputDataFormat & bwxGL_MESH_TANGENT) stride += 3;
+        if (m_inputDataFormat & bwxGL_MESH_BITANGENT) stride += 3;
+        if (m_inputDataFormat & bwxGL_MESH_COLOR) stride += 3;
         stride *= sizeof(float);
 
         int offset = 0;
@@ -76,27 +76,27 @@ namespace bwx_sdk {
         glEnableVertexAttribArray(0);
         offset += 3 * sizeof(float);
 
-        if (m_inputDataFormat & bwxGLMESH_NORMAL) {
+        if (m_inputDataFormat & bwxGL_MESH_NORMAL) {
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(static_cast<intptr_t>(offset)));
             glEnableVertexAttribArray(1);
             offset += 3 * sizeof(float);
         }
-        if (m_inputDataFormat & bwxGLMESH_TEX_COORD) {
+        if (m_inputDataFormat & bwxGL_MESH_TEX_COORD) {
             glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(static_cast<intptr_t>(offset)));
             glEnableVertexAttribArray(2);
             offset += 2 * sizeof(float);
         }
-        if (m_inputDataFormat & bwxGLMESH_TANGENT) {
+        if (m_inputDataFormat & bwxGL_MESH_TANGENT) {
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(static_cast<intptr_t>(offset)));
             glEnableVertexAttribArray(3);
             offset += 3 * sizeof(float);
         }
-        if (m_inputDataFormat & bwxGLMESH_BITANGENT) {
+        if (m_inputDataFormat & bwxGL_MESH_BITANGENT) {
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(static_cast<intptr_t>(offset)));
             glEnableVertexAttribArray(4);
             offset += 3 * sizeof(float);
         }
-        if (m_inputDataFormat & bwxGLMESH_COLOR) {
+        if (m_inputDataFormat & bwxGL_MESH_COLOR) {
             glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(static_cast<intptr_t>(offset)));
             glEnableVertexAttribArray(5);
         }
@@ -112,11 +112,11 @@ namespace bwx_sdk {
     }
 
     void bwxGLMesh::Render() {
-        if (!m_material || !m_buffer) return;
-        m_material->Bind();
+        //if (!m_material || !m_buffer) return;
+        //m_material->Bind();
         glBindVertexArray(m_vao);
 
-        if (m_inputDataFormat & bwxGLMESH_INDICES) {
+        if (m_inputDataFormat & bwxGL_MESH_INDICES) {
             glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, 0);
         }
         else {
@@ -144,7 +144,7 @@ namespace bwx_sdk {
             tmp.position = glm::vec3(v[i], v[i + 1], v[i + 2]);
             offset += 3;
 
-            if (m_inputDataFormat & bwxGLMESH_NORMAL)
+            if (m_inputDataFormat & bwxGL_MESH_NORMAL)
             {
                 tmp.normal = glm::vec3(v[i + offset], v[i + offset + 1], v[i + offset + 2]);
                 offset += 3;
@@ -154,17 +154,17 @@ namespace bwx_sdk {
                 tmp.normal = glm::vec3(0.0f, 0.0f, 0.0f);
             }
 
-            if (m_inputDataFormat & bwxGLMESH_TEX_COORD)
+            if (m_inputDataFormat & bwxGL_MESH_TEX_COORD)
             {
-                tmp.tex_coord = glm::vec2(v[i + offset], v[i + offset + 1]);
+                tmp.texCoord = glm::vec2(v[i + offset], v[i + offset + 1]);
                 offset += 2;
             }
             else
             {
-                tmp.tex_coord = glm::vec2(0.0f, 0.0f);
+                tmp.texCoord = glm::vec2(0.0f, 0.0f);
             }
 
-            if (m_inputDataFormat & bwxGLMESH_TANGENT)
+            if (m_inputDataFormat & bwxGL_MESH_TANGENT)
             {
                 tmp.tangent = glm::vec3(v[i + offset], v[i + offset + 1], v[i + offset + 1]);
                 offset += 3;
@@ -174,7 +174,7 @@ namespace bwx_sdk {
                 tmp.tangent = glm::vec3(0.0f, 0.0f, 0.0f);
             }
 
-            if (m_inputDataFormat & bwxGLMESH_BITANGENT)
+            if (m_inputDataFormat & bwxGL_MESH_BITANGENT)
             {
                 tmp.bitangent = glm::vec3(v[i + offset], v[i + offset + 1], v[i + offset + 2]);
                 offset += 3;
@@ -184,7 +184,7 @@ namespace bwx_sdk {
                 tmp.bitangent = glm::vec3(0.0f, 0.0f, 0.0f);
             }
 
-            if (m_inputDataFormat & bwxGLMESH_COLOR)
+            if (m_inputDataFormat & bwxGL_MESH_COLOR)
             {
                 tmp.color = glm::vec3(v[i + offset], v[i + offset + 1], v[i + offset + 2]);
                 offset += 3;
@@ -194,7 +194,7 @@ namespace bwx_sdk {
                 tmp.color = glm::vec3(0.0f, 0.0f, 0.0f);
             }
 
-            if (m_inputDataFormat & bwxGLMESH_UV)
+            if (m_inputDataFormat & bwxGL_MESH_UV)
             {
                 tmp.uv = glm::vec3(v[i + offset], v[i + offset + 1], v[i + offset + 2]);
                 offset += 3;

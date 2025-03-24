@@ -21,56 +21,71 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <functional>
+#include <unordered_map>    
+#include <typeindex>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "bwx_gl_component.h"
+
 namespace bwx_sdk {
 
     class bwxGLNode : public std::enable_shared_from_this<bwxGLNode> {
     public:
-        bwxGLNode();
+        bwxGLNode() = default;
         virtual ~bwxGLNode() = default;
 
-        void SetPosition(const glm::vec3& position);
-        void SetPosition(float x, float y, float z) { SetPosition(glm::vec3(x, y, z)); }
-        glm::vec3 GetPosition() const;
+        /**
+		* @brief Component addition
+        * 
+		* @tparam T Type of the component
+		* @tparam Args Arguments for the component
+		* @param args Arguments for the component
+		* @return std::shared_ptr<T> Shared pointer to the component
+		* @note The component must derive from bwxGLComponent and must be added before the node is added to the scene
+        */
+        template <typename T, typename... Args>
+        std::shared_ptr<T> AddComponent(Args&&... args) {
+            static_assert(std::is_base_of<bwxGLComponent, T>::value, "T must derive from bwxGLComponent");
+            auto component = std::make_shared<T>(std::forward<Args>(args)...);
+            m_components[typeid(T)] = component;
+            return component;
+        }
 
-        void SetRotation(const glm::quat& rotation);
-        void SetRotation(const glm::vec3& eulerAngles);
-        void SetRotation(float pitch, float yaw, float roll) { SetRotation(glm::vec3(pitch, yaw, roll)); }
-        glm::quat GetRotation() const;
-        glm::vec3 GetEulerAngles() const;
-        float GetYaw() const;
-        float GetPitch() const;
-        float GetRoll() const;
+        template <typename T>
+        std::shared_ptr<T> GetComponent() {
+            auto it = m_components.find(typeid(T));
+            return (it != m_components.end()) ? std::static_pointer_cast<T>(it->second) : nullptr;
+        }
 
-        void SetScale(const glm::vec3& scale);
-        glm::vec3 GetScale() const;
+        template <typename T>
+		bool HasComponent() {
+			return m_components.find(typeid(T)) != m_components.end();
+		}
 
-        glm::mat4 GetTransformMatrix() const;
+        template <typename T>
+        void RemoveComponent() {
+            m_components.erase(typeid(T));
+        }
 
-        void AddChild(std::shared_ptr<bwxGLNode> child);
-        void RemoveChild(std::shared_ptr<bwxGLNode> child);
-        std::vector<std::shared_ptr<bwxGLNode>> GetChildren() const;
+        void Update(float deltaTime) {
+            for (auto& [type, component] : m_components) {
+                component->Update(deltaTime);
+            }
+        }
 
-        void SetParent(std::shared_ptr<bwxGLNode> parent);
-        std::shared_ptr<bwxGLNode> GetParent() const;
+        void Render() {
+            for (auto& [type, component] : m_components) {
+                component->Render();
+            }
+        }
 
-        void SetName(const std::string& name);
-        std::string GetName() const;
-
-    protected:
-        glm::vec3 m_position;
-        glm::quat m_rotation;
-        glm::vec3 m_scale;
-        glm::mat4 m_localTransform;
-
-        std::vector<std::shared_ptr<bwxGLNode>> m_children;
-        std::weak_ptr<bwxGLNode> m_parent;
-        std::string m_name;
+    private:
+        std::unordered_map<std::type_index, std::shared_ptr<bwxGLComponent>> m_components;
     };
 
 } // namespace bwx_sdk

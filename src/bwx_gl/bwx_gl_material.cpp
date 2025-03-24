@@ -48,6 +48,33 @@ namespace bwx_sdk {
         }
     }
 
+	void bwxGLMaterial::Unbind() const {
+		int textureUnit = 0;
+		for (const auto& [type, texturePath] : m_textures) {
+			auto id = bwxGLTextureManager::GetInstance().GetTextureID(texturePath);
+			if (id == 0) continue;
+			glActiveTexture(GL_TEXTURE0 + textureUnit);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			textureUnit++;
+		}
+	}
+
+	void bwxGLMaterial::Release() {
+		Unbind();
+	}
+
+	void bwxGLMaterial::Unload() {
+		Delete();
+	}
+
+	void bwxGLMaterial::Delete() {
+		for (const auto& [type, texturePath] : m_textures) {
+			auto id = bwxGLTextureManager::GetInstance().GetTextureID(texturePath);
+			if (id == 0) continue;
+			glDeleteTextures(1, &id);
+		}
+	}
+
     void bwxGLMaterial::ApplyToShader(bwxGLShaderProgram& shader) const {
         shader.SetUniform("material.ambient", m_ambient);
         shader.SetUniform("material.diffuse", m_diffuse);

@@ -26,6 +26,7 @@
 
 #include "bwx_gl_shader.h"
 #include "bwx_gl_texture.h"
+#include "bwx_gl_resource_manager.h"
 
 #include <unordered_map>
 #include <string>
@@ -36,7 +37,7 @@
 
 namespace bwx_sdk {
 
-    class bwxGLMaterial {
+    class bwxGLMaterial : public bwxGLResource {
     public:
         bwxGLMaterial();
         bwxGLMaterial(const std::string& name);
@@ -45,7 +46,12 @@ namespace bwx_sdk {
 		void Clean();
 
         void ApplyToShader(bwxGLShaderProgram& shader) const;
-        void Bind() const;
+        
+		void Bind() const;
+		void Unbind() const;
+		void Release();
+		void Unload();
+		void Delete();
 
 		void AddTexture(bwxGL_TEXTURE_TYPE type, const std::string& path);
         std::unordered_map<bwxGL_TEXTURE_TYPE, std::string>& GetTextures();

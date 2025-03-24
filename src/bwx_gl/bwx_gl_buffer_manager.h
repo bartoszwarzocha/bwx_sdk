@@ -22,26 +22,46 @@
 
 namespace bwx_sdk {
 
-    struct bwxGLBufferData {
-        bwxGLBuffer* VBO;
-        bwxGLBuffer* EBO;
+    class bwxGLBufferData : public bwxGLResource {
+
+    public:
+		bwxGLBufferData() : VBO(nullptr), EBO(nullptr), UBO(nullptr), TBO(nullptr), TFO(nullptr), refCount(0) {}
+
+		bwxGLBufferData(bwxGLBuffer* vbo, bwxGLBuffer* ebo, bwxGLBuffer* ubo, bwxGLBuffer* tbo, bwxGLBuffer* tfo)
+			: VBO(vbo), EBO(ebo), UBO(ubo), TBO(tbo), TFO(tfo), refCount(1) {}
+
+		bwxGLBuffer* VBO = nullptr; ///< Vertex Buffer Object
+		bwxGLBuffer* EBO = nullptr; ///< Element Buffer Object
+		bwxGLBuffer* UBO = nullptr; ///< Uniform Buffer Object
+		bwxGLBuffer* TBO = nullptr; ///< Texture Buffer Object
+		bwxGLBuffer* TFO = nullptr; ///< Transform Feedback Object
         size_t refCount;
+
+        void Bind() const override;
+		void Unbind() const override;
+		void Release() override;
+		void Unload() override;
+		void Delete() override;
     };
 
-    class bwxGLBufferManager {
+    class bwxGLBufferManager : public bwxGLResourceManager<bwxGLBufferData> 
+    {
     public:
         static bwxGLBufferManager& GetInstance();
 
         bwxGLBuffer* GetOrCreateVBO(const std::string& key, const std::vector<float>& vertices);
         bwxGLBuffer* GetOrCreateEBO(const std::string& key, const std::vector<unsigned int>& indices);
+		bwxGLBuffer* GetOrCreateUBO(const std::string& key, const std::vector<float>& data);
+		bwxGLBuffer* GetOrCreateTBO(const std::string& key, const std::vector<float>& data);
+		bwxGLBuffer* GetOrCreateTFO(const std::string& key, const std::vector<float>& data);
+
         void ReleaseBuffer(const std::string& key);
+
         void Clear();
 
     private:
         bwxGLBufferManager() = default;
         ~bwxGLBufferManager();
-
-        std::unordered_map<std::string, bwxGLBufferData> m_buffers;
     };
 
 } // namespace bwx_sdk

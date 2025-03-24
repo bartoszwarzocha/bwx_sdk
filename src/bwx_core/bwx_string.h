@@ -195,7 +195,19 @@ namespace bwx_sdk {
 		 * @param ... The arguments to be formatted.
 		 * @return The formatted string.
 		 */
-		wxString bwxFormat(const wxString& format, ...);
+		std::string bwxFormatStd(const char* format, ...);
+
+		/**
+		 * @brief Formats a string using printf-style formatting.
+		 *
+		 * This function is a wrapper around wxString::PrintfV that allows for printf-style formatting
+		 * of strings.
+		 *
+		 * @param format The format string.
+		 * @param ... The arguments to be formatted.
+		 * @return The formatted string.
+		 */
+		std::string bwxFormatStd(const wxString& format, ...);
 
 		/**
 		 * @brief Converts a numeric value to a string.

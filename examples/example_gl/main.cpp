@@ -7,19 +7,38 @@
 // Licence:		wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
-#define USE_SHADER_PROGRAM_MANAGER 1
-#define USE_TEXTURE_MANAGER 1
-
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
+#if defined(__APPLE__)
+#error OpenGL functionality is not available for macOS.
 #endif
 
-#include <GL/glew.h>
-#include <wx/glcanvas.h>
-#include <wx/splitter.h>
-#include <wx/stopwatch.h>
+//---------------------------------------------------------------------------
+// Configuration
+//---------------------------------------------------------------------------
 
+/****************************************************************************
+* USE_SHADER_PROGRAM_MANAGER
+* If 0, use the normal way of managing shaders (create, bind etc.).
+* If 1, use shader program manager class to manage shader programs.
+*/
+#define USE_SHADER_PROGRAM_MANAGER 1
+
+/****************************************************************************
+* USE_TEXTURE_MANAGER
+* If 0, use the normal/manual way of managing textures (create, bind etc.).
+* If 1, use texture manager class to manage textures.
+*/
+#define USE_TEXTURE_MANAGER 1
+
+/****************************************************************************
+* USE_RENDER_TIMER_INSTEAD_PAINT_EVENT
+* If 0, use wxPaintEvent and wxIdleEvent to render the scene.
+*     Faster but stop rendering when you use the window actions (menu etc.).
+* If 1, use wxTimer to render the scene (slower but more stabilized).
+*     Doesn't stop rendering when you use the window actions (menu etc.).
+*/
+#define USE_RENDER_TIMER_INSTEAD_PAINT_EVENT 0
+
+//-----------------------------------------------------------------------------
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -27,94 +46,78 @@
 #include <unordered_map>
 #include <memory>
 
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
+
+#include <wx/glcanvas.h>
+#include <wx/splitter.h>
+#include <wx/stopwatch.h>
+
 #include <bwx_sdk/bwx_globals.h>
 #include <bwx_sdk/bwx_core/bwx_string.h>
 #include <bwx_sdk/bwx_gl/bwx_gl.h>
 
+//---------------------------------------------------------------------------
+// DATA
+//---------------------------------------------------------------------------
+
 // Vertices & texture coordinates
-float verts[] = {
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-};
+std::vector<float> verts = bwx_sdk::bwxGLUtils::GenerateSimpleCubeVertices(true);
 
 // Shaders
-const char* solid_vertex_src = "#version 330 core\n"
-"layout(location = 0) in vec3 pos;\n"
-"layout(location = 1) in vec2 texCoord;\n"
-"out vec2 TexCoord;\n"
-"uniform mat4 model;\n"
-"uniform mat4 view;\n"
-"uniform mat4 projection;\n"
-"void main()\n"
-"{\n"
-"    gl_Position = projection * view * model * vec4(pos, 1.0f);\n"
-"    TexCoord = vec2(texCoord.x, texCoord.y);\n"
-"}\n\0";
+std::string solid_vertex_src = R"(
+	#version 330 core
+	layout(location = 0) in vec3 pos;
+	layout(location = 1) in vec2 texCoord;
+	out vec2 TexCoord;
+	uniform mat4 model;
+	uniform mat4 view;
+	uniform mat4 projection;
+	void main()
+	{
+	    gl_Position = projection * view * model * vec4(pos, 1.0f);
+	    TexCoord = vec2(texCoord.x, texCoord.y);
+	}
+)";
 
-const char* solid_fragment_src = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec2 TexCoord;\n"
-"uniform sampler2D texture1;\n"
-"void main()\n"
-"{\n"
-"    FragColor = texture(texture1, TexCoord);\n"
-"}\n\0";
+std::string solid_fragment_src = R"(
+	#version 330 core
+	out vec4 FragColor;
+	in vec2 TexCoord;
+	uniform sampler2D texture1;
+	void main()
+	{
+	    FragColor = texture(texture1, TexCoord);
+	}
+)";
 
-const char* mesh_vertex_src = "#version 330 core\n"
-"layout(location = 0) in vec3 pos;\n"
-"uniform mat4 model;\n"
-"uniform mat4 view;\n"
-"uniform mat4 projection;\n"
-"void main()\n"
-"{\n"
-"    gl_Position = projection * view * model * vec4(pos, 1.0f);\n"
-"}\n\0";
+std::string mesh_vertex_src = R"(
+	#version 330 core
+	layout(location = 0) in vec3 pos;
+	uniform mat4 model;
+	uniform mat4 view;
+	uniform mat4 projection;
+	void main()
+	{
+	    gl_Position = projection * view * model * vec4(pos, 1.0f);
+	}
+)";
 
-const char* mesh_fragment_src = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
-"}\n\0";
+std::string mesh_fragment_src = R"(
+	#version 330 core
+	out vec4 FragColor;
+	void main()
+	{
+	   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+)";
 
 //---------------------------------------------------------------------------
 // MyCanvas class
@@ -160,16 +163,23 @@ public:
 		const wxPoint& pos, const wxSize& size, long style);
 	~MyFrame();
 
+	void InitScene();
+
+private:
+#if USE_RENDER_TIMER_INSTEAD_PAINT_EVENT
+	void OnRenderTimer(wxTimerEvent& event);
+	wxTimer timer;
+#else
+	void OnPaint(wxPaintEvent& event);
+	void OnIdle(wxIdleEvent& event);
+#endif
+
 	void OnAboutProgram(wxCommandEvent& event);
 	void OnClose(wxCommandEvent& event);
 
 	void OnMesh(wxCommandEvent& event);
+	void OnFPS(wxCommandEvent& event);
 
-	void OnPaint(wxPaintEvent& event);
-	void OnIdle(wxIdleEvent& event);
-	void OnSize(wxSizeEvent& event);
-
-private:
 	void Render();
 
 	wxStatusBar* sb;
@@ -180,17 +190,16 @@ private:
 
 	wxPanel* panel;
 
-	//
-	wxStopWatch timer;
-
 	MyCanvas* canvas;
 	wxGLContext* ctx;
 
-	wxString GLversion;
-	wxString GLvendor;
-	wxString GLrenderer;
+	wxString m_GLversion;
+	wxString m_GLvendor;
+	wxString m_GLrenderer;
 
-	unsigned int VBO, VAO;
+	bwx_sdk::bwxGLBuffer* m_cubeVbo;
+
+	int m_fpsLimit;
 
 #if not USE_SHADER_PROGRAM_MANAGER
 	std::shared_ptr<bwx_sdk::bwxGLShaderProgram> solid_shader_program;
@@ -225,9 +234,15 @@ enum
 {
 	ID_CLOSE = wxID_HIGHEST + 1,
 	ID_ABOUT_PROGRAM,
+	//
 	ID_POINT,
 	ID_LINE,
 	ID_FILL,
+	//
+	ID_FPS_UNLIMITED,
+	ID_FPS_30,
+	ID_FPS_60,
+	ID_FPS_120
 };
 
 //---------------------------------------------------------------------------
@@ -237,12 +252,15 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_MENU(ID_CLOSE, MyFrame::OnClose)
 	EVT_MENU(ID_ABOUT_PROGRAM, MyFrame::OnAboutProgram)
 	//
+#if USE_RENDER_TIMER_INSTEAD_PAINT_EVENT
+	EVT_TIMER(wxID_ANY, MyFrame::OnRenderTimer)
+#else
 	EVT_PAINT(MyFrame::OnPaint)
 	EVT_IDLE(MyFrame::OnIdle)
+#endif
 	//
-	EVT_MENU(ID_POINT, MyFrame::OnMesh)
-	EVT_MENU(ID_LINE, MyFrame::OnMesh)
-	EVT_MENU(ID_FILL, MyFrame::OnMesh)
+	EVT_MENU_RANGE(ID_POINT, ID_FILL, MyFrame::OnMesh)
+	EVT_MENU_RANGE(ID_FPS_UNLIMITED, ID_FPS_120, MyFrame::OnFPS)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(MyCanvas, wxGLCanvas)
@@ -265,8 +283,11 @@ bool MyApp::OnInit()
 // MyFrame constructor
 //---------------------------------------------------------------------------
 MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
-	: wxFrame(parent, id, title, pos, size, style)
+	: wxFrame(parent, id, title, pos, size, style), m_fpsLimit(0)
 {
+	wxLog::SetActiveTarget(new wxLogGui());
+	wxLog::SetLogLevel(0);
+
 	mb = new wxMenuBar();
 
 	mFile = new wxMenu();
@@ -280,11 +301,17 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 	mView->AppendRadioItem(ID_LINE, wxT("Line rendering\tF6"));
 	mView->AppendRadioItem(ID_FILL, wxT("Triangle rendering\tF7"));
 	mView->FindItem(ID_FILL)->Check();
+	mView->AppendSeparator();
+	mView->AppendRadioItem(ID_FPS_UNLIMITED, wxT("Unlimited FPS\tF8"));
+	mView->AppendRadioItem(ID_FPS_30, wxT("30 FPS\tF9"));
+	mView->AppendRadioItem(ID_FPS_60, wxT("60 FPS\tF10"));
+	mView->AppendRadioItem(ID_FPS_120, wxT("120 FPS\tF11"));
+	mView->FindItem(ID_FPS_UNLIMITED)->Check();
 
 	mHelp->Append(ID_ABOUT_PROGRAM, wxT("&About program\tF1"), wxT("About the program"));
 
 	mb->Append(mFile, wxT("&File"));
-	mb->Append(mView, wxT("&View"));
+	mb->Append(mView, wxT("&Render"));
 	mb->Append(mHelp, wxT("&Help"));
 
 	this->SetMenuBar(mb);
@@ -301,7 +328,19 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 	wxBoxSizer* ps = new wxBoxSizer(wxVERTICAL);
 	panel->SetSizer(ps);
 
-	timer.Start();
+#if USE_RENDER_TIMER_INSTEAD_PAINT_EVENT
+	timer.SetOwner(this);
+
+	// Render timer
+	// 1 ms -> Max 1000 FPS
+	// 2 ms -> Max 500 FPS
+	// 5 ms -> Max 200 FPS
+	// 10 ms -> Max 100 FPS
+	// 20 ms -> Max 50 FPS
+	// 50 ms -> Max 20 FPS
+	// 100 ms -> Max 10 FPS
+	timer.Start(1);
+#endif
 
 	//-------------------------------------------
 	// Canvas attributes
@@ -350,9 +389,9 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 	}
 
 	// Load OpenGL version and graphics card information
-	this->GLversion = wxString(glGetString(GL_VERSION));
-	this->GLvendor = wxString(glGetString(GL_VENDOR));
-	this->GLrenderer = wxString(glGetString(GL_RENDERER));
+	this->m_GLversion = wxString(glGetString(GL_VERSION));
+	this->m_GLvendor = wxString(glGetString(GL_VENDOR));
+	this->m_GLrenderer = wxString(glGetString(GL_RENDERER));
 
 	// Renderowanie 3D
 	glEnable(GL_DEPTH_TEST);
@@ -378,42 +417,43 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 
 	//-------------------------------------------
 	// BUFFERS
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	m_cubeVbo = new bwx_sdk::bwxGLBuffer(verts, 5, { 3, 2 });
 
 	//-------------------------------------------
 	// SHADERS
 #if USE_SHADER_PROGRAM_MANAGER
-	bwx_sdk::bwxGLShaderProgramManager::GetInstance().CreateShaderProgramFromStrings("solid", solid_vertex_src, solid_fragment_src, true);
-	bwx_sdk::bwxGLShaderProgramManager::GetInstance().CreateShaderProgramFromStrings("mesh", mesh_vertex_src, mesh_fragment_src, true);
+	bwx_sdk::bwxGLShaderProgramManager::GetInstance().CreateShaderProgramFromStrings("solid", solid_vertex_src, solid_fragment_src);
+	bwx_sdk::bwxGLShaderProgramManager::GetInstance().CreateShaderProgramFromStrings("mesh", mesh_vertex_src, mesh_fragment_src);
 	active_shader_program = bwx_sdk::bwxGLShaderProgramManager::GetInstance().GetShaderProgramPtr("solid").get();
+
+	bwx_sdk::bwxGLShaderProgramManager::GetInstance().Dump();
+	//wxMessageBox(bwx_sdk::str::bwxSimpleJoin(bwx_sdk::bwxGLShaderProgramManager::GetInstance().GetShaderProgramNames()));
 #else
 	bwx_sdk::bwxGLShader mvs, mfs, svs, sfs;
 
-	mvs.LoadShader(bwx_sdk::SHADER_VERTEX, mesh_vertex_src);
-	mfs.LoadShader(bwx_sdk::SHADER_FRAGMENT, mesh_fragment_src);
-	mesh_shader_program = std::make_shared<bwx_sdk::bwxGLShaderProgram>();
-	mesh_shader_program->AttachShader(mvs);
-	mesh_shader_program->AttachShader(mfs);
-	mesh_shader_program->Link();
+	if (mvs.LoadShader(bwx_sdk::SHADER_VERTEX, mesh_vertex_src) &&
+		mfs.LoadShader(bwx_sdk::SHADER_FRAGMENT, mesh_fragment_src)) {
+		mesh_shader_program = std::make_shared<bwx_sdk::bwxGLShaderProgram>();
+		mesh_shader_program->AttachShader(mvs);
+		mesh_shader_program->AttachShader(mfs);
+		if (!mesh_shader_program->Link())
+			wxLogError(wxT("Mesh shader program link failed."));
+	}
+	else {
+		wxLogError(wxT("Mesh shader program failed to load."));
+	}
 
-	svs.LoadShader(bwx_sdk::SHADER_VERTEX, solid_vertex_src);
-	sfs.LoadShader(bwx_sdk::SHADER_FRAGMENT, solid_fragment_src);
-	solid_shader_program = std::make_shared<bwx_sdk::bwxGLShaderProgram>();
-	solid_shader_program->AttachShader(svs);
-	solid_shader_program->AttachShader(sfs);
-	solid_shader_program->Link();
+	if (svs.LoadShader(bwx_sdk::SHADER_VERTEX, solid_vertex_src) &&
+		sfs.LoadShader(bwx_sdk::SHADER_FRAGMENT, solid_fragment_src)) {
+		solid_shader_program = std::make_shared<bwx_sdk::bwxGLShaderProgram>();
+		solid_shader_program->AttachShader(svs);
+		solid_shader_program->AttachShader(sfs);
+		if (!solid_shader_program->Link())
+			wxLogError(wxT("Solid shader program link failed."));
+	}
+	else {
+		wxLogError(wxT("Solid shader program failed to load."));
+	}
 
 	active_shader_program = solid_shader_program.get();
 #endif
@@ -428,14 +468,15 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 
 	//-------------------------------------------
 	// TEXT
-	//font.SetCharsetPL();
 	fontSmall.LoadFromFile("./assets/fonts/Ubuntu-R.ttf", 12);
 	textSmall = std::make_shared<bwx_sdk::bwxGLText>(fontSmall);
-	textSmall->SetDefaultShaderProgram();
 
 	fontLarge.LoadFromFile("./assets/fonts/BW Typeface.ttf", 36);
 	textLarge = std::make_shared<bwx_sdk::bwxGLText>(fontLarge);
-	textLarge->SetDefaultShaderProgram();
+
+	//-------------------------------------------
+	// SCENE
+	//InitScene();
 
 	//-------------------------------------------
 	Fit();
@@ -447,12 +488,67 @@ MyFrame::MyFrame(wxWindow* parent, wxWindowID id, const wxString& title, const w
 //-------------------------------------------------------------------------
 MyFrame::~MyFrame()
 {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	wxDELETE(m_cubeVbo);
 
 	wxDELETE(ctx);
 	wxDELETE(canvas);
 }
+
+//---------------------------------------------------------------------------
+// InitScene() function
+//---------------------------------------------------------------------------
+void MyFrame::InitScene() {
+	using namespace bwx_sdk;
+
+	// ---------- CAMERA ----------
+	auto cameraNode = std::make_shared<bwxGLNode>();
+	auto camTransform = cameraNode->AddComponent<bwxGLTransformComponent>();
+	auto camComponent = cameraNode->AddComponent<bwxGLCameraComponent>(bwxGL_CAMERA_TYPE::CAMERA_TYPE_SPECTATOR);
+	auto movement = cameraNode->AddComponent<bwxGLMovementComponent>();
+	auto control = cameraNode->AddComponent<bwxGLControlComponent>();
+
+	camTransform->SetPosition(0.0f, 0.0f, 5.0f);
+
+	// ---------- LIGHT 1 (yellow) ----------
+	auto light1 = std::make_shared<bwxGLNode>();
+	auto light1Transform = light1->AddComponent<bwxGLTransformComponent>();
+	auto light1Comp = light1->AddComponent<bwxGLLightComponent>(bwxGL_LIGHT_TYPE::LIGHT_POINT);
+
+	light1Transform->SetPosition(3.0f, 2.0f, 2.0f);
+	light1Comp->SetLightColor({ 1.0f, 1.0f, 0.8f });
+	light1Comp->SetPower(1.0f);
+	light1Comp->SetRange(10.0f);
+
+	// ---------- LIGHT 2 (blue) ----------
+	auto light2 = std::make_shared<bwxGLNode>();
+	auto light2Transform = light2->AddComponent<bwxGLTransformComponent>();
+	auto light2Comp = light2->AddComponent<bwxGLLightComponent>(bwxGL_LIGHT_TYPE::LIGHT_POINT);
+
+	light2Transform->SetPosition(-3.0f, 2.0f, 1.0f);
+	light2Comp->SetLightColor({ 0.7f, 0.8f, 1.0f });
+	light2Comp->SetPower(1.0f);
+	light2Comp->SetRange(10.0f);
+
+	// ---------- CUBE ----------
+	auto cubeNode = std::make_shared<bwxGLNode>();
+	auto cubeTransform = cubeNode->AddComponent<bwxGLTransformComponent>();
+	auto cubeRenderable = cubeNode->AddComponent<bwxGLRenderableComponent>();
+
+	// Za³aduj zasób siatki / bufora kostki (jeœli masz menad¿er zasobów)
+	// lub u¿yj tymczasowych danych VBO (przyk³ad pomijam dla skrótu)
+	cubeTransform->SetScale(1.0f);
+
+	// ---------- SYSTEMY ----------
+	auto& lightSystem = bwxGLLightSystem::GetInstance();
+	lightSystem.Register(light1);
+	lightSystem.Register(light2);
+
+	auto& renderSystem = bwxGLRenderSystem::GetInstance();
+	//renderSystem.SetActiveCamera(cameraNode);
+	//renderSystem.SetLightSystem(std::make_shared<bwxGLLightSystem>(lightSystem));
+	//renderSystem.Register(cubeRenderable);
+}
+
 
 //---------------------------------------------------------------------------
 // Function initiates program closure
@@ -515,23 +611,50 @@ void MyFrame::OnMesh(wxCommandEvent& event)
 }
 
 //---------------------------------------------------------------------------
+// Function handles FOS limit change
+//---------------------------------------------------------------------------
+void MyFrame::OnFPS(wxCommandEvent& event)
+{
+	if (event.GetId() == ID_FPS_UNLIMITED)
+		m_fpsLimit = 0;
+	else if (event.GetId() == ID_FPS_30)
+		m_fpsLimit = 30;
+	else if (event.GetId() == ID_FPS_60)
+		m_fpsLimit = 60;
+	else if (event.GetId() == ID_FPS_120)
+		m_fpsLimit = 120;
+}
+
+//---------------------------------------------------------------------------
 // Function handles window repaint event
 //---------------------------------------------------------------------------
+#if not USE_RENDER_TIMER_INSTEAD_PAINT_EVENT
 void MyFrame::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
 	Render();
 }
+#endif
 
 //---------------------------------------------------------------------------
 // Function performs drawing during window idle time
 //---------------------------------------------------------------------------
+#if not USE_RENDER_TIMER_INSTEAD_PAINT_EVENT
 void MyFrame::OnIdle(wxIdleEvent& event)
 {
 	Render();
-
-	// Ensure continuity...
-	event.RequestMore();
+	event.RequestMore(); // Ensure continuity...
 }
+#endif
+
+//---------------------------------------------------------------------------
+// Function performs drawing during render timer event
+//---------------------------------------------------------------------------
+#if USE_RENDER_TIMER_INSTEAD_PAINT_EVENT
+void MyFrame::OnRenderTimer(wxTimerEvent& event)
+{
+	Render();
+}
+#endif
 
 //---------------------------------------------------------------------------
 // Drawing function
@@ -539,6 +662,8 @@ void MyFrame::OnIdle(wxIdleEvent& event)
 void MyFrame::Render()
 {
 	if (!this->IsShown()) return;
+
+	fps.StartFrame();
 
 	// Default background color
 	bwx_sdk::bwxGLUtils::SetDefaultClearColor();
@@ -550,7 +675,7 @@ void MyFrame::Render()
 	active_shader_program->Bind();
 
 	// Set transformation matrices
-	glm::mat4 model = glm::rotate(glm::mat4(1.0f), (GLfloat)timer.TimeInMicro().ToDouble() / 1000000, glm::vec3(0.5f, 1.0f, 0.0f));
+	glm::mat4 model = glm::rotate(glm::mat4(1.0f), fps.GetElapsedTime(), glm::vec3(0.5f, 1.0f, 0.0f));
 	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)canvas->x / (float)canvas->y, 0.1f, 100.0f);
 
@@ -567,8 +692,8 @@ void MyFrame::Render()
 #endif
 
 	// Render object
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(m_cubeVbo->GetVAO());
+	glDrawArrays(GL_TRIANGLES, 0, verts.size() / 5); // 5 floats per vertex (pos + texcoord)
 	glBindVertexArray(0);
 
 #if USE_TEXTURE_MANAGER
@@ -580,7 +705,8 @@ void MyFrame::Render()
 	glm::mat4 ortho = glm::ortho(0.0f, (float)canvas->x, 0.0f, (float)canvas->y);
 
 	// Text with OpenGL coordinates... (from bottom-left corner)
-	textSmall->Render(bwx_sdk::str::bwxStringToWstring(fps.GetFPSStr()), ortho, glm::vec2(10, 26), 1.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	textSmall->Render(bwx_sdk::str::bwxStringToWstring(fps.GetFPSStr()), ortho, glm::vec2(10, 42), 1.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	textSmall->Render(bwx_sdk::str::bwxStringToWstring(std::format("FPS Limit: {}", m_fpsLimit)), ortho, glm::vec2(10, 26), 1.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	textSmall->Render(L"(c) 2025 by Bartosz Warzocha", ortho, glm::vec2(10, 10), 0.9f, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)); // Smaller scale looks better
 	
 	// Text with window coordinates... (from top-left corner)
@@ -595,4 +721,7 @@ void MyFrame::Render()
 	//-------------------------------------------
 	// Swap buffers
 	canvas->SwapBuffers();
+
+	// FPS limit
+	fps.LimitFPS(m_fpsLimit);
 }

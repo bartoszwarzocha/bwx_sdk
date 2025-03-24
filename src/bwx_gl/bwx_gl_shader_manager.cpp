@@ -28,8 +28,8 @@ namespace bwx_sdk {
 		
 	}
 
-	void bwxGLShaderManager::AddShader(const std::string& name, const bwxGLShader& shader) {
-		m_shaderMap[name] = std::make_shared<bwxGLShader>(shader);
+	void bwxGLShaderManager::AddShader(const std::string& name, bwxGLShader& shader) {
+		m_resources[name] = std::make_shared<bwxGLShader>(shader);
 	}
 
 	GLuint bwxGLShaderManager::LoadShader(const std::string& name, const std::string& source, bwxGL_SHADER_TYPE type, bool fromFile) 
@@ -37,9 +37,9 @@ namespace bwx_sdk {
 		std::shared_ptr<bwxGLShader> shader = std::make_shared<bwxGLShader>();
 		if (shader->LoadShader(type, source, fromFile)) 
 		{
-			if (m_overwrite || m_shaderMap.find(name) == m_shaderMap.end())
+			if (m_overwrite || m_resources.find(name) == m_resources.end())
 			{
-				m_shaderMap[name] = shader;
+				m_resources[name] = shader;
 			}
 		}
 		return shader->GetID();
@@ -131,16 +131,16 @@ namespace bwx_sdk {
 	}
 
 	bwxGLShader bwxGLShaderManager::GetShader(const std::string& name) {
-		auto it = m_shaderMap.find(name);
-		if (it != m_shaderMap.end()) {
+		auto it = m_resources.find(name);
+		if (it != m_resources.end()) {
 			return *it->second.get();
 		}
 		return bwxGLShader();
 	}
 
 	std::shared_ptr<bwxGLShader> bwxGLShaderManager::GetShaderPtr(const std::string& name) {
-		auto it = m_shaderMap.find(name);
-		if (it != m_shaderMap.end()) {
+		auto it = m_resources.find(name);
+		if (it != m_resources.end()) {
 			return it->second;
 		}
 		return nullptr;
@@ -159,8 +159,8 @@ namespace bwx_sdk {
 
         for (const auto& suffix : suffixes)
         {
-            auto it = m_shaderMap.find(name + suffix);
-            if (it != m_shaderMap.end())
+            auto it = m_resources.find(name + suffix);
+            if (it != m_resources.end())
             {
                 shaders.push_back(it->second->GetID());
             }
@@ -172,7 +172,7 @@ namespace bwx_sdk {
 	std::vector<GLuint> bwxGLShaderManager::GetAllShaders() const
 	{
 		std::vector<GLuint> shaders;
-		for (const auto& shader : m_shaderMap)
+		for (const auto& shader : m_resources)
 		{
 			shaders.push_back(shader.second->GetID());
 		}
@@ -182,7 +182,7 @@ namespace bwx_sdk {
 	std::vector<std::string> bwxGLShaderManager::GetShaderNames() const
 	{
 		std::vector<std::string> names;
-		for (const auto& shader : m_shaderMap)
+		for (const auto& shader : m_resources)
 		{
 			names.push_back(shader.first);
 		}
@@ -202,7 +202,7 @@ namespace bwx_sdk {
 	}
 
 	void bwxGLShaderManager::Clear() {
-		m_shaderMap.clear();
+		m_resources.clear();
 	}
 	
 	// ---------------------------------------------------------------------
@@ -213,18 +213,18 @@ namespace bwx_sdk {
 	}
 
 	bwxGLShaderProgramManager::~bwxGLShaderProgramManager() {
-		//for (const auto& program : m_shaderProgramMap)
-		//	glDeleteProgram(m_shaderProgramMap.begin()->second);
+		//for (const auto& program : m_resources)
+		//	glDeleteProgram(m_resources.begin()->second);
 	}
 
 	void bwxGLShaderProgramManager::AddShaderProgram(const std::string& name, const bwxGLShaderProgram& program) {
-		m_shaderProgramMap[name] = std::make_shared<bwxGLShaderProgram>(program);
+		m_resources[name] = std::make_shared<bwxGLShaderProgram>(program);
 	}
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgram(const std::string& programName, const std::initializer_list<std::pair<bwxGL_SHADER_TYPE, std::string>>& shaders, bool fromFile)
 	{
 		GLuint ret = bwxGL_SHADER_PROGRAM_EMPTY;
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 
 		for (const auto& shader : shaders)
 		{
@@ -235,7 +235,7 @@ namespace bwx_sdk {
 
 		if (program->Link())
 		{
-			m_shaderProgramMap[programName] = program;
+			m_resources[programName] = program;
 			return program->GetProgram();
 		}
 
@@ -244,7 +244,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgram(const std::string& programName)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		auto shaders = bwxGLShaderManager::GetInstance().GetShaders(programName);
 
 		for (const auto& shader : shaders)
@@ -254,7 +254,7 @@ namespace bwx_sdk {
 
 		if (program->Link())
 		{
-			m_shaderProgramMap[programName] = program;
+			m_resources[programName] = program;
 			return program->GetProgram();
 		}
 
@@ -263,12 +263,12 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgram(const std::string& programName, const std::string& vertexName, const std::string& fragmentName)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(vertexName));
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(fragmentName));
 		if (program->Link())
 		{
-			m_shaderProgramMap[programName] = program;
+			m_resources[programName] = program;
 			return program->GetProgram();
 		}
 		return bwxGL_SHADER_PROGRAM_EMPTY;
@@ -276,13 +276,13 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgram(const std::string& programName, const std::string& vertexName, const std::string& fragmentName, const std::string& geometryName)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(vertexName));
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(fragmentName));
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(geometryName));
 		if (program->Link())
 		{
-			m_shaderProgramMap[programName] = program;
+			m_resources[programName] = program;
 			return program->GetProgram();
 		}
 		return bwxGL_SHADER_PROGRAM_EMPTY;
@@ -290,14 +290,14 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgram(const std::string& programName, const std::string& vertexName, const std::string& fragmentName, const std::string& tessControlName, const std::string& tessEvalName)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(vertexName));
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(fragmentName));
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(tessControlName));
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(tessEvalName));
 		if (program->Link())
 		{
-			m_shaderProgramMap[programName] = program;
+			m_resources[programName] = program;
 			return program->GetProgram();
 		}
 		return bwxGL_SHADER_PROGRAM_EMPTY;
@@ -305,7 +305,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgram(const std::string& programName, const std::string& vertexName, const std::string& fragmentName, const std::string& tessControlName, const std::string& tessEvalName, const std::string& geometryName)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(vertexName));
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(fragmentName));
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(tessControlName));
@@ -313,7 +313,7 @@ namespace bwx_sdk {
 		program->AttachShader(bwxGLShaderManager::GetInstance().GetShader(geometryName));
 		if (program->Link())
 		{
-			m_shaderProgramMap[programName] = program;
+			m_resources[programName] = program;
 			return program->GetProgram();
 		}
 		return bwxGL_SHADER_PROGRAM_EMPTY;
@@ -321,7 +321,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgramFromStrings(const std::string& programName, const std::string& vertex, const std::string& fragment, bool addToShaderManager)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		bwxGLShader vertexShader;
 		bwxGLShader fragmentShader;
 		if (vertexShader.LoadShader(SHADER_VERTEX, vertex) && 
@@ -335,9 +335,10 @@ namespace bwx_sdk {
 
 			program->AttachShader(vertexShader);
 			program->AttachShader(fragmentShader);
+
 			if (program->Link())
 			{
-				m_shaderProgramMap[programName] = program;
+				m_resources[programName] = program;
 				return program->GetProgram();
 			}
 		}
@@ -346,7 +347,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgramFromStrings(const std::string& programName, const std::string& vertex, const std::string& fragment, const std::string& geometry, bool addToShaderManager)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		bwxGLShader vertexShader;
 		bwxGLShader fragmentShader;
 		bwxGLShader geometryShader;
@@ -366,7 +367,7 @@ namespace bwx_sdk {
 			program->AttachShader(geometryShader);
 			if (program->Link())
 			{
-				m_shaderProgramMap[programName] = program;
+				m_resources[programName] = program;
 				return program->GetProgram();
 			}
 		}
@@ -375,7 +376,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgramFromStrings(const std::string& programName, const std::string& vertex, const std::string& fragment, const std::string& tessControl, const std::string& tessEval, bool addToShaderManager)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		bwxGLShader vertexShader;
 		bwxGLShader fragmentShader;
 		bwxGLShader tessControlShader;
@@ -399,7 +400,7 @@ namespace bwx_sdk {
 			program->AttachShader(tessEvalShader);
 			if (program->Link())
 			{
-				m_shaderProgramMap[programName] = program;
+				m_resources[programName] = program;
 				return program->GetProgram();
 			}
 		}
@@ -408,7 +409,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgramFromStrings(const std::string& programName, const std::string& vertex, const std::string& fragment, const std::string& tessControl, const std::string& tessEval, const std::string& geometry, bool addToShaderManager)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		bwxGLShader vertexShader;
 		bwxGLShader fragmentShader;
 		bwxGLShader tessControlShader;
@@ -436,7 +437,7 @@ namespace bwx_sdk {
 			program->AttachShader(geometryShader);
 			if (program->Link())
 			{
-				m_shaderProgramMap[programName] = program;
+				m_resources[programName] = program;
 				return program->GetProgram();
 			}
 		}
@@ -445,7 +446,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgramFromFiles(const std::string& programName, const std::string& vertex, const std::string& fragment, bool addToShaderManager)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		bwxGLShader vertexShader;
 		bwxGLShader fragmentShader;
 		if (vertexShader.LoadShader(SHADER_VERTEX, vertex, true) &&
@@ -461,7 +462,7 @@ namespace bwx_sdk {
 			program->AttachShader(fragmentShader);
 			if (program->Link())
 			{
-				m_shaderProgramMap[programName] = program;
+				m_resources[programName] = program;
 				return program->GetProgram();
 			}
 		}
@@ -470,7 +471,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgramFromFiles(const std::string& programName, const std::string& vertex, const std::string& fragment, const std::string& geometry, bool addToShaderManager)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		bwxGLShader vertexShader;
 		bwxGLShader fragmentShader;
 		bwxGLShader geometryShader;
@@ -490,7 +491,7 @@ namespace bwx_sdk {
 			program->AttachShader(geometryShader);
 			if (program->Link())
 			{
-				m_shaderProgramMap[programName] = program;
+				m_resources[programName] = program;
 				return program->GetProgram();
 			}
 		}
@@ -499,7 +500,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgramFromFiles(const std::string& programName, const std::string& vertex, const std::string& fragment, const std::string& tessControl, const std::string& tessEval, bool addToShaderManager)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		bwxGLShader vertexShader;
 		bwxGLShader fragmentShader;
 		bwxGLShader tessControlShader;
@@ -523,7 +524,7 @@ namespace bwx_sdk {
 			program->AttachShader(tessEvalShader);
 			if (program->Link())
 			{
-				m_shaderProgramMap[programName] = program;
+				m_resources[programName] = program;
 				return program->GetProgram();
 			}
 		}
@@ -532,7 +533,7 @@ namespace bwx_sdk {
 
 	GLuint bwxGLShaderProgramManager::CreateShaderProgramFromFiles(const std::string& programName, const std::string& vertex, const std::string& fragment, const std::string& tessControl, const std::string& tessEval, const std::string& geometry, bool addToShaderManager)
 	{
-		std::shared_ptr<bwxGLShaderProgram> program = std::make_shared<bwxGLShaderProgram>();
+		auto program = std::make_shared<bwxGLShaderProgram>();
 		bwxGLShader vertexShader;
 		bwxGLShader fragmentShader;
 		bwxGLShader tessControlShader;
@@ -560,7 +561,7 @@ namespace bwx_sdk {
 			program->AttachShader(geometryShader);
 			if (program->Link())
 			{
-				m_shaderProgramMap[programName] = program;
+				m_resources[programName] = program;
 				return program->GetProgram();
 			}
 		}
@@ -568,16 +569,16 @@ namespace bwx_sdk {
 	}
 
 	bwxGLShaderProgram bwxGLShaderProgramManager::GetShaderProgram(const std::string& programName) {
-		auto it = m_shaderProgramMap.find(programName);
-		if (it != m_shaderProgramMap.end()) {
+		auto it = m_resources.find(programName);
+		if (it != m_resources.end()) {
 			return *it->second.get();
 		}
 		return bwxGLShaderProgram();
 	}
 
 	std::shared_ptr<bwxGLShaderProgram> bwxGLShaderProgramManager::GetShaderProgramPtr(const std::string& programName) {
-		auto it = m_shaderProgramMap.find(programName);
-		if (it != m_shaderProgramMap.end()) {
+		auto it = m_resources.find(programName);
+		if (it != m_resources.end()) {
 			return it->second;
 		}
 		return nullptr;
@@ -586,7 +587,7 @@ namespace bwx_sdk {
 	std::vector<GLuint> bwxGLShaderProgramManager::GetAllShaderPrograms() const
 	{
 		std::vector<GLuint> programs;
-		for (const auto& program : m_shaderProgramMap)
+		for (const auto& program : m_resources)
 		{
 			programs.push_back(program.second->GetProgram());
 		}
@@ -596,7 +597,7 @@ namespace bwx_sdk {
 	std::vector<std::string> bwxGLShaderProgramManager::GetShaderProgramNames() const
 	{
 		std::vector<std::string> names;
-		for (const auto& program : m_shaderProgramMap)
+		for (const auto& program : m_resources)
 		{
 			names.push_back(program.first);
 		}
@@ -605,8 +606,8 @@ namespace bwx_sdk {
 
 	void bwxGLShaderProgramManager::UseShaderProgram(const std::string& programName)
 	{
-		auto it = m_shaderProgramMap.find(programName);
-		if (it != m_shaderProgramMap.end())
+		auto it = m_resources.find(programName);
+		if (it != m_resources.end())
 		{
 			it->second->Bind();
 		}
@@ -619,16 +620,16 @@ namespace bwx_sdk {
 
 	void bwxGLShaderProgramManager::ReleaseShaderProgram(const std::string& programName)
 	{
-		auto it = m_shaderProgramMap.find(programName);
-		if (it != m_shaderProgramMap.end())
+		auto it = m_resources.find(programName);
+		if (it != m_resources.end())
 		{
 			glDeleteProgram(it->second->GetProgram());
-			m_shaderProgramMap.erase(it);
+			m_resources.erase(it);
 		}
 	}
 
 	void bwxGLShaderProgramManager::Clear() {
-		m_shaderProgramMap.clear();
+		m_resources.clear();
 	}
 
 } // namespace bwx_sdk

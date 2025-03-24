@@ -46,24 +46,33 @@ public:
     static std::string GetErrorString(int err);
 
     static void SetDefaultClearColor(GLfloat r = 0.2f, GLfloat g = 0.3f, GLfloat b = 0.3f, GLfloat a = 1.0f);
+
+    // FIGURES
+    static std::vector<float> GenerateSimpleCubeVertices(bool textured = false);
 };
 
 class bwxGLFPSMonitor {
 public:
     bwxGLFPSMonitor();
 
+    void StartFrame();
+
+    void LimitFPS(int targetFPS);
+
+    GLfloat GetDelta() const;
+
     GLfloat GetFPS(int refresh_ms = 500);
 
     std::string GetFPSStr(int refresh_ms = 500);
 
-    GLfloat GetDelta();
-
-    GLfloat GetElapsedTime();
+    GLfloat GetElapsedTime() const;
 
 private:
     std::chrono::steady_clock::time_point m_lastUpdate;
-    std::chrono::steady_clock::time_point m_lastFrame;
+    std::chrono::steady_clock::time_point m_startTime;
+    std::chrono::steady_clock::time_point m_frameStart;
 
+    GLfloat m_lastDelta;
     GLint m_frames;
     GLfloat m_fps;
 };

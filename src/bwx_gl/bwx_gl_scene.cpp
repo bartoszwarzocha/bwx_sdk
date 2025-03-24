@@ -15,8 +15,8 @@
 #include <memory>
 #include <vector>
 
-#include "bwx_gl_camera.h"
-#include "bwx_gl_light.h"
+//#include "bwx_gl_camera.h"
+//#include "bwx_gl_light.h"
 #include "bwx_gl_mesh.h"
 
 #include "bwx_gl_scene.h"
@@ -26,28 +26,28 @@ namespace bwx_sdk {
     bwxGLScene::bwxGLScene() {}
 
     bwxGLScene::~bwxGLScene() {
-        m_cameras.clear();
+        //m_cameras.clear();
 		//m_lights.clear();
         m_meshes.clear();
     }
 
-    void bwxGLScene::AddCamera(std::shared_ptr<bwxGLCamera> camera) {
-        m_cameras.push_back(camera);
-    }
+    //void bwxGLScene::AddCamera(std::shared_ptr<bwxGLCamera> camera) {
+    //    m_cameras.push_back(camera);
+    //}
 
     void bwxGLScene::SetActiveCamera(int index) {
-        if (index >= 0 && index < static_cast<int>(m_cameras.size())) {
-            m_activeCameraIndex = index;
-        }
-        else {
-            std::cerr << "Invalid camera index: " << index << std::endl;
-        }
+        //if (index >= 0 && index < static_cast<int>(m_cameras.size())) {
+        //    m_activeCameraIndex = index;
+        //}
+        //else {
+        //    std::cerr << "Invalid camera index: " << index << std::endl;
+        //}
     }
 
-    std::shared_ptr<bwxGLCamera> bwxGLScene::GetActiveCamera() const {
-        if (m_cameras.empty()) return nullptr;
-        return m_cameras[m_activeCameraIndex];
-    }
+    //std::shared_ptr<bwxGLCamera> bwxGLScene::GetActiveCamera() const {
+    //    if (m_cameras.empty()) return nullptr;
+    //    return m_cameras[m_activeCameraIndex];
+    //}
 
     void bwxGLScene::AddMesh(std::shared_ptr<bwxGLMesh> mesh) {
         m_meshes.push_back(mesh);
@@ -64,31 +64,19 @@ namespace bwx_sdk {
 		return m_meshes;
 	}
 
-	void bwxGLScene::AddLight(std::shared_ptr<bwxGLLight> light) {
-		m_lights.push_back(light);
-	}
+	//void bwxGLScene::AddLight(std::shared_ptr<bwxGLLight> light) {
+	//	m_lights.push_back(light);
+	//}
 
-	std::shared_ptr<bwxGLLight> bwxGLScene::GetLight(int index) const {
-		if (index >= 0 && index < static_cast<int>(m_lights.size())) {
-			return m_lights[index];
-		}
-		return nullptr;
-	}
+	//std::shared_ptr<bwxGLLight> bwxGLScene::GetLight(int index) const {
+	//	if (index >= 0 && index < static_cast<int>(m_lights.size())) {
+	//		return m_lights[index];
+	//	}
+	//	return nullptr;
+	//}
 
-	std::vector<std::shared_ptr<bwxGLLight>> bwxGLScene::GetLights() const {
-		return m_lights;
-	}
-
-    void bwxGLScene::Render() {
-        auto camera = GetActiveCamera();
-        if (!camera) {
-            std::cerr << "No active camera set in the scene!" << std::endl;
-            return;
-        }
-
-        for (auto& mesh : m_meshes) {
-            mesh->Render();
-        }
-    }
+	//std::vector<std::shared_ptr<bwxGLLight>> bwxGLScene::GetLights() const {
+	//	return m_lights;
+	//}
 
 } // namespace bwx_sdk

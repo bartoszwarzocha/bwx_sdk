@@ -18,6 +18,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 
 namespace bwx_sdk {
 
@@ -26,10 +27,20 @@ namespace bwx_sdk {
 	public:
 		static std::string GetVertexShader(bool useNormals = true, bool useTexCoords = true, bool useLighting = true);
 		static std::string GetFragmentShader(bool useTextures = true, bool useLighting = true);
+
 		static std::string GetDefaultSkyboxVertexShader();
 		static std::string GetDefaultSkyboxFragmentShader();
 		static std::string GetDefaultTTFVertexShader();
 		static std::string GetDefaultTTFFragmentShader();
+
+		// LIGHTS
+		static std::string GetLightStructBlock();
+		static std::string GetLightCalculationFunction();
+
+	private:
+		static std::unordered_map<std::string, std::string> m_shaderCache;
+		static std::string GenerateVertexShader(bool useNormals, bool useTexCoords, bool useLighting);
+		static std::string GenerateFragmentShader(bool useTextures, bool useLighting);
 	};
 
 } // namespace bwx_sdk

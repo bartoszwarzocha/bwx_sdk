@@ -28,11 +28,12 @@
 #endif
 
 #include "bwx_gl_image_loader.h"
+#include "bwx_gl_resource_manager.h"
 #include "bwx_gl_texture.h"
 
 namespace bwx_sdk {
 
-class bwxGLTextureManager {
+class bwxGLTextureManager : public bwxGLResourceManager<bwxGLTexture2D> {
 public:
     static bwxGLTextureManager& GetInstance();
 
@@ -51,8 +52,6 @@ public:
 private:
     bwxGLTextureManager() = default;
     ~bwxGLTextureManager();
-
-    std::unordered_map<std::string, std::shared_ptr<bwxGLTexture2D>> m_textureMap;
 };
 
 }  // namespace bwx_sdk

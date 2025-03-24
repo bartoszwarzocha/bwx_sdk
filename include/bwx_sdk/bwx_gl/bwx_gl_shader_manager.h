@@ -29,6 +29,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "bwx_gl_resource_manager.h"
 #include "bwx_gl_shader.h"
 
 namespace bwx_sdk {
@@ -40,11 +41,11 @@ namespace bwx_sdk {
 #define bwxGL_SHADER_TESS_EVAL_SUFIX "_te"
 #define bwxGL_SHADER_COMPUTE_SUFIX "_c"
 
-class bwxGLShaderManager {
+class bwxGLShaderManager : public bwxGLResourceManager<bwxGLShader> {
 public:
     static bwxGLShaderManager& GetInstance();
 
-    void AddShader(const std::string& name, const bwxGLShader& shader);
+    void AddShader(const std::string& name, bwxGLShader& shader);
 
     GLuint LoadShader(const std::string& name, const std::string& source, bwxGL_SHADER_TYPE type,
                       bool fromFile = false);
@@ -77,7 +78,7 @@ public:
                                 const std::string& tessControl, const std::string& tessEval,
                                 const std::string& geometry);
 
-    GLuint GetShaderID(const std::string& name) { return m_shaderMap[name]->GetID(); }
+    GLuint GetShaderID(const std::string& name) { return m_resources[name]->GetID(); }
     bwxGLShader GetShader(const std::string& name);
     std::shared_ptr<bwxGLShader> GetShaderPtr(const std::string& name);
 
@@ -95,13 +96,12 @@ private:
     bwxGLShaderManager() = default;
     ~bwxGLShaderManager();
 
-    std::unordered_map<std::string, std::shared_ptr<bwxGLShader>> m_shaderMap;
     std::string m_currentShader;
 
     static bool m_overwrite;
 };
 
-class bwxGLShaderProgramManager {
+class bwxGLShaderProgramManager : public bwxGLResourceManager<bwxGLShaderProgram> {
 public:
     static bwxGLShaderProgramManager& GetInstance();
 
@@ -125,32 +125,32 @@ public:
                                const std::string& tessEvalName, const std::string& geometryName);
 
     GLuint CreateShaderProgramFromStrings(const std::string& programName, const std::string& vertex,
-                                          const std::string& fragment, bool addToShaderManager = false);
+                                          const std::string& fragment, bool addToShaderManager = true);
     GLuint CreateShaderProgramFromStrings(const std::string& programName, const std::string& vertex,
                                           const std::string& fragment, const std::string& geometry,
-                                          bool addToShaderManager = false);
+                                          bool addToShaderManager = true);
     GLuint CreateShaderProgramFromStrings(const std::string& programName, const std::string& vertex,
                                           const std::string& fragment, const std::string& tessControl,
-                                          const std::string& tessEval, bool addToShaderManager = false);
+                                          const std::string& tessEval, bool addToShaderManager = true);
     GLuint CreateShaderProgramFromStrings(const std::string& programName, const std::string& vertex,
                                           const std::string& fragment, const std::string& tessControl,
                                           const std::string& tessEval, const std::string& geometry,
-                                          bool addToShaderManager = false);
+                                          bool addToShaderManager = true);
 
     GLuint CreateShaderProgramFromFiles(const std::string& programName, const std::string& vertex,
-                                        const std::string& fragment, bool addToShaderManager = false);
+                                        const std::string& fragment, bool addToShaderManager = true);
     GLuint CreateShaderProgramFromFiles(const std::string& programName, const std::string& vertex,
                                         const std::string& fragment, const std::string& geometry,
-                                        bool addToShaderManager = false);
+                                        bool addToShaderManager = true);
     GLuint CreateShaderProgramFromFiles(const std::string& programName, const std::string& vertex,
                                         const std::string& fragment, const std::string& tessControl,
-                                        const std::string& tessEval, bool addToShaderManager = false);
+                                        const std::string& tessEval, bool addToShaderManager = true);
     GLuint CreateShaderProgramFromFiles(const std::string& programName, const std::string& vertex,
                                         const std::string& fragment, const std::string& tessControl,
                                         const std::string& tessEval, const std::string& geometry,
-                                        bool addToShaderManager = false);
+                                        bool addToShaderManager = true);
 
-    GLuint GetShaderProgramID(const std::string& name) { return m_shaderProgramMap[name]->GetProgram(); }
+    GLuint GetShaderProgramID(const std::string& name) { return m_resources[name]->GetProgram(); }
     bwxGLShaderProgram GetShaderProgram(const std::string& name);
     std::shared_ptr<bwxGLShaderProgram> GetShaderProgramPtr(const std::string& name);
 
@@ -167,7 +167,6 @@ private:
     bwxGLShaderProgramManager() = default;
     ~bwxGLShaderProgramManager();
 
-    std::unordered_map<std::string, std::shared_ptr<bwxGLShaderProgram>> m_shaderProgramMap;
     std::string m_currentShaderProgram;
 };
 

@@ -86,6 +86,9 @@ namespace bwx_sdk {
 		 * @param a Alpha.
 		 */
 		static void SetDefaultClearColor(GLfloat r = 0.2f, GLfloat g = 0.3f, GLfloat b = 0.3f, GLfloat a = 1.0f);
+
+		// FIGURES
+		static std::vector<float> GenerateSimpleCubeVertices(bool textured = false);
 	};
 
 	/**
@@ -94,44 +97,56 @@ namespace bwx_sdk {
 	class bwxGLFPSMonitor
 	{
 	public:
-
 		/**
 		 * @brief Constructor.
 		 */
 		bwxGLFPSMonitor();
 
 		/**
-		 * @brief Get FPS.
-		 * @param refresh_ms Refresh time in milliseconds.
+		 * @brief Call at the beginning of each frame to update timing.
+		 */
+		void StartFrame();
+
+		/**
+		 * @brief Call at the end of each frame to enforce FPS limit.
+		 * @param targetFPS Desired maximum frames per second.
+		 */
+		void LimitFPS(int targetFPS);
+
+		/**
+		 * @brief Get delta time in seconds.
+		 * @return Delta time.
+		 */
+		GLfloat GetDelta() const;
+
+		/**
+		 * @brief Get current FPS, averaged over time.
+		 * @param refresh_ms Refresh interval in milliseconds.
 		 * @return FPS.
 		 */
 		GLfloat GetFPS(int refresh_ms = 500);
-		
+
 		/**
-		 * @brief Get FPS string.
-		 * @param refresh_ms Refresh time in milliseconds.
+		 * @brief Get FPS as formatted string.
+		 * @param refresh_ms Refresh interval in milliseconds.
 		 * @return FPS string.
 		 */
 		std::string GetFPSStr(int refresh_ms = 500);
-		
+
 		/**
-		 * @brief Get delta time.
-		 * @return Delta time.
+		 * @brief Get elapsed time since the monitor was created.
+		 * @return Elapsed time in seconds.
 		 */
-		GLfloat GetDelta();
-		
-		/**
-		 * @brief Get elapsed time.
-		 * @return Elapsed time.
-		 */
-		GLfloat GetElapsedTime();
+		GLfloat GetElapsedTime() const;
 
 	private:
-		std::chrono::steady_clock::time_point m_lastUpdate; ///< Last update time.
-		std::chrono::steady_clock::time_point m_lastFrame; ///< Last frame time.
+		std::chrono::steady_clock::time_point m_lastUpdate;
+		std::chrono::steady_clock::time_point m_startTime;
+		std::chrono::steady_clock::time_point m_frameStart;
 
-		GLint m_frames; ///< Frames.
-		GLfloat m_fps; ///< FPS.
+		GLfloat m_lastDelta;
+		GLint m_frames;
+		GLfloat m_fps;
 	};
 
 } // namespace bwx_sdk

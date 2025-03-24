@@ -18,6 +18,7 @@
 #include <glm/glm.hpp>
 
 #include "bwx_gl_shader.h"
+#include "bwx_gl_buffer.h"
 
 #include <string>
 #include <map>
@@ -232,6 +233,13 @@ namespace bwx_sdk {
 		bwxGLText(bwxGLTTF& font);
 
 		/**
+		 * @brief Destroys the bwxGLText object.
+		 *
+		 * This destructor destroys the bwxGLText object.
+		 */
+		~bwxGLText();
+
+		/**
 		 * @brief Sets the True Type Font to use for rendering text.
 		 *
 		 * This function sets the True Type Font to use for rendering text.
@@ -262,7 +270,7 @@ namespace bwx_sdk {
 		 * @param color Color in which to render the text.
 		 */
 		void Render(const std::wstring& text, const glm::mat4& orth, const glm::vec2& pos, GLfloat scale, const glm::vec4& color);
-		
+
 		/**
 		 * @brief Sets the effect parameters for rendering text.
 		 *
@@ -272,17 +280,17 @@ namespace bwx_sdk {
 		 *
 		 * @param params Effect parameters to set.
 		 */
-		//void SetEffectParams(const EffectParams& params);
+		 //void SetEffectParams(const EffectParams& params);
 
-		/**
-		 * @brief Sets the shader program to use for rendering text.
-		 *
-		 * This function sets the shader program to use for rendering text. The
-		 * shader program should be a text shader program that supports rendering
-		 * text using the font's texture atlas.
-		 *
-		 * @param shader Shader program to use for rendering text.
-		 */
+		 /**
+		  * @brief Sets the shader program to use for rendering text.
+		  *
+		  * This function sets the shader program to use for rendering text. The
+		  * shader program should be a text shader program that supports rendering
+		  * text using the font's texture atlas.
+		  *
+		  * @param shader Shader program to use for rendering text.
+		  */
 		void SetShaderProgram(std::shared_ptr<bwxGLShaderProgram> shader);
 
 		/**
@@ -300,6 +308,7 @@ namespace bwx_sdk {
 	private:
 		bwxGLTTF& m_font; ///< True Type Font to use for rendering text
 		std::shared_ptr<bwxGLShaderProgram> m_shaderProgram; ///< Shader program to use for rendering text
+		std::shared_ptr<bwxGLBuffer> m_dynamicBuffer; ///< Dynamic buffer for rendering text
 	};
 
 } // namespace bwx_sdk

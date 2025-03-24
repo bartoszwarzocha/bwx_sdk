@@ -83,10 +83,25 @@ namespace bwx_sdk {
         glBindTexture(GL_TEXTURE_2D, m_data.textureID);
     }
 
-    void bwxGLTexture2D::Unbind()
+	void bwxGLTexture2D::Bind() const
+	{
+		glBindTexture(GL_TEXTURE_2D, m_data.textureID);
+	}
+
+    void bwxGLTexture2D::Unbind() const
     {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+
+	void bwxGLTexture2D::Release()
+	{
+		Unbind();
+	}
+
+	void bwxGLTexture2D::Unload()
+	{
+		Delete();
+	}
 
     void bwxGLTexture2D::Delete()
     {

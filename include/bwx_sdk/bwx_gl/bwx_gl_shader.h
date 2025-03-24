@@ -30,6 +30,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "bwx_gl_resource_manager.h"
+
 #define bwxGL_SHADER_EMPTY 0
 #define bwxGL_SHADER_PROGRAM_EMPTY 0
 
@@ -44,7 +46,7 @@ enum bwxGL_SHADER_TYPE : GLenum {
     SHADER_COMPUTE
 };
 
-class bwxGLShader {
+class bwxGLShader : public bwxGLResource {
 public:
     bwxGLShader();
     bwxGLShader(bwxGL_SHADER_TYPE type, const std::string& source, bool fromFile = false);
@@ -52,7 +54,12 @@ public:
 
     bool LoadShader(bwxGL_SHADER_TYPE type, const std::string& source, bool fromFile = false);
     void AttachToProgram(GLuint program);
-    void DeleteShader();
+
+    void Bind() const override;
+    void Unbind() const override;
+    void Release() override;
+    void Unload() override;
+    void Delete() override;
 
     GLuint GetID() const { return m_id; }
 
@@ -106,17 +113,21 @@ inline void glVertexAttribHelper(GLint location, GLint v0, GLint v1, GLint v2, G
     glVertexAttribI4i(location, v0, v1, v2, v3);
 }
 
-class bwxGLShaderProgram {
+class bwxGLShaderProgram : public bwxGLResource {
 public:
     bwxGLShaderProgram();
     ~bwxGLShaderProgram();
 
     void AttachShader(const bwxGLShader& shader);
     void AttachShader(const GLuint& shaderId);
+
     bool Link();
-    void Bind();
-    void Unbind();
-    void Delete();
+
+    void Bind() const override;
+    void Unbind() const override;
+    void Delete() override;
+    void Unload() override;
+    void Release() override;
 
     GLuint GetProgram() const { return m_program; }
 

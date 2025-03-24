@@ -14,9 +14,12 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <memory>
+
 #include "bwx_gl_ttf.h"
 #include "bwx_gl_shader.h"
 #include "bwx_gl_shader_generator.h"
+#include "bwx_gl_buffer.h"
 
 namespace bwx_sdk {
 
@@ -170,8 +173,17 @@ namespace bwx_sdk {
     
     bwxGLText::bwxGLText(bwxGLTTF& font) : m_font(font)
 	{
-    
+		GLsizeiptr bufferSize = sizeof(GLfloat) * 6 * 4;
+        m_dynamicBuffer = std::make_shared<bwxGLBuffer>();
+        m_dynamicBuffer->Create(bufferSize, 4, { 4 }, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+		SetDefaultShaderProgram();
     }
+
+	bwxGLText::~bwxGLText()
+	{
+		m_dynamicBuffer->Release();
+		m_dynamicBuffer.reset();
+	}
 
 	void bwxGLText::SetShaderProgram(std::shared_ptr<bwxGLShaderProgram> shader)
 	{
@@ -211,23 +223,7 @@ namespace bwx_sdk {
         glBindTexture(GL_TEXTURE_2D, m_font.GetTextureAtlas());
 
         // Initialize VAO/VBO once (ideally this should be done during class initialization)
-        static GLuint VAO = 0, VBO = 0;
-        if (VAO == 0)
-        {
-            glGenVertexArrays(1, &VAO);
-            glGenBuffers(1, &VBO);
-            glBindVertexArray(VAO);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
-
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
-        }
-
-        glBindVertexArray(VAO);
+        glBindVertexArray(m_dynamicBuffer->GetVAO());
 
         GLfloat x = pos.x;
         GLfloat y = pos.y;
@@ -252,7 +248,7 @@ namespace bwx_sdk {
                 { xpos + w, ypos + h,   ch.uvBottomRight.x, ch.uvBottomRight.y }
             };
 
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBindBuffer(GL_ARRAY_BUFFER, m_dynamicBuffer->GetID());
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
             glDrawArrays(GL_TRIANGLES, 0, 6);

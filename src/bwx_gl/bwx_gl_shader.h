@@ -24,6 +24,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "bwx_gl_resource_manager.h"
+
 #define bwxGL_SHADER_EMPTY 0
 #define bwxGL_SHADER_PROGRAM_EMPTY 0
 
@@ -41,7 +43,7 @@ namespace bwx_sdk {
 	/**
 	* @brief Class for handling OpenGL shaders
 	*/
-	class bwxGLShader
+	class bwxGLShader : public bwxGLResource
 	{
 	public:
 
@@ -51,7 +53,12 @@ namespace bwx_sdk {
 
 		bool LoadShader(bwxGL_SHADER_TYPE type, const std::string& source, bool fromFile = false);
 		void AttachToProgram(GLuint program);
-		void DeleteShader();
+		
+		void Bind() const override;
+		void Unbind() const override;
+		void Release() override;
+		void Unload() override;
+		void Delete() override;
 
 		GLuint GetID() const { return m_id; }
 
@@ -94,7 +101,7 @@ namespace bwx_sdk {
 	/**
 	* @brief Class for handling OpenGL shader programs
 	*/
-	class bwxGLShaderProgram
+	class bwxGLShaderProgram : public bwxGLResource
 	{
 	public:
 		bwxGLShaderProgram();
@@ -102,10 +109,14 @@ namespace bwx_sdk {
 
 		void AttachShader(const bwxGLShader& shader);
 		void AttachShader(const GLuint& shaderId);
+		
 		bool Link();
-		void Bind();
-		void Unbind();
-		void Delete();
+		
+		void Bind() const override;
+		void Unbind() const override;
+		void Delete() override;
+		void Unload() override;
+		void Release() override;
 
 		GLuint GetProgram() const { return m_program; }
 

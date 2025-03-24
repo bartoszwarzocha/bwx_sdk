@@ -83,6 +83,8 @@ class bwxGLText {
 public:
     bwxGLText(bwxGLTTF& font);
 
+    ~bwxGLText();
+
     void SetFont(bwxGLTTF& font);
 
     int GetFontHeight();
@@ -99,7 +101,8 @@ public:
 private:
     bwxGLTTF& m_font;
     std::shared_ptr<bwxGLShaderProgram> m_shaderProgram;
-};
+    std::shared_ptr<bwxGLBuffer> m_dynamicBuffer;
+}
 
 }  // namespace bwx_sdk
 

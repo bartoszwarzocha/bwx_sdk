@@ -36,7 +36,7 @@ namespace bwx_sdk {
 	}
 
 	bwxGLShader::~bwxGLShader() {
-		DeleteShader();
+		Delete();
 	}
 
 	bool bwxGLShader::LoadShader(bwxGL_SHADER_TYPE type, const std::string& source, bool fromFile)
@@ -81,7 +81,30 @@ namespace bwx_sdk {
 		}
 	}
 
-	void bwxGLShader::DeleteShader()
+	void bwxGLShader::Bind() const
+	{
+		if (m_id)
+		{
+			glUseProgram(m_id);
+		}
+	}
+
+	void bwxGLShader::Unbind() const
+	{
+		glUseProgram(0);
+	}
+
+	void bwxGLShader::Release()
+	{
+		Unbind();
+	}
+
+	void bwxGLShader::Unload()
+	{
+		Delete();
+	}
+
+	void bwxGLShader::Delete()
 	{
 		if (m_id)
 		{
@@ -118,6 +141,9 @@ namespace bwx_sdk {
 			glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &length);
 			std::vector<char> errorLog(length);
 			glGetProgramInfoLog(m_program, length, &length, &errorLog[0]);
+
+			//wxMessageBox("Shader linking failed: " + std::string(&errorLog[0]));
+			wxLogError("Shader linking failed: %s", &errorLog[0]);
 			std::cerr << "Shader linking failed: " << &errorLog[0] << std::endl;
 
 			glDeleteProgram(m_program);
@@ -127,7 +153,7 @@ namespace bwx_sdk {
 		return true;
 	}
 
-	void bwxGLShaderProgram::Bind()
+	void bwxGLShaderProgram::Bind() const
 	{
 		if (m_program)
 		{
@@ -135,7 +161,7 @@ namespace bwx_sdk {
 		}
 	}
 
-	void bwxGLShaderProgram::Unbind()
+	void bwxGLShaderProgram::Unbind() const
 	{
 		glUseProgram(0);
 	}
@@ -147,6 +173,16 @@ namespace bwx_sdk {
 			glDeleteProgram(m_program);
 			m_program = bwxGL_SHADER_PROGRAM_EMPTY;
 		}
+	}
+
+	void bwxGLShaderProgram::Unload()
+	{
+		Delete();
+	}
+
+	void bwxGLShaderProgram::Release()
+	{
+		Unbind();
 	}
 
 	void bwxGLShaderProgram::AddUniform(const std::string& name)

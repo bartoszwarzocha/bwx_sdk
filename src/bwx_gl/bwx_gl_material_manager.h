@@ -20,12 +20,14 @@
 #include <iostream>
 
 #include "bwx_gl_material.h"
+#include "bwx_gl_resource_manager.h"
 
 namespace bwx_sdk {
 
-    class bwxGLMaterialLibrary {
+	class bwxGLMaterialManager : public bwxGLResourceManager<bwxGLMaterial>
+    {
     public:
-        static bwxGLMaterialLibrary& GetInstance();
+        static bwxGLMaterialManager& GetInstance();
         std::shared_ptr<bwxGLMaterial> GetMaterial(const std::string& name) const;
 		std::shared_ptr<bwxGLMaterial> GetMaterial(const unsigned int& id) const;
         std::shared_ptr<bwxGLMaterial> CreateMaterial(const std::string& name);
@@ -35,13 +37,13 @@ namespace bwx_sdk {
         void ClearAllMaterials();
 
     private:
-        bwxGLMaterialLibrary() = default;
-        ~bwxGLMaterialLibrary() = default;
+        bwxGLMaterialManager() = default;
+        ~bwxGLMaterialManager() = default;
 
-        bwxGLMaterialLibrary(const bwxGLMaterialLibrary&) = delete;
-        bwxGLMaterialLibrary& operator=(const bwxGLMaterialLibrary&) = delete;
+        bwxGLMaterialManager(const bwxGLMaterialManager&) = delete;
+        bwxGLMaterialManager& operator=(const bwxGLMaterialManager&) = delete;
 
-        std::unordered_map<std::string, std::weak_ptr<bwxGLMaterial>> m_materials;
+        //std::unordered_map<std::string, std::weak_ptr<bwxGLMaterial>> m_materials;
     };
 
 } // namespace bwx_sdk

@@ -28,36 +28,36 @@
 #include <iostream>
 #include <vector>
 
-#include "bwx_gl_renderable.h"
+#include "bwx_gl_buffer.h"
 
 namespace bwx_sdk {
 
-#define bwxGLMESH_NORMAL 0x00000001
-#define bwxGLMESH_TEX_COORD 0x00000002
-#define bwxGLMESH_TANGENT 0x00000004
-#define bwxGLMESH_BITANGENT 0x00000008
-#define bwxGLMESH_COLOR 0x00000010
-#define bwxGLMESH_UV 0x00000020
+#define bwxGL_MESH_NORMAL 0x00000001
+#define bwxGL_MESH_TEX_COORD 0x00000002
+#define bwxGL_MESH_TANGENT 0x00000004
+#define bwxGL_MESH_BITANGENT 0x00000008
+#define bwxGL_MESH_COLOR 0x00000010
+#define bwxGL_MESH_UV 0x00000020
 
-#define bwxGLMESH_INDICES 0x00001000
-#define bwxGLMESH_DEFAULT bwxGLMESH_NORMAL | bwxGLMESH_TEX_COORD
+#define bwxGL_MESH_INDICES 0x00001000
+#define bwxGL_MESH_DEFAULT bwxGL_MESH_NORMAL | bwxGL_MESH_TEX_COORD
 
 struct bwxGLVertex {
     glm::vec3 position;
     glm::vec3 normal;
-    glm::vec2 tex_coord;
+    glm::vec2 texCoord;
     glm::vec3 tangent;
     glm::vec3 bitangent;
     glm::vec3 color;
     glm::vec3 uv;
 };
 
-class bwxGLMesh : public bwxGLRenderable {
+class bwxGLMesh {
 public:
     bwxGLMesh(int style);
     virtual ~bwxGLMesh();
 
-    void Render() override;
+    void Render();
     void Delete();
 
     inline void AddVertex(const bwxGLVertex& v) { m_vertices.push_back(v); }

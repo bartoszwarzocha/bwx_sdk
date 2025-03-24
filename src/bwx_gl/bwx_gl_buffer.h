@@ -15,36 +15,58 @@
 #endif
 
 #include <vector>
-#include <iostream>
+#include <initializer_list>
 
 #include <GL/glew.h>
-#include <glm/glm.hpp>
+
+#include "bwx_gl_resource_manager.h"
 
 namespace bwx_sdk {
 
-    enum class bwxGL_BUFFER_TYPE {
-        VERTEX,
-        INDEX,
-        UNIFORM
-    };
-
-    class bwxGLBuffer {
+    class bwxGLBuffer : public bwxGLResource {
     public:
-        bwxGLBuffer() : m_bufferID(0), m_target(GL_ARRAY_BUFFER) {}
+        bwxGLBuffer();
         bwxGLBuffer(GLenum target);
+        bwxGLBuffer(const std::vector<float>& data,
+            GLsizei stride,
+            const std::vector<GLint>& layout,
+            GLenum target = GL_ARRAY_BUFFER,
+            GLenum usage = GL_STATIC_DRAW);
+        bwxGLBuffer(GLsizeiptr size,
+            GLsizei stride,
+            const std::vector<GLint>& layout,
+            GLenum target = GL_ARRAY_BUFFER,
+            GLenum usage = GL_DYNAMIC_DRAW);
+
+		void Create(const std::vector<float>& data,
+			GLsizei stride,
+			const std::vector<GLint>& layout,
+			GLenum target = GL_ARRAY_BUFFER,
+			GLenum usage = GL_STATIC_DRAW);
+		void Create(GLsizeiptr size,
+			GLsizei stride,
+			const std::vector<GLint>& layout,
+			GLenum target = GL_ARRAY_BUFFER,
+			GLenum usage = GL_DYNAMIC_DRAW);
+
         virtual ~bwxGLBuffer();
 
-        void Bind() const;
-        void Unbind() const;
-        void Release();
-        GLuint GetID() const { return m_bufferID; }
+        void Bind() const override;
+        void Unbind() const override;
+        void Release() override;
+        void Unload() override;
+        void Delete() override;
+
+        inline GLuint GetID() const { return m_bufferID; }
+        inline GLuint GetVAO() const { return m_vaoID; }
 
         void SetData(const void* data, GLsizeiptr size, GLenum usage = GL_STATIC_DRAW);
         void SetData(const std::vector<GLuint>& indices, GLenum usage = GL_STATIC_DRAW);
 
     protected:
-        GLuint m_bufferID;
-        GLenum m_target;
+        GLuint m_bufferID = 0;
+        GLuint m_vaoID = 0;
+        GLenum m_target = GL_ARRAY_BUFFER;
     };
 
 } // namespace bwx_sdk
