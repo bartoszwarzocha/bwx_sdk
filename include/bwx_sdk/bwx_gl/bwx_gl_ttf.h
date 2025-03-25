@@ -102,7 +102,7 @@ private:
     bwxGLTTF& m_font;
     std::shared_ptr<bwxGLShaderProgram> m_shaderProgram;
     std::shared_ptr<bwxGLBuffer> m_dynamicBuffer;
-}
+};
 
 }  // namespace bwx_sdk
 
