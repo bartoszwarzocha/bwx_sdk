@@ -7,6 +7,8 @@ target_include_directories(example_gl
     PRIVATE ${wxWidgets_INCLUDE_DIRS}
 )
 
+set_output_directories(example_gl)
+
 target_link_libraries(example_gl
     PRIVATE bwx_gl
     PRIVATE bwx_core
