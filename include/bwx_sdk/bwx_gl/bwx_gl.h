@@ -13,6 +13,7 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWX_GL_H_
 #define _BWX_GL_H_
 
@@ -38,19 +39,19 @@
 #include <wx/image.h>
 #include <wx/mstream.h>
 
-#include <algorithm>
-#include <cmath>
-#include <ctime>
 #include <fstream>
-#include <functional>
-#include <initializer_list>
-#include <iomanip>
 #include <iostream>
-#include <memory>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
+#include <functional>
+#include <initializer_list>
+#include <algorithm>
+#include <cmath>
+#include <ctime>
+#include <sstream>
+#include <iomanip>
 
 #include "bwx_gl_armature.h"
 #include "bwx_gl_buffer.h"

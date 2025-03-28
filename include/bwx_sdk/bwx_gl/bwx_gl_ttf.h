@@ -13,6 +13,7 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWX_GL_TTF_H_
 #define _BWX_GL_TTF_H_
 
@@ -21,89 +22,90 @@
 #endif
 
 #include <GL/glew.h>
-
 #include <glm/glm.hpp>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
 
 #include "bwx_gl_shader.h"
+#include "bwx_gl_buffer.h"
+
+#include <string>
+#include <map>
+#include <vector>
+#include <memory>
 
 namespace bwx_sdk {
 
-class bwxGLTTF {
-public:
-    struct bwxGLTTFGlyph {
-        glm::ivec2 size;
-        glm::ivec2 bearing;
-        GLuint advance;
-        glm::vec2 uvTopLeft;
-        glm::vec2 uvBottomRight;
-    };
+	class bwxGLTTF {
+	public:
+		struct bwxGLTTFGlyph {
+			glm::ivec2 size;
+			glm::ivec2 bearing;
+			GLuint advance;
+			glm::vec2 uvTopLeft;
+			glm::vec2 uvBottomRight;
+		};
 
-    bool LoadFromFile(const std::string& filepath, int pixelHeight = 48);
+		bool LoadFromFile(const std::string& filepath, int pixelHeight = 48);
 
-    GLuint GetTextureAtlas() const;
+		GLuint GetTextureAtlas() const;
+		
+		bwxGLTTFGlyph& GetGlyph(wchar_t c);
 
-    bwxGLTTFGlyph& GetGlyph(wchar_t c);
+		std::map<GLchar, bwxGLTTF::bwxGLTTFGlyph>& GetGlyphs();
 
-    std::map<GLchar, bwxGLTTF::bwxGLTTFGlyph>& GetGlyphs();
+		int GetGlyphHeight(wchar_t c) const;
+		
+		int GetGlyphWidth(wchar_t c) const;
 
-    int GetGlyphHeight(wchar_t c) const;
+		void SetCharset(const std::wstring& charset);
 
-    int GetGlyphWidth(wchar_t c) const;
+		void SetCharsetPL();
 
-    void SetCharset(const std::wstring& charset);
+		void SetCharsetEN();
 
-    void SetCharsetPL();
+		void SetCharsetRU();
 
-    void SetCharsetEN();
+		void SetCharsetDE();
 
-    void SetCharsetRU();
+		void SetCharsetFR();
 
-    void SetCharsetDE();
+		void SetCharsetES();
 
-    void SetCharsetFR();
+		void SetCharsetIT();
 
-    void SetCharsetES();
+	private:
+		std::wstring m_charset =
+			L" !\"#$%&'()*+,-./0123456789:;<=>?@"
+			L"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-    void SetCharsetIT();
+		GLuint m_textureAtlas;
+		std::map<GLchar, bwxGLTTFGlyph> m_glyphs;
+	};
 
-private:
-    std::wstring m_charset =
-        L" !\"#$%&'()*+,-./0123456789:;<=>?@"
-        L"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+	class bwxGLText {
+	public:
 
-    GLuint m_textureAtlas;
-    std::map<GLchar, bwxGLTTFGlyph> m_glyphs;
-};
+		bwxGLText(bwxGLTTF& font);
 
-class bwxGLText {
-public:
-    bwxGLText(bwxGLTTF& font);
+		~bwxGLText();
 
-    ~bwxGLText();
+		void SetFont(bwxGLTTF& font);
 
-    void SetFont(bwxGLTTF& font);
+		int GetFontHeight();
 
-    int GetFontHeight();
+		void Render(const std::wstring& text, const glm::mat4& orth, const glm::vec2& pos, GLfloat scale, const glm::vec4& color);
 
-    void Render(const std::wstring& text, const glm::mat4& orth, const glm::vec2& pos, GLfloat scale,
-                const glm::vec4& color);
+		 //void SetEffectParams(const EffectParams& params);
 
-    // void SetEffectParams(const EffectParams& params);
+		void SetShaderProgram(std::shared_ptr<bwxGLShaderProgram> shader);
 
-    void SetShaderProgram(std::shared_ptr<bwxGLShaderProgram> shader);
+		void SetDefaultShaderProgram();
 
-    void SetDefaultShaderProgram();
+	private:
+		bwxGLTTF& m_font;
+		std::shared_ptr<bwxGLShaderProgram> m_shaderProgram;
+		std::shared_ptr<bwxGLBuffer> m_dynamicBuffer;
+	};
 
-private:
-    bwxGLTTF& m_font;
-    std::shared_ptr<bwxGLShaderProgram> m_shaderProgram;
-    std::shared_ptr<bwxGLBuffer> m_dynamicBuffer;
-}
-
-}  // namespace bwx_sdk
+} // namespace bwx_sdk
 
 #endif

@@ -14,11 +14,12 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWX_INTERNAT_H_
 #define _BWX_INTERNAT_H_
 
-#include <wx/filename.h>
 #include <wx/intl.h>
+#include <wx/filename.h>
 #include <wx/log.h>
 
 #include <algorithm>
@@ -28,95 +29,93 @@
 
 namespace bwx_sdk {
 
-constexpr auto bwxDEFAULT_LANG_FOLDER = "locale";
+	constexpr auto bwxDEFAULT_LANG_FOLDER = "locale";
 
-class bwxLanguage {
-public:
-    bwxLanguage() noexcept
-        : m_wxLangCode(wxLANGUAGE_DEFAULT),
-          m_shortName(wxEmptyString),
-          m_uname(wxEmptyString),
-          m_name("System default") {}
+    class bwxLanguage {
+    public:
 
-    bwxLanguage(const wxString& sn, const wxString& n, const wxString& un, wxLanguage wxl) noexcept
-        : m_wxLangCode(wxl), m_shortName(sn), m_uname(un), m_name(n) {}
+        bwxLanguage() noexcept
+            : m_wxLangCode(wxLANGUAGE_DEFAULT), m_shortName(wxEmptyString), m_uname(wxEmptyString), m_name("System default") {}
 
-    void SetWxLangCode(wxLanguage l) noexcept { m_wxLangCode = l; }
+        bwxLanguage(const wxString& sn, const wxString& n, const wxString& un, wxLanguage wxl) noexcept
+            : m_wxLangCode(wxl), m_shortName(sn), m_uname(un), m_name(n) {}
 
-    wxLanguage GetWxLangCode() const noexcept { return m_wxLangCode; }
+        void SetWxLangCode(wxLanguage l) noexcept { m_wxLangCode = l; }
 
-    void SetShortName(const wxString& sn) noexcept { m_shortName = sn; }
+        wxLanguage GetWxLangCode() const noexcept { return m_wxLangCode; }
+        
+		void SetShortName(const wxString& sn) noexcept { m_shortName = sn; }
+        
+		const wxString& GetShortName() const noexcept { return m_shortName; }
+        
+		void SetName(const wxString& n) noexcept { m_name = n; }
+        
+		const wxString& GetName() const noexcept { return m_name; }
 
-    const wxString& GetShortName() const noexcept { return m_shortName; }
+        void SetUnicodeName(const wxString& n) noexcept { m_uname = n; }
+        
+		wxString GetUnicodeName() const noexcept { return m_uname.IsEmpty() ? m_name : m_uname; }
 
-    void SetName(const wxString& n) noexcept { m_name = n; }
+    private:
+		wxLanguage m_wxLangCode;
+		wxString m_shortName;
+        wxString m_uname;
+		wxString m_name;
+    };
 
-    const wxString& GetName() const noexcept { return m_name; }
+	WX_DECLARE_STRING_HASH_MAP(bwxLanguage, LangMap);
 
-    void SetUnicodeName(const wxString& n) noexcept { m_uname = n; }
+    class bwxInternat : public wxLocale {
+    public:
+        
+        bwxInternat();
+        
+		explicit bwxInternat(const bwxLanguage& l);
 
-    wxString GetUnicodeName() const noexcept { return m_uname.IsEmpty() ? m_name : m_uname; }
+        bwxInternat(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode);
 
-private:
-    wxLanguage m_wxLangCode;
-    wxString m_shortName;
-    wxString m_uname;
-    wxString m_name;
-};
+        bool Init(const wxString& shortName = wxEmptyString);
 
-WX_DECLARE_STRING_HASH_MAP(bwxLanguage, LangMap);
+        bool InitByName(const wxString& name);
 
-class bwxInternat : public wxLocale {
-public:
-    bwxInternat();
+        void SetDefaultAppLanguage(const bwxLanguage& l) noexcept { m_defaultLang = l; }
+        
+		void SetDefaultAppLanguage(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode) noexcept;
 
-    explicit bwxInternat(const bwxLanguage& l);
+        bwxLanguage GetDefaultAppLanguage() const noexcept { return m_defaultLang; }
+        wxLanguage GetDefaultAppLanguageCode() const noexcept { return m_defaultLang.GetWxLangCode(); }
 
-    bwxInternat(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode);
+        void AddLanguage(const bwxLanguage& l);
 
-    bool Init(const wxString& shortName = wxEmptyString);
+        void AddLanguage(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode);
+        
+		void AddLanguageSystemDefault();
 
-    bool InitByName(const wxString& name);
+        void AddLanguageEnglish();
 
-    void SetDefaultAppLanguage(const bwxLanguage& l) noexcept { m_defaultLang = l; }
+        void AddLanguagePolish();
 
-    void SetDefaultAppLanguage(const wxString& shortName, const wxString& name, const wxString& uname,
-                               wxLanguage wxLangCode) noexcept;
+        void AddLanguageGerman();
 
-    bwxLanguage GetDefaultAppLanguage() const noexcept { return m_defaultLang; }
-    wxLanguage GetDefaultAppLanguageCode() const noexcept { return m_defaultLang.GetWxLangCode(); }
+        wxArrayString GetLangNames() const;
 
-    void AddLanguage(const bwxLanguage& l);
+        void SetLangFolderName(const wxString& name) noexcept { m_langFolder = name; }
+        const wxString& GetLangFolderName() const noexcept { return m_langFolder; }
 
-    void AddLanguage(const wxString& shortName, const wxString& name, const wxString& uname, wxLanguage wxLangCode);
+        void UseShortCatalogNames() noexcept { m_useShortCatalogNames = true; }
+        void DontUseShortCatalogNames() noexcept { m_useShortCatalogNames = false; }
 
-    void AddLanguageSystemDefault();
+        void ResetToDefaultLanguage();
 
-    void AddLanguageEnglish();
+    private:
+		bwxLanguage m_defaultLang;
+		LangMap m_langMap;
+		wxString m_langFolder = bwxDEFAULT_LANG_FOLDER;
+		bool m_useShortCatalogNames = true;
 
-    void AddLanguagePolish();
+        bool LoadCatalogs(const wxLanguageInfo* langInfo);
+    };
 
-    void AddLanguageGerman();
-
-    wxArrayString GetLangNames() const;
-
-    void SetLangFolderName(const wxString& name) noexcept { m_langFolder = name; }
-    const wxString& GetLangFolderName() const noexcept { return m_langFolder; }
-
-    void UseShortCatalogNames() noexcept { m_useShortCatalogNames = true; }
-    void DontUseShortCatalogNames() noexcept { m_useShortCatalogNames = false; }
-
-    void ResetToDefaultLanguage();
-
-private:
-    bwxLanguage m_defaultLang;
-    LangMap m_langMap;
-    wxString m_langFolder = bwxDEFAULT_LANG_FOLDER;
-    bool m_useShortCatalogNames = true;
-
-    bool LoadCatalogs(const wxLanguageInfo* langInfo);
-};
-
-}  // namespace bwx_sdk
+}
 
 #endif

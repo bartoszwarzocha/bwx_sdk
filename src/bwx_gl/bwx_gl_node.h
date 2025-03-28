@@ -30,7 +30,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include "bwx_gl_component.h"
+#include "bwx_sdk/bwx_gl/bwx_gl_component.h"
 
 namespace bwx_sdk {
 

@@ -14,189 +14,205 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWXJSON_H_
 #define _BWXJSON_H_
 
-#include <wx/file.h>
-#include <wx/log.h>
 #include <wx/string.h>
+#include <wx/file.h>
 #include <wx/textfile.h>
-#include <wx/txtstrm.h>
 #include <wx/wfstream.h>
+#include <wx/txtstrm.h>
+#include <wx/log.h>
 
+#include <unordered_map>
+#include <vector>
+#include <variant>
 #include <memory>
 #include <optional>
-#include <unordered_map>
-#include <variant>
-#include <vector>
 
 namespace bwx_sdk {
 
-class bwxJSON;  // Forward declarations
-struct bwxJsonValueHelper;
+    class bwxJSON; // Forward declarations
+    struct bwxJsonValueHelper;
 
-using bwxJsonValue = std::optional<std::variant<std::nullptr_t, int, int64_t, uint64_t, double, bool, std::string,
-                                                wxString, std::shared_ptr<bwxJSON>, std::vector<bwxJsonValueHelper>>>;
+    using bwxJsonValue = std::optional<std::variant<
+        std::nullptr_t,
+        int,
+        int64_t,
+        uint64_t,
+        double,
+        bool,
+        std::string,
+        wxString,
+        std::shared_ptr<bwxJSON>,
+        std::vector<bwxJsonValueHelper>
+    >>;
 
-struct bwxJsonValueHelper {
-    bwxJsonValue value;
+    struct bwxJsonValueHelper {
+        bwxJsonValue value;
 
-    bool operator==(const bwxJsonValueHelper& other) const { return value == other.value; }
-};
+        bool operator==(const bwxJsonValueHelper& other) const {
+            return value == other.value;
+        }
+    };
 
-class bwxJSON {
-public:
-    bwxJSON() = default;
+    class bwxJSON
+    {
+    public:
 
-    explicit bwxJSON(const wxString& jsonText);
+        bwxJSON() = default;
+        
+        explicit bwxJSON(const wxString& jsonText);
+        
+        explicit bwxJSON(const bwxJsonValue& defaultValue);
+        
+        bwxJSON(const bwxJSON& other);
+        
+        bwxJSON(bwxJSON&& other) noexcept;
 
-    explicit bwxJSON(const bwxJsonValue& defaultValue);
+        bool LoadFromFile(const wxString& filename);
 
-    bwxJSON(const bwxJSON& other);
+        bool SaveToFile(const wxString& filename) const;
 
-    bwxJSON(bwxJSON&& other) noexcept;
+        bool LoadFromStream(wxInputStream& stream);
 
-    bool LoadFromFile(const wxString& filename);
+        bool SaveToStream(wxOutputStream& stream) const;
 
-    bool SaveToFile(const wxString& filename) const;
+        bool ParseFromString(const wxString& jsonText);
 
-    bool LoadFromStream(wxInputStream& stream);
+        wxString SerializeToString() const;
 
-    bool SaveToStream(wxOutputStream& stream) const;
+        bool HasKey(const wxString& key) const;
+        
+        void RemoveKey(const wxString& key);
 
-    bool ParseFromString(const wxString& jsonText);
+        std::vector<wxString> GetKeys() const;
 
-    wxString SerializeToString() const;
+        void SetValue(const wxString& key, const bwxJsonValue& value);
 
-    bool HasKey(const wxString& key) const;
+        bwxJsonValue GetValue(const wxString& key, const bwxJsonValue& defaultValut = std::nullopt) const;
 
-    void RemoveKey(const wxString& key);
+        bwxJsonValue FindValue(const wxString& key) const;
 
-    std::vector<wxString> GetKeys() const;
+        void AppendToArray(const wxString& key, const bwxJsonValue& value);
 
-    void SetValue(const wxString& key, const bwxJsonValue& value);
+        std::vector<bwxJsonValue> GetArray(const wxString& key) const;
 
-    bwxJsonValue GetValue(const wxString& key, const bwxJsonValue& defaultValut = std::nullopt) const;
+        void RemoveFromArray(const wxString& key, size_t index);
 
-    bwxJsonValue FindValue(const wxString& key) const;
+        size_t GetSize() const;
 
-    void AppendToArray(const wxString& key, const bwxJsonValue& value);
+        wxString GetKey(size_t index) const;
 
-    std::vector<bwxJsonValue> GetArray(const wxString& key) const;
+        void SortKeys();
 
-    void RemoveFromArray(const wxString& key, size_t index);
+        bool IsValid() const;
 
-    size_t GetSize() const;
+        wxString SerializeCompact() const;
 
-    wxString GetKey(size_t index) const;
+        wxString SerializePretty(int indentLevel = 4) const;
 
-    void SortKeys();
+        wxString GetLastError() const { return m_lastError; }
 
-    bool IsValid() const;
+        //
 
-    wxString SerializeCompact() const;
+        int AsInt(const wxString& key, int defaultValue = 0) const;
 
-    wxString SerializePretty(int indentLevel = 4) const;
+        int64_t AsInt64(const wxString& key, int64_t defaultValue = 0) const;
+        
+        uint64_t AsUInt64(const wxString& key, uint64_t defaultValue = 0) const;
 
-    wxString GetLastError() const { return m_lastError; }
+        double AsDouble(const wxString& key, double defaultValue = 0.0) const;
 
-    //
+        bool AsBool(const wxString& key, bool defaultValue = false) const;
 
-    int AsInt(const wxString& key, int defaultValue = 0) const;
+        wxString AsWxString(const wxString& key, const wxString& defaultValue = "") const;
 
-    int64_t AsInt64(const wxString& key, int64_t defaultValue = 0) const;
+        std::string AsStdString(const wxString& key, const std::string& defaultValue = "") const;
 
-    uint64_t AsUInt64(const wxString& key, uint64_t defaultValue = 0) const;
+        //
 
-    double AsDouble(const wxString& key, double defaultValue = 0.0) const;
+        using iterator = std::unordered_map<wxString, bwxJsonValue>::iterator;
+        using const_iterator = std::unordered_map<wxString, bwxJsonValue>::const_iterator;
 
-    bool AsBool(const wxString& key, bool defaultValue = false) const;
+        iterator begin();
+        iterator end();
+        const_iterator begin() const;
+        const_iterator end() const;
 
-    wxString AsWxString(const wxString& key, const wxString& defaultValue = "") const;
+        //
 
-    std::string AsStdString(const wxString& key, const std::string& defaultValue = "") const;
+        bool IsNull(const wxString& key) const;
 
-    //
+        template <typename T>
+        bool IsType(const wxString& key) const
+        {
+            if (!HasKey(key)) return false;
+            const auto& value = GetValue(key);
+            return value.has_value() && std::holds_alternative<T>(*value);
+        }
 
-    using iterator = std::unordered_map<wxString, bwxJsonValue>::iterator;
-    using const_iterator = std::unordered_map<wxString, bwxJsonValue>::const_iterator;
+        //
 
-    iterator begin();
-    iterator end();
-    const_iterator begin() const;
-    const_iterator end() const;
+        std::shared_ptr<bwxJSON> Clone() const;
 
-    //
+        //
 
-    bool IsNull(const wxString& key) const;
+        bwxJSON& operator=(const bwxJSON& other);
 
-    template <typename T>
-    bool IsType(const wxString& key) const {
-        if (!HasKey(key)) return false;
-        const auto& value = GetValue(key);
-        return value.has_value() && std::holds_alternative<T>(*value);
-    }
+        bool operator==(const bwxJSON& other) const;
 
-    //
+        bool operator!=(const bwxJSON& other) const;
 
-    std::shared_ptr<bwxJSON> Clone() const;
+        bwxJsonValue& operator[](const wxString& key);
 
-    //
+        const bwxJsonValue& operator[](const wxString& key) const;
 
-    bwxJSON& operator=(const bwxJSON& other);
+        //
 
-    bool operator==(const bwxJSON& other) const;
+        void Merge(const bwxJSON& other, bool overwriteExisting = true);
 
-    bool operator!=(const bwxJSON& other) const;
+        bwxJSON Diff(const bwxJSON& other) const;
 
-    bwxJsonValue& operator[](const wxString& key);
+        void Patch(const bwxJSON& patchData);
 
-    const bwxJsonValue& operator[](const wxString& key) const;
+        bwxJSON Flatten(const wxString& separator = ".") const;
 
-    //
+        static bwxJSON Unflatten(const bwxJSON& flatJson, const wxString& separator = ".");
 
-    void Merge(const bwxJSON& other, bool overwriteExisting = true);
+        std::vector<wxString> Search(const wxString& key) const;
 
-    bwxJSON Diff(const bwxJSON& other) const;
+        std::vector<wxString> SearchValue(const bwxJsonValue& value) const;
 
-    void Patch(const bwxJSON& patchData);
+        bwxJSON Filter(std::function<bool(const wxString&, const bwxJsonValue&)> predicate) const;
 
-    bwxJSON Flatten(const wxString& separator = ".") const;
+        void Transform(std::function<void(wxString&, bwxJsonValue&)> rule);
 
-    static bwxJSON Unflatten(const bwxJSON& flatJson, const wxString& separator = ".");
+        bwxJSON Map(std::function<bwxJsonValue(const wxString&, const bwxJsonValue&)> transform) const;
 
-    std::vector<wxString> Search(const wxString& key) const;
+    private:
+		std::unordered_map<wxString, bwxJsonValue> m_data;
 
-    std::vector<wxString> SearchValue(const bwxJsonValue& value) const;
+		wxString m_lastError;
 
-    bwxJSON Filter(std::function<bool(const wxString&, const bwxJsonValue&)> predicate) const;
+        wxString EscapeString(const wxString& str) const;
 
-    void Transform(std::function<void(wxString&, bwxJsonValue&)> rule);
+        wxString JsonValueToString(const bwxJsonValue& value) const;
 
-    bwxJSON Map(std::function<bwxJsonValue(const wxString&, const bwxJsonValue&)> transform) const;
+        size_t SkipWhitespace(const wxString& text, size_t start) const;
 
-private:
-    std::unordered_map<wxString, bwxJsonValue> m_data;
+        bwxJsonValue ParseValue(const wxString& text, size_t& pos);
 
-    wxString m_lastError;
+        wxString ParseString(const wxString& text, size_t& pos);
 
-    wxString EscapeString(const wxString& str) const;
+        bwxJsonValue ParseNumber(const wxString& text, size_t& pos);
 
-    wxString JsonValueToString(const bwxJsonValue& value) const;
+        bwxJsonValue ParseObject(const wxString& text, size_t& pos);
 
-    size_t SkipWhitespace(const wxString& text, size_t start) const;
+        bwxJsonValue ParseArray(const wxString& text, size_t& pos);
+    };
 
-    bwxJsonValue ParseValue(const wxString& text, size_t& pos);
-
-    wxString ParseString(const wxString& text, size_t& pos);
-
-    bwxJsonValue ParseNumber(const wxString& text, size_t& pos);
-
-    bwxJsonValue ParseObject(const wxString& text, size_t& pos);
-
-    bwxJsonValue ParseArray(const wxString& text, size_t& pos);
-};
-
-}  // namespace bwx_sdk
+}
 
 #endif
