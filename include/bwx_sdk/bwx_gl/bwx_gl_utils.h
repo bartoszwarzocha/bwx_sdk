@@ -13,6 +13,7 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWX_GL_UTILS_H_
 #define _BWX_GL_UTILS_H_
 
@@ -21,62 +22,65 @@
 #endif
 
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+
 #include <wx/glcanvas.h>
 
 #include <chrono>
-#include <glm/glm.hpp>
 #include <string>
 
 namespace bwx_sdk {
+	
+	class bwxGLUtils {
+	public:
+		
+		static glm::vec2 GetWindowCoordinates(wxGLCanvas* canvas, glm::vec2 pos);
+		
+		static std::string GetVersion();
+		
+		static std::string GetVendor();
+		
+		static std::string GetRenderer();
+		
+		static wxGLContextAttrs GetDefaultContextAttrs(int major = 3, int minor = 3);
+		
+		static wxGLAttributes GetDefaultCanvasAttrs(int depth = 24);
+		
+		static std::string GetErrorString(int err);
+		
+		static void SetDefaultClearColor(GLfloat r = 0.2f, GLfloat g = 0.3f, GLfloat b = 0.3f, GLfloat a = 1.0f);
 
-class bwxGLUtils {
-public:
-    static glm::vec2 GetWindowCoordinates(wxGLCanvas* canvas, glm::vec2 pos);
+		// FIGURES
+		static std::vector<float> GenerateSimpleCubeVertices(bool textured = false);
+	};
 
-    static std::string GetVersion();
+	class bwxGLFPSMonitor
+	{
+	public:
+		bwxGLFPSMonitor();
 
-    static std::string GetVendor();
+		void StartFrame();
 
-    static std::string GetRenderer();
+		void LimitFPS(int targetFPS);
 
-    static wxGLContextAttrs GetDefaultContextAttrs(int major = 3, int minor = 3);
+		GLfloat GetDelta() const;
 
-    static wxGLAttributes GetDefaultCanvasAttrs(int depth = 24);
+		GLfloat GetFPS(int refresh_ms = 500);
 
-    static std::string GetErrorString(int err);
+		std::string GetFPSStr(int refresh_ms = 500);
 
-    static void SetDefaultClearColor(GLfloat r = 0.2f, GLfloat g = 0.3f, GLfloat b = 0.3f, GLfloat a = 1.0f);
+		GLfloat GetElapsedTime() const;
 
-    // FIGURES
-    static std::vector<float> GenerateSimpleCubeVertices(bool textured = false);
-};
+	private:
+		std::chrono::steady_clock::time_point m_lastUpdate;
+		std::chrono::steady_clock::time_point m_startTime;
+		std::chrono::steady_clock::time_point m_frameStart;
 
-class bwxGLFPSMonitor {
-public:
-    bwxGLFPSMonitor();
+		GLfloat m_lastDelta;
+		GLint m_frames;
+		GLfloat m_fps;
+	};
 
-    void StartFrame();
+} // namespace bwx_sdk
 
-    void LimitFPS(int targetFPS);
-
-    GLfloat GetDelta() const;
-
-    GLfloat GetFPS(int refresh_ms = 500);
-
-    std::string GetFPSStr(int refresh_ms = 500);
-
-    GLfloat GetElapsedTime() const;
-
-private:
-    std::chrono::steady_clock::time_point m_lastUpdate;
-    std::chrono::steady_clock::time_point m_startTime;
-    std::chrono::steady_clock::time_point m_frameStart;
-
-    GLfloat m_lastDelta;
-    GLint m_frames;
-    GLfloat m_fps;
-};
-
-}  // namespace bwx_sdk
-
-#endif  // _BWX_GL_UTILS_H_
+#endif // _BWX_GL_UTILS_H_

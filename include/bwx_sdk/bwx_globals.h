@@ -20,8 +20,8 @@
 // Options: _NORMAL_BLOCK/_CLIENT_BLOCK
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
 #include <stdlib.h>
+#include <crtdbg.h>
 #define _new new (_CLIENT_BLOCK, __FILE__, __LINE__)
 #define bwxMemStat(x)         \
     _CrtMemState _##x;        \

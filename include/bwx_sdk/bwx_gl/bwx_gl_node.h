@@ -13,6 +13,7 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWX_GL_NODE_H_
 #define _BWX_GL_NODE_H_
 
@@ -22,68 +23,69 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
+#include <memory>
+#include <vector>
+#include <string>
+#include <iostream>
 #include <algorithm>
 #include <functional>
+#include <unordered_map>    
+#include <typeindex>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/transform.hpp>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <typeindex>
-#include <unordered_map>
-#include <vector>
 
-#include "bwx_gl_component.h"
+#include "bwx_sdk/bwx_gl/bwx_gl_component.h"
 
 namespace bwx_sdk {
 
-class bwxGLNode : public std::enable_shared_from_this<bwxGLNode> {
-public:
-    bwxGLNode() = default;
-    virtual ~bwxGLNode() = default;
+    class bwxGLNode : public std::enable_shared_from_this<bwxGLNode> {
+    public:
+        bwxGLNode() = default;
+        virtual ~bwxGLNode() = default;
 
-    template <typename T, typename... Args>
-    std::shared_ptr<T> AddComponent(Args&&... args) {
-        static_assert(std::is_base_of<bwxGLComponent, T>::value, "T must derive from bwxGLComponent");
-        auto component = std::make_shared<T>(std::forward<Args>(args)...);
-        m_components[typeid(T)] = component;
-        return component;
-    }
-
-    template <typename T>
-    std::shared_ptr<T> GetComponent() {
-        auto it = m_components.find(typeid(T));
-        return (it != m_components.end()) ? std::static_pointer_cast<T>(it->second) : nullptr;
-    }
-
-    template <typename T>
-    bool HasComponent() {
-        return m_components.find(typeid(T)) != m_components.end();
-    }
-
-    template <typename T>
-    void RemoveComponent() {
-        m_components.erase(typeid(T));
-    }
-
-    void Update(float deltaTime) {
-        for (auto& [type, component] : m_components) {
-            component->Update(deltaTime);
+        template <typename T, typename... Args>
+        std::shared_ptr<T> AddComponent(Args&&... args) {
+            static_assert(std::is_base_of<bwxGLComponent, T>::value, "T must derive from bwxGLComponent");
+            auto component = std::make_shared<T>(std::forward<Args>(args)...);
+            m_components[typeid(T)] = component;
+            return component;
         }
-    }
 
-    void Render() {
-        for (auto& [type, component] : m_components) {
-            component->Render();
+        template <typename T>
+        std::shared_ptr<T> GetComponent() {
+            auto it = m_components.find(typeid(T));
+            return (it != m_components.end()) ? std::static_pointer_cast<T>(it->second) : nullptr;
         }
-    }
 
-private:
-    std::unordered_map<std::type_index, std::shared_ptr<bwxGLComponent>> m_components;
-};
+        template <typename T>
+		bool HasComponent() {
+			return m_components.find(typeid(T)) != m_components.end();
+		}
 
-}  // namespace bwx_sdk
+        template <typename T>
+        void RemoveComponent() {
+            m_components.erase(typeid(T));
+        }
 
-#endif  // _BWX_GL_NODE_H_
+        void Update(float deltaTime) {
+            for (auto& [type, component] : m_components) {
+                component->Update(deltaTime);
+            }
+        }
+
+        void Render() {
+            for (auto& [type, component] : m_components) {
+                component->Render();
+            }
+        }
+
+    private:
+        std::unordered_map<std::type_index, std::shared_ptr<bwxGLComponent>> m_components;
+    };
+
+} // namespace bwx_sdk
+
+#endif // _BWX_GL_NODE_H_

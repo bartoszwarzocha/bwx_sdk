@@ -13,47 +13,48 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWX_GL_TEXTURE_MANAGER_H_
 #define _BWX_GL_TEXTURE_MANAGER_H_
 
-#include <iostream>
-#include <memory>
-#include <string>
 #include <unordered_map>
+#include <string>
+#include <memory>
+#include <iostream>
 
 #if defined(__APPLE__)
-#error OpenGL functionality is not available for macOS.
+    #error OpenGL functionality is not available for macOS.
 #else
-#include <GL/glew.h>
+    #include <GL/glew.h>
 #endif
 
 #include "bwx_gl_image_loader.h"
-#include "bwx_gl_resource_manager.h"
 #include "bwx_gl_texture.h"
+#include "bwx_gl_resource_manager.h"
 
 namespace bwx_sdk {
 
-class bwxGLTextureManager : public bwxGLResourceManager<bwxGLTexture2D> {
-public:
-    static bwxGLTextureManager& GetInstance();
+    class bwxGLTextureManager : public bwxGLResourceManager<bwxGLTexture2D> {
+    public:
+        static bwxGLTextureManager& GetInstance();
 
-    GLuint LoadTexture(const std::string& filePath, bool generateMipmaps = true);
+        GLuint LoadTexture(const std::string& filePath, bool generateMipmaps = true);
 
-    void BindTexture(const std::string& filePath, int textureUnit = 0);
-    void UnbindTexture(int textureUnit = 0);
+        void BindTexture(const std::string& filePath, int textureUnit = 0);
+        void UnbindTexture(int textureUnit = 0);
+        
+        void DeleteTexture(const std::string& filePath);
 
-    void DeleteTexture(const std::string& filePath);
+		std::shared_ptr<bwxGLTexture2D> GetTexturePtr(const std::string& filePath);
+		GLuint GetTextureID(const std::string& filePath);
 
-    std::shared_ptr<bwxGLTexture2D> GetTexturePtr(const std::string& filePath);
-    GLuint GetTextureID(const std::string& filePath);
+        void Clear();
 
-    void Clear();
+    private:
+        bwxGLTextureManager() = default;
+        ~bwxGLTextureManager();
+    };
 
-private:
-    bwxGLTextureManager() = default;
-    ~bwxGLTextureManager();
-};
-
-}  // namespace bwx_sdk
+} // namespace bwx_sdk
 
 #endif

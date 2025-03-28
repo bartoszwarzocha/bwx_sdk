@@ -14,22 +14,22 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWX_UTILS_H_
 #define _BWX_UTILS_H_
 
 #include "bwx_sdk/bwx_globals.h"
 
 namespace bwx_sdk {
-namespace utils {
+	namespace utils {
 
-wxColour bwxGetRandomColour();
+		wxColour bwxGetRandomColour();
 
-void bwxGetRandomColours(wxVector<wxColour>* v, int howMany, bool unique = true,
-                         const wxColour& first = wxColour(255, 0, 255));
+		void bwxGetRandomColours(wxVector<wxColour>* v, int howMany, bool unique = true, const wxColour& first = wxColour(255, 0, 255));
 
-wxColour bwxMixColours(const wxColour& col1, const wxColour& col2, double factor);
+		wxColour bwxMixColours(const wxColour& col1, const wxColour& col2, double factor);
 
-}  // namespace utils
-}  // namespace bwx_sdk
+	}
+}
 
 #endif

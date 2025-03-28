@@ -13,83 +13,84 @@
 // Full versions of source code files, including hidden sections and Doxygen comments,
 // can be found in the 'src' directory.
 
+
 #ifndef _BWX_DATETIME_H_
 #define _BWX_DATETIME_H_
 
 #include "bwx_sdk/bwx_globals.h"
 
 namespace bwx_sdk {
-namespace dt {
+    namespace dt {
 
-int bwxGetWeekDay(int d, int m, int y, int s = 1);
+        int bwxGetWeekDay(int d, int m, int y, int s = 1);
 
-int bwxGetWeekDay(wxDateTime date, int s);
+        int bwxGetWeekDay(wxDateTime date, int s);
 
-int bwxGetWeekNumber(int d, int m, int y, int wd);
+        int bwxGetWeekNumber(int d, int m, int y, int wd);
 
-int bwxGetWeekNumber(wxDateTime date, int wd);
+        int bwxGetWeekNumber(wxDateTime date, int wd);
 
-int bwxGetWeekNumber(wxDateTime date);
+        int bwxGetWeekNumber(wxDateTime date);
 
-wxDateSpan bwxGetDateDiff(wxDateTime d1, wxDateTime d2);
+        wxDateSpan bwxGetDateDiff(wxDateTime d1, wxDateTime d2);
 
-wxDateTime bwxAddToDate(wxDateTime date, int y, int m, int d);
+        wxDateTime bwxAddToDate(wxDateTime date, int y, int m, int d);
 
-wxDateTime bwxSubtractFromDate(wxDateTime date, int y, int m, int d);
+        wxDateTime bwxSubtractFromDate(wxDateTime date, int y, int m, int d);
 
-wxTimeSpan bwxGetTimeDiff(wxDateTime t1, wxDateTime t2);
+        wxTimeSpan bwxGetTimeDiff(wxDateTime t1, wxDateTime t2);
 
-int bwxDateSpanCompare(wxDateSpan s1, wxDateSpan s2, bool s1Conv, bool s2Conv);
+        int bwxDateSpanCompare(wxDateSpan s1, wxDateSpan s2, bool s1Conv, bool s2Conv);
 
-wxDateTime::Month bwxInt2DTMonth(int month);
+        wxDateTime::Month bwxInt2DTMonth(int month);
 
-int bwxDT2IntMonth(wxDateTime::Month month);
+        int bwxDT2IntMonth(wxDateTime::Month month);
 
-wxDateTime::WeekDay bwxInt2DTWeekDay(int wd);
+        wxDateTime::WeekDay bwxInt2DTWeekDay(int wd);
 
-wxString bwxGetMonthName(int month, bool shortName = false, BWX_CASES c = BWX_NOMINATIVE);
+        wxString bwxGetMonthName(int month, bool shortName = false, BWX_CASES c = BWX_NOMINATIVE);
 
-wxString bwxGetWeekDayName(int weekDay, bool shortName = false);
+        wxString bwxGetWeekDayName(int weekDay, bool shortName = false);
 
-int bwxZodiac(wxDateTime date);
+        int bwxZodiac(wxDateTime date);
 
-wxString bwxZodiacName(wxDateTime date);
+        wxString bwxZodiacName(wxDateTime date);
 
-wxString bwxYStr(int y);
+        wxString bwxYStr(int y);
 
-wxString bwxMStr(int m);
+        wxString bwxMStr(int m);
 
-wxString bwxDStr(int d);
+        wxString bwxDStr(int d);
 
-wxString bwxYMDStr(int y, int m, int d);
+        wxString bwxYMDStr(int y, int m, int d);
 
-wxString bwxYMDStr(wxDateSpan span);
+        wxString bwxYMDStr(wxDateSpan span);
 
-wxString bwxHourStr(int h);
+        wxString bwxHourStr(int h);
 
-wxString bwxMinuteStr(int m);
+        wxString bwxMinuteStr(int m);
 
-wxString bwxSecondStr(int s);
+        wxString bwxSecondStr(int s);
 
-wxString bwxHMSStr(int h, int m, int s);
+        wxString bwxHMSStr(int h, int m, int s);
 
-wxString bwxHMSStr(wxTimeSpan span);
+        wxString bwxHMSStr(wxTimeSpan span);
 
-wxString bwxFormatDateTime(const wxDateTime& dt, const wxString& format = wxT("$YY-$M-$D $h:$m:$s"));
+        wxString bwxFormatDateTime(const wxDateTime& dt, const wxString& format = wxT("$YY-$M-$D $h:$m:$s"));
 
-std::string bwxToISO8601(wxDateTime date);
+        std::string bwxToISO8601(wxDateTime date);
 
-int bwxCalculateAge(wxDateTime birthDate, wxDateTime currentDate = wxDateTime::Today());
+        int bwxCalculateAge(wxDateTime birthDate, wxDateTime currentDate = wxDateTime::Today());
 
-bool bwxIsValidDate(int d, int m, int y);
+        bool bwxIsValidDate(int d, int m, int y);
 
-wxDateTime bwxConvertToUTC(wxDateTime date);
+        wxDateTime bwxConvertToUTC(wxDateTime date);
 
-time_t bwxToTimeT(wxDateTime date);
+        time_t bwxToTimeT(wxDateTime date);
 
-wxDateTime bwxFromTimeT(time_t timestamp);
+        wxDateTime bwxFromTimeT(time_t timestamp);
 
-}  // namespace dt
-}  // namespace bwx_sdk
+    }
+}
 
 #endif
