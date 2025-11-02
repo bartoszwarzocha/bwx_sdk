@@ -13,7 +13,7 @@
 #include <wx/wx.h>
 #endif
 
-#include "bwx_string.h"
+#include <bwx_sdk/bwx_core/bwx_string.h>
 
 #include <string>
 #include <locale>

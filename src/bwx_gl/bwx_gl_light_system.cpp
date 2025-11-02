@@ -10,10 +10,10 @@
 #error OpenGL functionality is not available for macOS.
 #endif
 
-#include "bwx_gl_light_system.h"
-#include "bwx_gl_transform_component.h"
-#include "bwx_gl_light_component.h"
-#include "bwx_gl_node.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_light_system.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_transform_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_light_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_node.h>
 
 namespace bwx_sdk {
 

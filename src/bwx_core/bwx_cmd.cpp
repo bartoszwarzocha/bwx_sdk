@@ -13,7 +13,7 @@
 #include <wx/wx.h>
 #endif
 
-#include "bwx_cmd.h"
+#include <bwx_sdk/bwx_core/bwx_cmd.h>
 
 namespace bwx_sdk {
 

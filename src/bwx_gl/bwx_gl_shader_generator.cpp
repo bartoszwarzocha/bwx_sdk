@@ -7,7 +7,7 @@
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "bwx_gl_shader_generator.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_shader_generator.h>
 
 #include <sstream>
 #include <iostream>

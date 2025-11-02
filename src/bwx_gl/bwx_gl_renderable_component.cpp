@@ -7,7 +7,7 @@
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "bwx_gl_renderable_component.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_renderable_component.h>
 
 namespace bwx_sdk {
 

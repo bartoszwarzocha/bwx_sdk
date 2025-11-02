@@ -4,7 +4,7 @@
 // Author:      Bartosz Warzocha
 // Created:     2020-04-10
 // Copyright:   (c) Bartosz Warzocha (bartosz.warzocha@gmail.com)
-// Licence:		All rights reserved.
+// Licence:        All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
 
 // WARNING! This is a lightweight, automatically formatted version of the file.

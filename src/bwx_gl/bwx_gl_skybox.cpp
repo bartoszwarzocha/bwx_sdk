@@ -7,7 +7,7 @@
 // Licence:		All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
 
-#include "bwx_gl_skybox.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_skybox.h>
 
 #include <vector>
 

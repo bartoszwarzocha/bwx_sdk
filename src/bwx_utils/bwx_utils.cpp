@@ -18,9 +18,9 @@
 #include <wx/wx.h>
 #endif
 
-#include "bwx_sdk/bwx_core/bwx_math.h"
+#include <bwx_sdk/bwx_core/bwx_math.h>
 
-#include "bwx_utils.h"
+#include <bwx_sdk/bwx_utils/bwx_utils.h>
 
 namespace bwx_sdk {
 	namespace utils {

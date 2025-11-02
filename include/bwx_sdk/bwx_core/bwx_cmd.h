@@ -5,7 +5,7 @@
 // Created:     2025-02-24
 // RCS-ID:
 // Copyright:   (c) Bartosz Warzocha (bartosz.warzocha@gmail.com)
-// Licence:		wxWidgets licence
+// Licence:        wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 // WARNING! This is a lightweight, automatically formatted version of the file.

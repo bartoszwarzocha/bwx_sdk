@@ -18,8 +18,8 @@
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
 
-#include "bwx_sdk/bwx_globals.h"
-#include "bwx_config_utils.h"
+#include <bwx_sdk/bwx_globals.h>
+#include <bwx_sdk/bwx_core/bwx_config_utils.h>
 
 namespace bwx_sdk {
 

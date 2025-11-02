@@ -16,8 +16,8 @@
 #include <wx/wx.h>
 #endif
 
-#include "bwx_gl_texture.h"
-#include "bwx_gl_texture_manager.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_texture.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_texture_manager.h>
 #include <iostream>
 
 namespace bwx_sdk {

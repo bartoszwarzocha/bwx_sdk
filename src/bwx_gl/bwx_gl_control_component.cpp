@@ -15,9 +15,9 @@
 #include <wx/wx.h>
 #endif
 
-#include "bwx_gl_control_component.h"
-#include "bwx_gl_movement_component.h"
-#include "bwx_gl_node.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_control_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_movement_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_node.h>
 
 #include <wx/event.h>
 #include <wx/window.h>

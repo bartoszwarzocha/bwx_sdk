@@ -19,7 +19,7 @@
 #endif
 
 #include <random>
-#include "bwx_math.h"
+#include <bwx_sdk/bwx_core/bwx_math.h>
 
 namespace bwx_sdk {
 	namespace math {
@@ -92,9 +92,9 @@ namespace bwx_sdk {
 
 			const float threehalfs = 1.5F;
 
-			i = *(long*)&y;
+			i = std::bit_cast<long>(y);
 			i = 0x5f3759df - (i >> 1);
-			y = *(float*)&i;
+			y = std::bit_cast<float>(i);
 			y = y * (threehalfs - (x * y * y));
 
 			return 1.0f / y;

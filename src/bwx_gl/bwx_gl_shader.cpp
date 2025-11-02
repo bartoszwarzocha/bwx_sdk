@@ -15,7 +15,7 @@
 #include <fstream>
 #include <vector>
 
-#include "bwx_gl_shader.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_shader.h>
 
 namespace bwx_sdk {
 

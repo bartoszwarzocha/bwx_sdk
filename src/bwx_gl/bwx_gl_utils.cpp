@@ -16,7 +16,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "bwx_gl_utils.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_utils.h>
 
 namespace bwx_sdk {
 

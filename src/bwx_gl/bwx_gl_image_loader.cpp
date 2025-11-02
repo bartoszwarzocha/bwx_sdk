@@ -11,12 +11,12 @@
 #error OpenGL functionality is not available for macOS.
 #endif
 
-#include "bwx_gl_image_loader.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_image_loader.h>
 #include <wx/image.h>
 #include <iostream>
 
-#include "bwx_sdk/bwx_globals.h"
-#include "bwx_sdk/bwx_core/bwx_math.h"
+#include <bwx_sdk/bwx_globals.h>
+#include <bwx_sdk/bwx_core/bwx_math.h>
 
 namespace bwx_sdk {
 

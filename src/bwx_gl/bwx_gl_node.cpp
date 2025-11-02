@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "bwx_gl_node.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_node.h>
 
 namespace bwx_sdk {
 

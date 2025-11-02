@@ -8,7 +8,7 @@
 // Licence:     wxWidgets licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "bwx_json.h"
+#include <bwx_sdk/bwx_core/bwx_json.h>
 
 #include <wx/log.h>
 #include <wx/file.h>

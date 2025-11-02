@@ -27,13 +27,21 @@ void bwxStdPathsInfo(void);
 // Bitwise flag operations
 //----------------------------------------------------------------------------------------------
 
-inline void bwxSetByteFlag(int& var, bwxByteFlag flag) noexcept;
+inline void bwxSetByteFlag(int& var, bwxByteFlag flag) noexcept {
+    var = flag;
+}
 
-inline void bwxAddByteFlag(int& var, bwxByteFlag flag) noexcept;
+inline void bwxAddByteFlag(int& var, bwxByteFlag flag) noexcept {
+    var |= flag;
+}
 
-inline void bwxRemoveByteFlag(int& var, bwxByteFlag flag) noexcept;
+inline void bwxRemoveByteFlag(int& var, bwxByteFlag flag) noexcept {
+    var &= ~flag;
+}
 
-inline bool bwxIsByteFlagSet(int& var, bwxByteFlag flag) noexcept;
+inline bool bwxIsByteFlagSet(const int& var, bwxByteFlag flag) noexcept {
+    return (var & flag) != 0;
+}
 
 //----------------------------------------------------------------------------------------------
 // Multithreading (MT) error description functions

@@ -15,11 +15,11 @@
 #include <memory>
 #include <vector>
 
-//#include "bwx_gl_camera.h"
-//#include "bwx_gl_light.h"
-#include "bwx_gl_mesh.h"
+//#include <bwx_sdk/bwx_gl/bwx_gl_camera.h>
+//#include <bwx_sdk/bwx_gl/bwx_gl_light.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_mesh.h>
 
-#include "bwx_gl_scene.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_scene.h>
 
 namespace bwx_sdk {
 

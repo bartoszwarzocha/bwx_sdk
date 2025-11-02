@@ -11,7 +11,7 @@
 #error OpenGL functionality is not available for macOS.
 #endif
 
-#include "bwx_gl_buffer.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_buffer.h>
 
 namespace bwx_sdk {
 

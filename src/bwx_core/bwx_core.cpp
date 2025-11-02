@@ -15,7 +15,7 @@
 
 #include <wx/stdpaths.h>
 
-#include "bwx_core.h"
+#include <bwx_sdk/bwx_core/bwx_core.h>
 
 namespace bwx_sdk {
 
@@ -43,25 +43,6 @@ namespace bwx_sdk {
 			wxEmptyString,
 			wxOK
 		);
-	}
-
-	//----------------------------------------------------------------------------------------------
-	// Bitwise flag operations
-	//----------------------------------------------------------------------------------------------
-	inline void bwxAddByteFlag(int& var, bwxByteFlag flag) noexcept {
-		var |= flag;
-	}
-
-	inline void bwxRemoveByteFlag(int& var, bwxByteFlag flag) noexcept {
-		var &= ~flag;
-	}
-
-	inline bool bwxIsByteFlagSet(const int& var, bwxByteFlag flag) noexcept {
-		return (var & flag) != 0;
-	}
-
-	inline void bwxSetByteFlag(int& var, bwxByteFlag flag) noexcept {
-		var = flag;
 	}
 
 	//----------------------------------------------------------------------------------------------

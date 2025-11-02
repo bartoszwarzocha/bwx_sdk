@@ -12,7 +12,7 @@
 #include <wx/wx.h> 
 #endif
 
-#include "bwx_sizer.h"
+#include <bwx_sdk/bwx_gui/bwx_sizer.h>
 
 namespace bwx_sdk {
 

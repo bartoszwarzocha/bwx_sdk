@@ -11,8 +11,8 @@
 #error OpenGL functionality is not available for macOS.
 #endif
 
-#include "bwx_gl_movement_component.h"
-#include "bwx_gl_transform_component.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_movement_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_transform_component.h>
 
 namespace bwx_sdk {
 

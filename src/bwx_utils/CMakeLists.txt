@@ -3,17 +3,12 @@ file(GLOB_RECURSE BWX_UTILS_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
 )
 
-file(GLOB_RECURSE BWX_UTILS_INTERNAL_HEADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
-)
-
 file(GLOB_RECURSE BWX_UTILS_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/../../include/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../include/*.hpp"
 )
 
-add_library(bwx_utils ${BWX_UTILS_SOURCES} ${BWX_UTILS_INTERNAL_HEADERS} ${BWX_UTILS_HEADERS})
+add_library(bwx_utils ${BWX_UTILS_SOURCES} ${BWX_UTILS_HEADERS})
 
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(bwx_utils PRIVATE BWX_SHARED_LIB)
@@ -38,5 +33,4 @@ target_link_libraries(bwx_utils
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${BWX_UTILS_SOURCES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Internal Header Files" FILES ${BWX_UTILS_INTERNAL_HEADERS})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/../../include PREFIX "Header Files" FILES ${BWX_UTILS_HEADERS})

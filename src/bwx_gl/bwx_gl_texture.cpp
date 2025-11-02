@@ -16,11 +16,11 @@
     #include <wx/wx.h>
 #endif
 
-#include "bwx_gl_texture.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_texture.h>
 #include <string>
 
-#include "bwx_sdk/bwx_core/bwx_math.h"
-#include "bwx_gl_image_loader.h"
+#include <bwx_sdk/bwx_core/bwx_math.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_image_loader.h>
 
 namespace bwx_sdk {
 

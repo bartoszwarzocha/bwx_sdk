@@ -5,7 +5,7 @@
 // Created:     2025-02-24
 // RCS-ID:
 // Copyright:   (c) Bartosz Warzocha (bartosz.warzocha@gmail.com)
-// Licence:		wxWidgets licence
+// Licence:        wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 // WARNING! This is a lightweight, automatically formatted version of the file.
@@ -284,10 +284,10 @@ public:
 
     explicit bwxPropertyVector(wxEvtHandler* handler = nullptr, ChangeCallback callback = nullptr,
                                size_t historyLimit = 0, size_t capacityLimit = 0)
-        : m_eventHandler(handler),
-          m_onChange(std::move(callback)),
-          m_historyLimit(historyLimit),
+        : m_historyLimit(historyLimit),
           m_capacityLimit(capacityLimit),
+          m_eventHandler(handler),
+          m_onChange(std::move(callback)),
           m_lastChangeTime(std::chrono::system_clock::now()) {}
 
     void add(const T& value) {
@@ -472,10 +472,10 @@ public:
 
     explicit bwxPropertyMap(wxEvtHandler* handler = nullptr, ChangeCallback callback = nullptr, size_t historyLimit = 0,
                             size_t capacityLimit = 0)
-        : m_eventHandler(handler),
-          m_onChange(std::move(callback)),
-          m_historyLimit(historyLimit),
+        : m_historyLimit(historyLimit),
           m_capacityLimit(capacityLimit),
+          m_eventHandler(handler),
+          m_onChange(std::move(callback)),
           m_lastChangeTime(std::chrono::system_clock::now()) {}
 
     void set(const K& key, const V& value) {

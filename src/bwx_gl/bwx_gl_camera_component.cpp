@@ -6,9 +6,9 @@
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "bwx_gl_camera_component.h"
-#include "bwx_gl_transform_component.h"
-#include "bwx_gl_node.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_camera_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_transform_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_node.h>
 
 namespace bwx_sdk {
 

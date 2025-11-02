@@ -11,7 +11,7 @@
 #error OpenGL functionality is not available for macOS.
 #endif
 
-#include "bwx_gl_material_manager.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_material_manager.h>
 
 namespace bwx_sdk {
 

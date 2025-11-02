@@ -13,11 +13,11 @@
 
 #include <algorithm>
 
-#include "bwx_gl_render_system.h"
-#include "bwx_gl_renderable_component.h"
-#include "bwx_gl_camera_component.h"
-#include "bwx_gl_light_system.h"
-#include "bwx_gl_buffer_manager.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_render_system.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_renderable_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_camera_component.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_light_system.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_buffer_manager.h>
 
 namespace bwx_sdk {
 

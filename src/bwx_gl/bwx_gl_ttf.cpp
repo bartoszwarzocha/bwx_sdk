@@ -16,10 +16,10 @@
 
 #include <memory>
 
-#include "bwx_gl_ttf.h"
-#include "bwx_gl_shader.h"
-#include "bwx_gl_shader_generator.h"
-#include "bwx_gl_buffer.h"
+#include <bwx_sdk/bwx_gl/bwx_gl_ttf.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_shader.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_shader_generator.h>
+#include <bwx_sdk/bwx_gl/bwx_gl_buffer.h>
 
 namespace bwx_sdk {
 
