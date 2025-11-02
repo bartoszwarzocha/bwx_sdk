@@ -22,11 +22,10 @@ set(VCPKG_KEEP_BUILT_PACKAGES ON CACHE BOOL "Keep vcpkg built packages" FORCE)
 
 # Compiler flags for MSVC
 if(MSVC)
-    if(NOT BUILD_SHARED_LIBS)
-        add_compile_options(/MD) # MD instead MT (please change if necessary depends on wxWidgets build mode)
-    else()
-        add_compile_options(/MD)
-    endif()
+    # Let CMake choose the runtime library based on build type (Debug=/MDd, Release=/MD)
+    # This prevents "overriding /MDd with /MD" warnings in Debug builds
+    # Note: Projects using bwx_sdk should ensure they use the same runtime library
+
     # Silence C++17 deprecation warnings for codecvt (used in bwx_string.cpp)
     add_compile_definitions(_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
     # Disable /WX when used as submodule (Kalahari uses stricter warnings)

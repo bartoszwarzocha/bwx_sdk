@@ -305,7 +305,7 @@ namespace bwx_sdk {
             else if constexpr (std::is_same_v<T, bool>) return wxString(arg ? "true" : "false");
             else if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, wxString>) return "\"" + wxString(arg) + "\"";
             else if constexpr (std::is_same_v<T, std::shared_ptr<bwxJSON>>) return arg ? arg->SerializeToString() : wxString("null");
-            else if constexpr (std::is_same_v<T, std::vector<bwxJsonValueHelper>>) {
+            else { // std::vector<bwxJsonValueHelper>
                 wxString jsonArray = "[";
                 for (const auto& val : arg) {
                     jsonArray += JsonValueToString(val.value) + ",";
@@ -314,7 +314,6 @@ namespace bwx_sdk {
                 jsonArray += "]";
                 return jsonArray;
             }
-            return wxString("null");
             }, *value);
     }
 
