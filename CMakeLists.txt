@@ -17,6 +17,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Option to build shared libraries
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(BWX_BUILD_GL "Build bwx_gl module (requires OpenGL/GLEW)" ON)
 set(VCPKG_KEEP_BUILT_PACKAGES ON CACHE BOOL "Keep vcpkg built packages" FORCE)
 
 # Compiler flags for MSVC
@@ -27,7 +28,8 @@ if(MSVC)
         add_compile_options(/MD)
     endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic)
+    # Disable -Werror when used as submodule (Kalahari uses stricter warnings)
+    add_compile_options(-Wall -Wextra -Wno-error)
 endif()
 
 # Check VCPKG_TARGET_TRIPLET setting
@@ -59,10 +61,10 @@ else()
 endif()
 
 # Find and include OpenGL + FreeType (not available for macOS)
-if(NOT APPLE)
+if(NOT APPLE AND BWX_BUILD_GL)
     find_package(OpenGL REQUIRED)
     find_package(GLEW REQUIRED)
-    
+
     find_package(Freetype REQUIRED)
 endif()
 
@@ -98,7 +100,7 @@ add_subdirectory(src/bwx_gui)
 add_subdirectory(src/bwx_utils)
 add_subdirectory(examples/example_app)
 
-if(NOT APPLE)
+if(NOT APPLE AND BWX_BUILD_GL)
     add_subdirectory(src/bwx_gl)
     add_subdirectory(examples/example_gl)
 endif()

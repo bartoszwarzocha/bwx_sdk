@@ -9,8 +9,8 @@ file(GLOB_RECURSE BWX_GUI_INTERNAL_HEADERS
 )
 
 file(GLOB_RECURSE BWX_GUI_HEADERS
-    "${CMAKE_SOURCE_DIR}/include/*.h"
-    "${CMAKE_SOURCE_DIR}/include/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../include/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../include/*.hpp"
 )
 
 add_library(bwx_gui ${BWX_GUI_SOURCES} ${BWX_GUI_INTERNAL_HEADERS} ${BWX_GUI_HEADERS})
@@ -28,7 +28,7 @@ set_output_directories(bwx_gui)
 
 target_include_directories(bwx_gui
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-    PUBLIC ${CMAKE_SOURCE_DIR}/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include
     PUBLIC ${wxWidgets_INCLUDE_DIRS}
 )
 
@@ -39,4 +39,4 @@ target_link_libraries(bwx_gui
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${BWX_GUI_SOURCES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Internal Header Files" FILES ${BWX_GUI_INTERNAL_HEADERS})
-source_group(TREE ${CMAKE_SOURCE_DIR}/include PREFIX "Header Files" FILES ${BWX_GUI_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/../../include PREFIX "Header Files" FILES ${BWX_GUI_HEADERS})
