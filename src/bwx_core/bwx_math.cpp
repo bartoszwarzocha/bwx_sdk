@@ -86,13 +86,13 @@ namespace bwx_sdk {
 
 		float bwxFastSqrt(float number)
 		{
-			long i;
+			int32_t i;
 			float x = number * 0.5F;
 			float y = number;
 
 			const float threehalfs = 1.5F;
 
-			i = std::bit_cast<long>(y);
+			i = std::bit_cast<int32_t>(y);
 			i = 0x5f3759df - (i >> 1);
 			y = std::bit_cast<float>(i);
 			y = y * (threehalfs - (x * y * y));
