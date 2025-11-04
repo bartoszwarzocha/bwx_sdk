@@ -89,8 +89,9 @@ void FullViewRenderer::CalculateLayout()
 	}
 
 	// Create temporary DC for measurements
+	// Use client width/height for proper text extent calculations
 	wxMemoryDC memDC;
-	wxBitmap tempBitmap(1, 1);
+	wxBitmap tempBitmap(std::max(m_clientWidth, 1), std::max(m_clientHeight, 1));
 	memDC.SelectObject(tempBitmap);
 
 	int yPos = m_marginLeft;  // Start with top margin

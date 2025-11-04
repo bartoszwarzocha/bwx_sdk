@@ -267,6 +267,11 @@ public:
 		if (!insertCmd)
 			return false;
 
+		// Only merge single-character insertions (typical typing)
+		// Don't merge multi-character inserts (programmatic operations)
+		if (m_text.Length() != 1 || insertCmd->m_text.Length() != 1)
+			return false;
+
 		// Can merge if inserting at adjacent position
 		return insertCmd->m_position == m_position + (int)m_text.Length();
 	}
@@ -462,15 +467,23 @@ void bwxTextDocument::InsertTextInternal(int pos, const wxString& text)
 	// Adjust format runs
 	for (auto& run : m_formatRuns)
 	{
-		if (run.startPos >= pos)
+		if (pos < run.startPos)
 		{
+			// Insertion is before this run - shift entire run
 			run.startPos += textLength;
 			run.endPos += textLength;
 		}
-		else if (run.endPos > pos)
+		else if (pos >= run.startPos && pos < run.endPos)
 		{
+			// Insertion is inside this run - expand run
 			run.endPos += textLength;
 		}
+		else if (pos == run.endPos && run.startPos == run.endPos)
+		{
+			// Special case: empty run at insertion point - expand it
+			run.endPos += textLength;
+		}
+		// If pos >= run.endPos (and run is not empty), don't modify the run
 	}
 
 	// Adjust cursor
