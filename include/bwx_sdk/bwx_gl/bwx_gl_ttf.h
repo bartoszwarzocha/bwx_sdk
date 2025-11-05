@@ -22,6 +22,7 @@
 
 #include <GL/glew.h>
 
+#include <bwx_sdk/bwx_gl/bwx_gl_buffer.h>
 #include <glm/glm.hpp>
 #include <map>
 #include <memory>
