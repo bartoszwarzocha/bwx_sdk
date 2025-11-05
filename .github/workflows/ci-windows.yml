@@ -9,6 +9,8 @@ on:
       - 'src/**'
       - 'examples/**'
       - '.github/**'
+      - 'vcpkg.json'
+      - 'CMakeLists.txt'
   pull_request:
     branches:
       - master
@@ -17,6 +19,8 @@ on:
       - 'src/**'
       - 'examples/**'
       - '.github/**'
+      - 'vcpkg.json'
+      - 'CMakeLists.txt'
   workflow_dispatch:
 
 concurrency:
