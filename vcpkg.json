@@ -1,7 +1,7 @@
 {
   "name": "bwx-sdk",
   "version": "1.0.0",
-  "builtin-baseline": "9df46ca3f4ec3bd05984e5668218630c52ea302a",
+  "builtin-baseline": "271a5b8850aa50f9a40269cbf3cf414b36e333d6",
   "dependencies": [
     {
       "name": "freetype",
@@ -26,7 +26,10 @@
     },
     {
       "name": "wxwidgets",
-      "version>=": "3.2.6"
+      "version>=": "3.3.1",
+      "features": [
+        "fonts"
+      ]
     }
   ]
 }
