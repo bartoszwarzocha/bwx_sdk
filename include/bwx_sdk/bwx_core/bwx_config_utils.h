@@ -17,7 +17,7 @@
 #ifndef __BWXCONFIGUTILS_H__
 #define __BWXCONFIGUTILS_H__
 
-#include <bwx_oop.h>
+#include <bwx_sdk/bwx_core/bwx_oop.h>
 #include <bwx_sdk/bwx_globals.h>
 #include <wx/confbase.h>
 
