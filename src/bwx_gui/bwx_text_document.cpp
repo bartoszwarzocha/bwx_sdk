@@ -936,14 +936,14 @@ void bwxTextDocument::UpdateWordCount()
 // File I/O (Stub - will implement with JSON in Day 11-12)
 // ============================================================================
 
-bool bwxTextDocument::LoadFromFile(const wxString& path)
+bool bwxTextDocument::LoadFromFile([[maybe_unused]] const wxString& path)
 {
 	// TODO: Implement JSON loading (Day 11-12)
 	wxLogWarning("bwxTextDocument::LoadFromFile() not yet implemented");
 	return false;
 }
 
-bool bwxTextDocument::SaveToFile(const wxString& path)
+bool bwxTextDocument::SaveToFile([[maybe_unused]] const wxString& path)
 {
 	// TODO: Implement JSON saving (Day 11-12)
 	wxLogWarning("bwxTextDocument::SaveToFile() not yet implemented");
