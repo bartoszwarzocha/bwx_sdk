@@ -115,6 +115,14 @@ public:
 	/// @return Current view mode
 	ViewMode GetViewMode() const { return m_viewMode; }
 
+	/// Get renderer (for settings configuration)
+	/// @return Pointer to current renderer (nullptr if not initialized)
+	/// @note For MVP, cast to FullViewRenderer* to access configuration methods
+	ITextRenderer* GetRenderer() { return m_renderer.get(); }
+
+	/// Get renderer (const version)
+	const ITextRenderer* GetRenderer() const { return m_renderer.get(); }
+
 	// ========================================================================
 	// Editing Operations
 	// ========================================================================

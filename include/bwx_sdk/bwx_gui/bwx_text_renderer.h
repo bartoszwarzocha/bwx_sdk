@@ -127,6 +127,14 @@ public:
 	/// Set line spacing multiplier (1.0 = single spacing, 1.5 = 1.5x, 2.0 = double)
 	void SetLineSpacing(double spacing) { m_lineSpacing = spacing; InvalidateLayout(); }
 
+	/// Set selection color
+	/// @param color RGB color for selection background
+	void SetSelectionColor(const wxColour& color) { m_selectionColor = color; }
+
+	/// Set selection opacity
+	/// @param opacity Alpha value (0-255, where 0 = transparent, 255 = opaque)
+	void SetSelectionOpacity(int opacity) { m_selectionOpacity = opacity; }
+
 	/// Get left margin
 	int GetMarginLeft() const { return m_marginLeft; }
 
@@ -135,6 +143,12 @@ public:
 
 	/// Get line spacing
 	double GetLineSpacing() const { return m_lineSpacing; }
+
+	/// Get selection color
+	wxColour GetSelectionColor() const { return m_selectionColor; }
+
+	/// Get selection opacity
+	int GetSelectionOpacity() const { return m_selectionOpacity; }
 
 private:
 	// ========================================================================
@@ -211,6 +225,10 @@ private:
 	int m_marginRight;                  ///< Right margin
 	double m_lineSpacing;               ///< Line spacing multiplier
 	bool m_layoutValid;                 ///< Is layout up-to-date?
+
+	// Selection appearance (Task #00019 Settings)
+	wxColour m_selectionColor;          ///< Selection background color
+	int m_selectionOpacity;             ///< Selection opacity (0-255)
 
 	// Font cache (expensive to create, so reuse)
 	std::map<wxString, wxFont> m_fontCache; ///< Font cache (key = fontName-size-bold-italic-underline)

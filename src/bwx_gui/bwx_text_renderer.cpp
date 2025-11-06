@@ -31,6 +31,8 @@ FullViewRenderer::FullViewRenderer()
 	, m_marginRight(20)
 	, m_lineSpacing(1.2)
 	, m_layoutValid(false)
+	, m_selectionColor(100, 150, 255)  // Blue (Task #00019 Settings)
+	, m_selectionOpacity(128)           // Semi-transparent (Task #00019 Settings)
 	, m_fontCache()
 {
 }
@@ -379,8 +381,10 @@ void FullViewRenderer::RenderSelection(wxDC& dc, int scrollY)
 
 	std::vector<wxRect> rects = GetSelectionRects(sel.GetMin(), sel.GetMax());
 
-	// Draw selection rectangles
-	dc.SetBrush(wxBrush(wxColour(100, 150, 255, 128)));  // Semi-transparent blue
+	// Draw selection rectangles (Task #00019 Settings - uses configurable color/opacity)
+	wxColour selColor(m_selectionColor.Red(), m_selectionColor.Green(),
+	                  m_selectionColor.Blue(), m_selectionOpacity);
+	dc.SetBrush(wxBrush(selColor));
 	dc.SetPen(*wxTRANSPARENT_PEN);
 
 	for (wxRect rect : rects)
