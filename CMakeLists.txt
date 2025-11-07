@@ -52,7 +52,7 @@ if(NOT BUILD_SHARED_LIBS)
     set(wxWidgets_USE_STATIC 1)
 endif()
 
-if(NOT APPLE)
+if(NOT APPLE AND BWX_BUILD_GL)
     find_package(wxWidgets REQUIRED COMPONENTS core base gl)
 else()
     find_package(wxWidgets REQUIRED COMPONENTS core base)
