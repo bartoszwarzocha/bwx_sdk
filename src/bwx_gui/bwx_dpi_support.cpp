@@ -20,20 +20,28 @@ namespace gui {
 
 template<typename TWindow>
 void DPISupport<TWindow>::initializeDPI() {
+    wxLogInfo("DPI: initializeDPI() CALLED - Starting DPI initialization");
+
     // Prevent double initialization
     if (m_dpiInitialized) {
+        wxLogWarning("DPI: Already initialized, skipping");
         return;
     }
     m_dpiInitialized = true;
 
     // Get current DPI scale factor
     double scaleFactor = getDPIScaleFactor();
+    wxLogInfo("DPI: Scale factor = %.2f (%.0f%%)", scaleFactor, scaleFactor * 100.0);
 
     // Platform-specific font initialization
+    wxLogDebug("DPI: Calling platformInitializeDPI()...");
     platformInitializeDPI();
 
     // Apply DPI scaling to special controls
+    wxLogDebug("DPI: Calling applyDPIScaling()...");
     applyDPIScaling(scaleFactor);
+
+    wxLogInfo("DPI: initializeDPI() COMPLETE");
 }
 
 // ============================================================================
