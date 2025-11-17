@@ -20,28 +20,36 @@ namespace gui {
 
 template<typename TWindow>
 void DPISupport<TWindow>::initializeDPI() {
-    wxLogInfo("DPI: initializeDPI() CALLED - Starting DPI initialization");
+    // NOTE: Cannot use core::Logger here (BWX SDK is independent library)
+    // Use printf for debugging - will appear in console/debugger
+    printf("[BWX DPI] initializeDPI() CALLED - Starting DPI initialization\n");
+    fflush(stdout);
 
     // Prevent double initialization
     if (m_dpiInitialized) {
-        wxLogWarning("DPI: Already initialized, skipping");
+        printf("[BWX DPI] Already initialized, skipping\n");
+        fflush(stdout);
         return;
     }
     m_dpiInitialized = true;
 
     // Get current DPI scale factor
     double scaleFactor = getDPIScaleFactor();
-    wxLogInfo("DPI: Scale factor = %.2f (%.0f%%)", scaleFactor, scaleFactor * 100.0);
+    printf("[BWX DPI] Scale factor = %.2f (%.0f%%)\n", scaleFactor, scaleFactor * 100.0);
+    fflush(stdout);
 
     // Platform-specific font initialization
-    wxLogDebug("DPI: Calling platformInitializeDPI()...");
+    printf("[BWX DPI] Calling platformInitializeDPI()...\n");
+    fflush(stdout);
     platformInitializeDPI();
 
     // Apply DPI scaling to special controls
-    wxLogDebug("DPI: Calling applyDPIScaling()...");
+    printf("[BWX DPI] Calling applyDPIScaling()...\n");
+    fflush(stdout);
     applyDPIScaling(scaleFactor);
 
-    wxLogInfo("DPI: initializeDPI() COMPLETE");
+    printf("[BWX DPI] initializeDPI() COMPLETE\n");
+    fflush(stdout);
 }
 
 // ============================================================================
@@ -140,8 +148,9 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
             wxFont baseFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
             wxFont scaledFont = baseFont.Scaled(scaleFactor);
 
-            wxLogDebug("DPI: Scaling MenuBar (factor: %.2f, base: %dpt -> scaled: %dpt)",
-                       scaleFactor, baseFont.GetPointSize(), scaledFont.GetPointSize());
+            printf("[BWX DPI] Scaling MenuBar (factor: %.2f, base: %dpt -> scaled: %dpt)\n",
+                   scaleFactor, baseFont.GetPointSize(), scaledFont.GetPointSize());
+            fflush(stdout);
 
             menuBar->SetFont(scaledFont);
             menuBar->Refresh();  // Force visual update
@@ -168,7 +177,8 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
             wxFont scaledFont = baseFont.Scaled(scaleFactor);
 
             // DEBUG: Log wxAuiNotebook scaling
-            wxLogDebug("DPI: Scaling wxAuiNotebook tabs (factor: %.2f)", scaleFactor);
+            printf("[BWX DPI] Scaling wxAuiNotebook tabs (factor: %.2f)\n", scaleFactor);
+            fflush(stdout);
 
             // Set fonts on notebook window itself
             notebook->SetFont(scaledFont);
@@ -181,9 +191,11 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
                 tabArt->SetNormalFont(scaledFont);
                 tabArt->SetSelectedFont(scaledFont);
                 tabArt->SetMeasuringFont(scaledFont);
-                wxLogDebug("DPI: wxAuiTabArt fonts set");
+                printf("[BWX DPI] wxAuiTabArt fonts set\n");
+                fflush(stdout);
             } else {
-                wxLogWarning("DPI: wxAuiNotebook has NO TabArt provider!");
+                printf("[BWX DPI] WARNING: wxAuiNotebook has NO TabArt provider!\n");
+                fflush(stdout);
             }
 
             // CRITICAL: Force notebook to refresh/update after font changes
