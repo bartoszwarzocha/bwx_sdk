@@ -52,9 +52,16 @@ void DPISupport<TWindow>::platformInitializeDPI() {
 
     // CRITICAL: wxWidgets does NOT automatically propagate fonts!
     // We must manually propagate to all child windows.
+    // EXCEPTION: Skip wxAuiNotebook (handled separately in scaleSpecialControls)
     std::function<void(wxWindow*)> propagateFont;
     propagateFont = [&](wxWindow* window) {
         if (!window) return;
+
+        // Skip wxAuiNotebook - it will be scaled in scaleSpecialControls()
+        // to avoid double scaling (propagation + special handling)
+        if (dynamic_cast<wxAuiNotebook*>(window)) {
+            return;  // Don't propagate to wxAuiNotebook
+        }
 
         // Set font on this window
         window->SetFont(scaledFont);
