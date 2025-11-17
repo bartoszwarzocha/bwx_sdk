@@ -117,19 +117,20 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
     }
 
     // ========================================================================
-    // 2. MenuBar - DON'T scale on Windows (Issue #22957)
+    // 2. MenuBar - Scale on all platforms (Issue #22957 FIXED in wxWidgets 3.3.1)
     // ========================================================================
-    // Windows native MenuBar handles scaling via DPI manifest automatically.
-    // Calling SetFont() causes sizing bugs.
-    // Linux/macOS: Could be scaled if needed, but typically not necessary.
+    // wxWidgets Issue #22957 (MenuBar SetFont causing sizing bugs on high DPI)
+    // was fixed in PR #22958 (November 2022) and included in wxWidgets 3.3.1.
+    // The fix ensures correct DPI scaling for owner-drawn menu items.
     //
     // Compile-time check: Only wxFrame has GetMenuBar()
-    // if constexpr (std::is_base_of_v<wxFrame, TWindow>) {
-    //     wxMenuBar* menuBar = this->GetMenuBar();
-    //     if (menuBar) {
-    //         // DON'T: menuBar->SetFont(...)  -- causes bugs on Windows
-    //     }
-    // }
+    if constexpr (std::is_base_of_v<wxFrame, TWindow>) {
+        wxMenuBar* menuBar = this->GetMenuBar();
+        if (menuBar) {
+            wxFont font = menuBar->GetFont();
+            menuBar->SetFont(font.Scaled(scaleFactor));
+        }
+    }
 
     // ========================================================================
     // 3. wxAuiNotebook - Scale via wxAuiTabArt (recursive search)
