@@ -130,7 +130,13 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
         if (menuBar) {
             // Use base font to avoid double scaling
             wxFont baseFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
-            menuBar->SetFont(baseFont.Scaled(scaleFactor));
+            wxFont scaledFont = baseFont.Scaled(scaleFactor);
+
+            wxLogDebug("DPI: Scaling MenuBar (factor: %.2f, base: %dpt -> scaled: %dpt)",
+                       scaleFactor, baseFont.GetPointSize(), scaledFont.GetPointSize());
+
+            menuBar->SetFont(scaledFont);
+            menuBar->Refresh();  // Force visual update
         }
     }
 
@@ -153,7 +159,10 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
             wxFont baseFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
             wxFont scaledFont = baseFont.Scaled(scaleFactor);
 
-            // Set fonts on notebook
+            // DEBUG: Log wxAuiNotebook scaling
+            wxLogDebug("DPI: Scaling wxAuiNotebook tabs (factor: %.2f)", scaleFactor);
+
+            // Set fonts on notebook window itself
             notebook->SetFont(scaledFont);
             notebook->SetNormalFont(scaledFont);
             notebook->SetSelectedFont(scaledFont);
@@ -164,7 +173,14 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
                 tabArt->SetNormalFont(scaledFont);
                 tabArt->SetSelectedFont(scaledFont);
                 tabArt->SetMeasuringFont(scaledFont);
+                wxLogDebug("DPI: wxAuiTabArt fonts set");
+            } else {
+                wxLogWarning("DPI: wxAuiNotebook has NO TabArt provider!");
             }
+
+            // CRITICAL: Force notebook to refresh/update after font changes
+            notebook->Refresh();
+            notebook->Update();
         }
 
         // Recursively check all children (supports nested notebooks)
