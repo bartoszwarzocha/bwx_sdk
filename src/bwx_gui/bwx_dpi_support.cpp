@@ -42,21 +42,31 @@ void DPISupport<TWindow>::initializeDPI() {
 
 template<typename TWindow>
 void DPISupport<TWindow>::platformInitializeDPI() {
-#ifdef __WXMSW__
-    // Windows: Use MSWUpdateFontOnDPIChange() built-in function
-    // This automatically scales ALL fonts in window hierarchy
-    // (MenuBar, StatusBar, controls, panels, child windows)
-    this->MSWUpdateFontOnDPIChange(this->GetDPI());
-#else
-    // Linux/macOS: Manual font scaling
-    // Get system default font and scale it
+    // Get system default font and scale factor
     wxFont baseFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
-    wxFont scaledFont = baseFont.Scaled(getDPIScaleFactor());
+    double scaleFactor = getDPIScaleFactor();
+    wxFont scaledFont = baseFont.Scaled(scaleFactor);
 
     // Set scaled font on this window
-    // wxWidgets will automatically propagate font to child windows
     this->SetFont(scaledFont);
-#endif
+
+    // CRITICAL: wxWidgets does NOT automatically propagate fonts!
+    // We must manually propagate to all child windows.
+    std::function<void(wxWindow*)> propagateFont;
+    propagateFont = [&](wxWindow* window) {
+        if (!window) return;
+
+        // Set font on this window
+        window->SetFont(scaledFont);
+
+        // Recursively propagate to all children
+        for (wxWindow* child : window->GetChildren()) {
+            propagateFont(child);
+        }
+    };
+
+    // Start propagation from this window's children
+    propagateFont(this);
 }
 
 // ============================================================================
