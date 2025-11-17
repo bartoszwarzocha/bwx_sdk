@@ -111,8 +111,9 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
     // Compile-time check: Only wxFrame has GetStatusBar()
     if constexpr (std::is_base_of_v<wxFrame, TWindow>) {
         if (wxStatusBar* statusBar = this->GetStatusBar()) {
-            wxFont font = statusBar->GetFont();
-            statusBar->SetFont(font.Scaled(scaleFactor));
+            // Use base font to avoid double scaling
+            wxFont baseFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+            statusBar->SetFont(baseFont.Scaled(scaleFactor));
         }
     }
 
@@ -127,8 +128,9 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
     if constexpr (std::is_base_of_v<wxFrame, TWindow>) {
         wxMenuBar* menuBar = this->GetMenuBar();
         if (menuBar) {
-            wxFont font = menuBar->GetFont();
-            menuBar->SetFont(font.Scaled(scaleFactor));
+            // Use base font to avoid double scaling
+            wxFont baseFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+            menuBar->SetFont(baseFont.Scaled(scaleFactor));
         }
     }
 
@@ -147,8 +149,9 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
 
         // Check if this is a wxAuiNotebook
         if (wxAuiNotebook* notebook = dynamic_cast<wxAuiNotebook*>(window)) {
-            wxFont font = notebook->GetFont();
-            wxFont scaledFont = font.Scaled(scaleFactor);
+            // Use base font to ensure consistent scaling
+            wxFont baseFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+            wxFont scaledFont = baseFont.Scaled(scaleFactor);
 
             // Set fonts on notebook
             notebook->SetFont(scaledFont);
@@ -185,9 +188,10 @@ void DPISupport<TWindow>::scaleSpecialControls(double scaleFactor) {
         if (auiMgr) {
             wxAuiDockArt* art = auiMgr->GetArtProvider();
             if (art) {
-                // Get current font and scale it
-                wxFont font = this->GetFont();
-                wxFont scaledFont = font.Scaled(scaleFactor);
+                // CRITICAL: Use base font (not this->GetFont() which is already scaled!)
+                // this->GetFont() returns SCALED font → scaling again = double scaling!
+                wxFont baseFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+                wxFont scaledFont = baseFont.Scaled(scaleFactor);
 
                 // Set scaled font for pane captions
                 art->SetFont(wxAUI_DOCKART_CAPTION_FONT, scaledFont);
